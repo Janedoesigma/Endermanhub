@@ -798,7 +798,7 @@ function hoangtuveu()
     -- UI TỪ DYNAMICISLAND_AXIOM-1.LUA (CÓ DISCORD + CONTAINER)
     -- ============================================================
     local gui = Instance.new('ScreenGui')
-    gui.Name = "KaitunUI"
+    gui.Name = "ENDERMAN HUB (KAITUN)"
     gui.Parent = game:GetService('CoreGui')
     gui.Enabled = true
     gui.ResetOnSpawn = true
@@ -820,18 +820,7 @@ function hoangtuveu()
     containerLayout.FillDirection = Enum.FillDirection.Vertical
     containerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-    local discordLabel = Instance.new("TextLabel")
-    discordLabel.Name = "DiscordLabel"
-    discordLabel.Parent = container
-    discordLabel.LayoutOrder = 1
-    discordLabel.AutomaticSize = Enum.AutomaticSize.XY
-    discordLabel.Size = UDim2.new(0, 0, 0, 0)
-    discordLabel.BackgroundTransparency = 1
-    discordLabel.Text = "https://discord.gg/KrEPeAtjn"
-    discordLabel.TextSize = 13
-    discordLabel.Font = Enum.Font.Highway
-    discordLabel.TextColor3 = Color3.fromRGB(255, 45, 155)
-    discordLabel.TextXAlignment = Enum.TextXAlignment.Center
+    
 
     local frame = Instance.new("Frame")
     frame.Name = "Frame"
@@ -839,7 +828,7 @@ function hoangtuveu()
     frame.LayoutOrder = 2
     frame.AutomaticSize = Enum.AutomaticSize.XY
     frame.Size = UDim2.new(0, 0, 0, 0)
-    frame.BackgroundColor3 = Color3.fromRGB(38, 5, 25)
+    frame.BackgroundColor3 = Color3.fromRGB(138, 43, 226)
     frame.BackgroundTransparency = 0.25
     frame.BorderSizePixel = 0
 
@@ -852,7 +841,7 @@ function hoangtuveu()
     Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 6)
 
     local stroke = Instance.new("UIStroke", frame)
-    stroke.Color = Color3.fromRGB(255, 45, 155)
+    stroke.Color = Color3.fromRGB(138, 43, 226)
     stroke.Thickness = 1.5
     stroke.Transparency = 0
 
@@ -897,7 +886,7 @@ function hoangtuveu()
     subTaskLabel.Text = "Sub Task :"
     subTaskLabel.TextSize = 13
     subTaskLabel.Font = Enum.Font.Ubuntu
-    subTaskLabel.TextColor3 = Color3.fromRGB(255, 170, 220)
+    subTaskLabel.TextColor3 = Color3.fromRGB(147, 112, 219)
     subTaskLabel.TextTransparency = 0
     subTaskLabel.TextXAlignment = Enum.TextXAlignment.Left
 
