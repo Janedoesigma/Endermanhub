@@ -153,42 +153,42 @@ end
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
 local Window = WindUI:CreateWindow({
-    Title = "EndermanHub Kaitun",
+    Title = "EndermanHub Kaitun version",
     Icon = "door-open",
-    Author = "Config Menu",
+    Author = "[BLOX FRUITS] by jane doe Sigma",
     Folder = "EndermanHub",
-    Size = UDim2.fromOffset(600, 480),
-    MinSize = Vector2.new(560, 350),
+    Size = UDim2.fromOffset(520, 480),
+    MinSize = Vector2.new(480, 350),
     MaxSize = Vector2.new(850, 560),
     Transparent = true,
     Theme = "Dark",
     Resizable = true,
     SideBarWidth = 200,
-    HideSearchBar = true,
+    HideSearchBar = false,
     ScrollBarEnabled = false,
 
     -- 🔽 TROCA ESSA IMAGEM DE FUNDO PELO ID QUE VOCÊ QUISER
     -- Ex rbxassetid://1234567890  OU  video:LINK.webm
-    Background = "rbxassetid://0",
+    Background = "rbxassetid://8176158130",
     BackgroundImageTransparency = 0.5,
 
     User = {
         Enabled = true,
-        Anonymous = true,
-        Callback = function() print("user clicked") end,
+        Anonymous = false,
+        Callback = function() print(":3") end,
     },
 
     -- 🔽 SISTEMA DE KEY DO WINDUI
     -- Troque as Keys e o URL conforme quiser
     KeySystem = {
-        Key = { "END3RMAN", "KAITUN2026", "FREEMIUM" },
-        Note = "Pegue sua key no nosso Discord!",
+        Key = { "rpNVYJDO4U7DCEQh", "2vkz0nkSUkb7sbJP", "25VctsNED7CwwP26" },
+        Note = "Get the key from the Link Vertise. ",
         Thumbnail = {
-            Image = "rbxassetid://0",
-            Title = "EndermanHub",
+            Image = "rbxassetid://6003957600",
+            Title = "EndermanHub Key (permanent key)",
         },
         URL = "https://discord.gg/SEU_DISCORD_AQUI",
-        SaveKey = true,
+        SaveKey = false,
     },
 })
 
@@ -201,7 +201,7 @@ local function ExecuteKaitun()
     WindUI:Notify({
         Title = "Kaitun",
         Content = "Executando Kaitun...",
-        Duration = 3,
+        Duration = 4,
         Icon = "play",
     })
     pcall(function()
