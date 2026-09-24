@@ -1,67 +1,74 @@
-Config = {
-    Team = "Pirates",
-    Configuration = {
-        HopWhenIdle = true,
-        AutoHop = true,
-        AutoHopDelay = 60 * 60,
-        FpsBoost = false,
-        blackscreen = false,
-        LowGraphics = true
-    },
-    Items = {
-        AutoFullyMelees = true,
-        Saber = true,
-        CursedDualKatana = true,
-        SoulGuitar = true,
-        RaceV2 = true,
-        AutoRaceV3 = true,
-        AutoRandomFruit = false,
-    },
-    Sword = {
-        ["Shark Saw"]        = true,
-        ["Wardens Sword"]    = true,
-        ["Pole (1st Form)"]  = true,
-        ["Gravity Blade"]    = true,
-        ["Longsword"]        = true,
-        ["Rengoku"]          = true,
-        ["Flail"]            = true,
-        ["Twin Hooks"]       = true,
-    },
-    BossWeapons = {
-        ["Awakened Ice Admiral"] = true,
-        ["Tide Keeper"]          = true,
-        ["Deandre"]              = true,
-        ["Urban"]                = true,
-        ["Diablo"]               = true,
-        ["Soul Reaper"]          = true,
-        ["Cake Prince"]          = true,
-        ["Core"]                 = true,
-        ["Darkbeard"]            = true,
-        ["Katakuri"]             = true,
-        ["Beautiful Pirates"]    = true,
-    },
-    Melee = {
-        AutoBuy              = true,
-        CheckMasteryAfterBuy = true,
-        RaidAtV1Mastery      = 500,
-        GodhumanAtV2Mastery  = 400,
-    },
-    AutoKen = true,
-    BringMobs = true,
-    PanicMode = {
-        Enabled          = true,
-        LowHealthPercent = 20,
-        SafeHealthPercent = 75,
-        EscapeHeight     = 2000,
-        CheckInterval    = 1,
-    },
-    Settings = {
-        StayInSea2UntilHaveDarkFragments = true
-    },
-    AutoSea2 = true,
-    AutoSea3 = true,
-    AutoRaidIce_TargetFragments = 5000,
-}
+-- ============================================================
+-- FALLBACK: só define o Config se não foi definido por um menu externo
+-- (Isso permite que o script funcione sozinho E também junto com o WindUI)
+-- ============================================================
+if not Config then
+    Config = {
+        Team = "Pirates",
+        Configuration = {
+            HopWhenIdle = true,
+            AutoHop = true,
+            AutoHopDelay = 60 * 60,
+            FpsBoost = false,
+            blackscreen = false,
+            LowGraphics = true
+        },
+        Items = {
+            AutoFullyMelees = true,
+            Saber = true,
+            CursedDualKatana = true,
+            SoulGuitar = true,
+            RaceV2 = true,
+            AutoRaceV3 = true,
+            AutoRandomFruit = false,
+        },
+        Sword = {
+            ["Shark Saw"]        = true,
+            ["Wardens Sword"]    = true,
+            ["Pole (1st Form)"]  = true,
+            ["Gravity Blade"]    = true,
+            ["Longsword"]        = true,
+            ["Rengoku"]          = true,
+            ["Flail"]            = true,
+            ["Twin Hooks"]       = true,
+        },
+        BossWeapons = {
+            ["Awakened Ice Admiral"] = true,
+            ["Tide Keeper"]          = true,
+            ["Deandre"]              = true,
+            ["Urban"]                = true,
+            ["Diablo"]               = true,
+            ["Soul Reaper"]          = true,
+            ["Cake Prince"]          = true,
+            ["Core"]                 = true,
+            ["Darkbeard"]            = true,
+            ["Katakuri"]             = true,
+            ["Beautiful Pirates"]    = true,
+        },
+        Melee = {
+            AutoBuy              = true,
+            CheckMasteryAfterBuy = true,
+            RaidAtV1Mastery      = 500,
+            GodhumanAtV2Mastery  = 400,
+        },
+        AutoKen = true,
+        BringMobs = true,
+        PanicMode = {
+            Enabled          = true,
+            LowHealthPercent = 20,
+            SafeHealthPercent = 75,
+            EscapeHeight     = 2000,
+            CheckInterval    = 1,
+        },
+        Settings = {
+            StayInSea2UntilHaveDarkFragments = true
+        },
+        AutoSea2 = true,
+        AutoSea3 = true,
+        AutoRaidIce_TargetFragments = 5000,
+    }
+end
+
 print("[Tiro] Script da duoc nap, dang cho game load...")
 repeat task.wait() until game:IsLoaded()
 
