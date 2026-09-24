@@ -108,14 +108,15 @@ function FastAttack:SuperFastAttack()
         Register_Hit:FireServer(primaryPart, hitData)
     end
 end
-Hub = {}
-Hub.Title = "ENDERMAN HUB [Main version 0.3]" .. (getgenv().Premium and " [Beta]" or getgenv().Developer and " [Beta]" or " [Beta]")
-Hub.Game = "BloxFruits"
 
-local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/huyyeuemhihi/Fluent/refs/heads/main/Fluentvip.lua"))()
+
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local Fluent, SaveManager, InterfaceManager = loadstring(Game:HttpGet("https://raw.githubusercontent.com/discoart/FluentPlus/refs/heads/main/Beta.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+
 
 local Window = Fluent:CreateWindow({
-    Title = Hub.Title,
+    Title = "Enderman Hub 0.3 [Normal Version]",
     SubTitle = "by jane_doe sigma",
     TabWidth = 130,
     Size = UDim2.fromOffset(370, 340),
@@ -128,7 +129,7 @@ local Options = Fluent.Options
 
 Notify = function(title, content, duration)
     Fluent:Notify({
-        Title = title or "Dwac Hub",
+        Title = title or "Enderman hub",
         Content = content or "...",
         Duration = duration or 5
     })
