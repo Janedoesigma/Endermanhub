@@ -109,17 +109,17 @@ function FastAttack:SuperFastAttack()
     end
 end
 Hub = {}
-Hub.Title = "Dwac Hub" .. (getgenv().Premium and " [Premium]" or getgenv().Developer and " [Developer]" or " [Beta]")
+Hub.Title = "ENDERMAN HUB [Main version 0.3]" .. (getgenv().Premium and " [Beta]" or getgenv().Developer and " [Beta]" or " [Beta]")
 Hub.Game = "BloxFruits"
 
 local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/huyyeuemhihi/Fluent/refs/heads/main/Fluentvip.lua"))()
 
 local Window = Fluent:CreateWindow({
     Title = Hub.Title,
-    SubTitle = "by @it_kuridev and @dzvaiooo",
-    TabWidth = 160,
-    Size = UDim2.fromOffset(580, 460),
-    Acrylic = false,
+    SubTitle = "by jane_doe sigma",
+    TabWidth = 130,
+    Size = UDim2.fromOffset(370, 340),
+    Acrylic = true,
     Theme = "Dark",
     MinimizeKey = Enum.KeyCode.LeftControl
 })
@@ -135,9 +135,9 @@ Notify = function(title, content, duration)
 end
 
 if CurrnetExecutor == "Wave" or CurrnetExecutor == "AWP" or CurrnetExecutor == "Posstasium" then
-    Notify("Dwac Hub","Your currnently executor support all function, some function will work good", 3)
+    Notify("enderman hub","Your currnently executor support all function, some function will work good", 3)
 else
-    Notify("Dwac Hub","Your currnently executor not support all function, some function will not work", 3)
+    Notify("enderman hub","Your currnently executor not support all function, some function will not work", 3)
 end
 
 plr.Idled:Connect(function()
@@ -148,18 +148,18 @@ end)
 
 local RandomText = {
     [1] = "Welcome to my script",
-    [2] = "Your Dad Fat",
-    [3] = "Your Mom Fat",
-    [4] = "?",
+    [2] = "Hello Night",
+    [3] = "Hello brothers",
+    [4] = "walcome for fake banana cat hub lol",
     [5] = "Oh hi fat men",
-    [6] = "You're Banned",
+    [6] = "You're Banned for rip indra lol",
     [7] = "your fat"
 }
 
 local module,Settings = {}, {
     ["Fast Attack"] = true,
-    ["Bring Distance"] = 350,
-    ["Tween Speed"] = 300,
+    ["Bring Distance"] = 300,
+    ["Tween Speed"] = 100,
     ["Auto Buso"] = true,
 }
 
@@ -3079,7 +3079,7 @@ local TableM1Fruit = {
     ["Venom-Venom"] = 3500000000,
     ["Control-Control"] = 3700000000,
     ["Spirit-Spirit"] = 4000000000,
-    ["Dragon-Dragon"] = 4500000000,
+    ["Dragon-Dragon"] = 10000000000,
     ["Leopard-Leopard"] = 5000000000,
 	["Kitsune-Kitsune"] = 8000000000,
 }
