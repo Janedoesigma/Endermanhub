@@ -3,8 +3,8 @@
 -- ============================================================
 Config = {
     Team = "Pirates",
-    Language = "pt-BR",   -- idioma salvo
-    AutoExecute = false,  -- auto executar kaitun
+    Language = "pt-BR",
+    AutoExecute = false,
     Configuration = {
         HopWhenIdle = true,
         AutoHop = true,
@@ -100,7 +100,7 @@ local function LoadConfig()
     end)
 end
 
-LoadConfig()  -- carrega antes de montar o menu
+LoadConfig()
 
 -- ============================================================
 -- SISTEMA DE TRADUÇÃO
@@ -148,7 +148,7 @@ local function T(key)
 end
 
 -- ============================================================
--- WIND UI - JANELA PRINCIPAL (com fundo + key system)
+-- WIND UI
 -- ============================================================
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
@@ -167,8 +167,6 @@ local Window = WindUI:CreateWindow({
     HideSearchBar = false,
     ScrollBarEnabled = false,
 
-    -- 🔽 TROCA ESSA IMAGEM DE FUNDO PELO ID QUE VOCÊ QUISER
-    -- Ex rbxassetid://1234567890  OU  video:LINK.webm
     Background = "rbxassetid://8176158130",
     BackgroundImageTransparency = 0.5,
 
@@ -178,11 +176,9 @@ local Window = WindUI:CreateWindow({
         Callback = function() print(":3") end,
     },
 
-    -- 🔽 SISTEMA DE KEY DO WINDUI
-    -- Troque as Keys e o URL conforme quiser
     KeySystem = {
         Key = { "rpNVYJDO4U7DCEQh", "2vkz0nkSUkb7sbJP", "25VctsNED7CwwP26" },
-        Note = "Get the key from the Link Vertise. ",
+        Note = "Get the key from the Link Vertise.",
         Thumbnail = {
             Image = "rbxassetid://6003957600",
             Title = "EndermanHub Key (permanent key)",
@@ -196,7 +192,6 @@ local Window = WindUI:CreateWindow({
 -- FUNÇÃO QUE EXECUTA O KAITUN
 -- ============================================================
 local function ExecuteKaitun()
-    -- Save config antes de executar (pra caso Kaitun leia a tabela Config)
     SaveConfig()
     WindUI:Notify({
         Title = "Kaitun",
@@ -210,7 +205,74 @@ local function ExecuteKaitun()
 end
 
 -- ============================================================
--- ABA: PRINCIPAL (Team + Configuration)
+-- REJOIN / SERVER HOP
+-- ============================================================
+local function RejoinSameServer()
+    local TeleportService = game:GetService("TeleportService")
+    pcall(function()
+        TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, game.Players.LocalPlayer)
+    end)
+end
+
+local function ServerHop()
+    local HttpService = game:GetService("HttpService")
+    local TeleportService = game:GetService("TeleportService")
+    local placeId = game.PlaceId
+
+    local ok, result = pcall(function()
+        return HttpService:JSONDecode(game:HttpGet(
+            "https://games.roblox.com/v1/games/" .. placeId .. "/servers/Public?sortOrder=Asc&limit=100"
+        ))
+    end)
+
+    if ok and result and result.data then
+        for _, server in pairs(result.data) do
+            if server.id ~= game.JobId and server.playing < server.maxPlayers then
+                pcall(function()
+                    TeleportService:TeleportToPlaceInstance(placeId, server.id, game.Players.LocalPlayer)
+                end)
+                return true
+            end
+        end
+    end
+    return false
+end
+
+local function TryRejoin()
+    WindUI:Notify({
+        Title = "Kaitun",
+        Content = "Reentrando no servidor...",
+        Duration = 3,
+        Icon = "refresh-cw",
+    })
+
+    local teleportFailed = false
+    local conn = game:GetService("TeleportService").TeleportInitFailed:Connect(function()
+        teleportFailed = true
+    end)
+
+    RejoinSameServer()
+    task.wait(5)
+    pcall(function() conn:Disconnect() end)
+
+    if teleportFailed or game.Players.LocalPlayer.Parent then
+        WindUI:Notify({
+            Title = "Kaitun",
+            Content = "Falha ao reentrar. Procurando outro servidor...",
+            Duration = 4,
+            Icon = "alert-triangle",
+        })
+        task.wait(2)
+        local tentativas = 0
+        while not ServerHop() and tentativas < 10 do
+            tentativas = tentativas + 1
+            task.wait(3)
+        end
+    end
+end
+
+-- ============================================================
+-- ABA: PRINCIPAL
 -- ============================================================
 local MainTab = Window:Tab({ Title = T("main"), Icon = "home" })
 
@@ -342,7 +404,7 @@ SeaTab:Slider({
 })
 
 -- ============================================================
--- ABA: UI CONFIG (Tema, Transparência, Keybind, Idioma)
+-- ABA: UI CONFIG
 -- ============================================================
 local UIConfigTab = Window:Tab({ Title = T("uiconfig"), Icon = "palette" })
 
@@ -400,28 +462,60 @@ UIConfigTab:Keybind({
 -- ============================================================
 local ExecTab = Window:Tab({ Title = T("exec"), Icon = "play" })
 
-ExecTab:Toggle({
+local KaitunExecuted = false
+local ExecuteToggle
+local AutoExecToggle
+
+ExecuteToggle = ExecTab:Toggle({
     Title = T("execKaitun"),
     Value = false,
     Callback = function(state)
-        if state then
+        if not state then return end
+
+        -- Desativa Auto Executar (mutuamente exclusivos)
+        if Config.AutoExecute then
+            Config.AutoExecute = false
+            SaveConfig()
+            if AutoExecToggle then
+                pcall(function() AutoExecToggle:Set(false) end)
+            end
+        end
+
+        if not KaitunExecuted then
+            KaitunExecuted = true
             ExecuteKaitun()
+        else
+            TryRejoin()
         end
     end
 })
 
-ExecTab:Toggle({
+AutoExecToggle = ExecTab:Toggle({
     Title = T("autoexec"),
     Value = Config.AutoExecute,
     Callback = function(state)
         Config.AutoExecute = state
         SaveConfig()
-        WindUI:Notify({
-            Title = "Auto Execute",
-            Content = state and "Ativado! Kaitun vai rodar sozinho ao reinjetar." or "Desativado.",
-            Duration = 4,
-            Icon = "zap",
-        })
+
+        if state then
+            -- Desativa Execute Kaitun (mutuamente exclusivos)
+            if ExecuteToggle then
+                pcall(function() ExecuteToggle:Set(false) end)
+            end
+            WindUI:Notify({
+                Title = "Auto Execute",
+                Content = "Ativado! Na próxima reinjeção o Kaitun vai rodar sozinho.",
+                Duration = 5,
+                Icon = "zap",
+            })
+        else
+            WindUI:Notify({
+                Title = "Auto Execute",
+                Content = "Desativado.",
+                Duration = 3,
+                Icon = "zap",
+            })
+        end
     end
 })
 
@@ -448,11 +542,11 @@ ExecTab:Button({
 })
 
 -- ============================================================
--- AUTO EXECUTE NO INÍCIO (se estava ativo na última sessão)
+-- AUTO EXECUTE NO INÍCIO
 -- ============================================================
 if Config.AutoExecute then
     task.spawn(function()
-        task.wait(2) -- pequeno delay pro WindUI carregar
+        task.wait(2)
         ExecuteKaitun()
     end)
 end
