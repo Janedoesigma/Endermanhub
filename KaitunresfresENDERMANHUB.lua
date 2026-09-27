@@ -195,7 +195,7 @@ local Window = WindUI:CreateWindow({
         Callback = function() print(":3") end,
     },
     KeySystem = {
-        Key = { "rpNVYJDO4U7DCEQh", "2vkz0nkSUkb7sbJP", "25VctsNED7CwwP26" },
+        Key = { "rpNVYJDO4U7DCEQh", "2vkz0nkSUkb7sbJP", "25VctsNED7CwwP26", "Xq9Lm2Rt7Yb4Nc8P", "a7Kp3Vz9Qm5Wn2Xe", "R4tY8uI2oL6pK9dF", "z1Xc5Vb9Nm3Qw7Er", "T6yU2iO8pL4kJ9hG", "b3Nv7Mq1Wz5Xc9Rt", "Q8wE2rT6yU4iO1pL", "m5Kj9Hh3Gf7Dd2Ss", "V1cX4zA7sD2fG5hJ", "n9Bm3Qw7Er1Ty5Ui", "L2oP6iU8yT4rE1wQ", "k7Jh3Gf5Dd9Ss2Aa", "Z4xC8vB2nM6qW1eR", "p9Oo3Ii7Uu1Yy5Tt", "F2dD6sS8aA4pP1oO", "w5Ee9Rr3Tt7Yy1Uu", "H8jJ2kK6lL4mM9nN", "c3Vv7Bb1Nn5Mm9Qq", "G6fF2dD8sS4aA1pP", "x9Zz3Xx7Cc1Vv5Bb", "R2tT6yY8uU4iI1oO", "q5Ww9Ee3Rr7Tt1Yy", "M8nN2mM6lL4kK9jJ", "v3Bb7Vv1Cc5Xx9Zz", "D6sS2aA8pP4oO1iI", "y9Uu3Yy7Tt1Rr5Ee", "K2lL6kK8jJ4hH9gG", "b5Nn9Mm3Qq7Ww1Ee", "P8oO2iI6uU4yY1tT", "z3Xx7Cc1Vv5Bb9Nn", "J6hH2gG8fF4dD9sS", "r9Ee3Ww7Qq1Mm5Nn", "T2yY6uU8iI4oO1pP", "m5Nn9Bb3Vv7Cc1Xx", "L8kK2jJ6hH4gG9fF", "w3Ee7Rr1Tt5Yy9Uu", "Q6wW2eE8rR4tT1yY", "a9Ss3Dd7Ff1Gg5Hh", "Z2xX6cC8vV4bB9nN", "p5Oo9Ii3Uu7Yy1Tt", "F8dD2sS6aA4pP9oO", "k3Jj7Hh1Gg5Ff9Dd", "V6cC2xX8zZ4lL9kK", "n5Mm9Nn3Bb7Vv1Cc", "R8tT2yY6uU4iI9oO", "q3Ww7Ee1Rr5Tt9Yy", "M6nN2mM8lL4kK9jJ", "v5Bb9Vv3Cc7Xx1Zz", "D8sS2aA6pP4oO9iI", "y3Uu7Yy1Tt5Rr9Ee", },
         Note = "Get the key from the Link Vertise.",
         Thumbnail = {
             Image = "rbxassetid://6003957600",
