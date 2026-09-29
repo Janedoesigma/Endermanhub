@@ -631,15 +631,32 @@ end
 -- ============================================================
 -- BONUS MOMENTS AUTO (PlaceId 994732206)
 -- ============================================================
-if game.PlaceId == 994732206 then
-    task.spawn(function()
-        while task.wait(0.2) do
-            pcall(function()
-                local Event = game:GetService("ReplicatedStorage").Remotes.BonusMomentsRemoteFunction
-                Event:InvokeServer("Escape from Alcatraz", "Provoke", "Puncher")
-                Event:InvokeServer("Escape from Alcatraz", "Provoke", "Raft")
-                Event:InvokeServer("Escape from Alcatraz", "Provoke", "Digger")
-            end)
-        end
-    end)
+while true do
+
+    local Event = game:GetService("ReplicatedStorage").Remotes.BonusMomentsRemoteFunction
+
+    Event:InvokeServer(
+        "Escape from Alcatraz",
+        "Provoke",
+        "Puncher"
+    )
+
+    task.wait(0.2)
+
+    Event:InvokeServer(
+        "Escape from Alcatraz",
+        "Provoke",
+        "Digger"
+    )
+
+    task.wait(0.2)
+
+    Event:InvokeServer(
+        "Escape from Alcatraz",
+        "Provoke",
+        "Raft"
+    )
+
+    task.wait(0.2)
+
 end
