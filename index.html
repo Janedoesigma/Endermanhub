@@ -1,34 +1,2068 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Enderman Hub</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 60px 20px;
-      background: #0f0f0f;
-      color: #fff;
-    }
-    h1 { font-size: 2.5rem; color: #a855f7; }
-    p { font-size: 1.1rem; }
-    a {
-      display: inline-block;
-      margin: 10px;
-      padding: 12px 24px;
-      background: #a855f7;
-      color: #fff;
-      text-decoration: none;
-      border-radius: 8px;
-    }
-    a:hover { background: #7e22ce; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Key System</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  color-scheme: dark;
+  --bg: #070b14;
+  --card: rgba(12, 17, 30, 0.88);
+  --text: #ffffff;
+  --soft: #151c2d;
+  --line: rgba(255,255,255,.12);
+  --accent: #418cff;
+  --accent2: #7b4dff;
+  --ok: #35d98a;
+  --err: #ff5b6e;
+}
+
+html, body {
+  margin: 0;
+  width: 100%;
+  min-height: 100%;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 20% 20%, rgba(65,140,255,.15), transparent 30%),
+    radial-gradient(circle at 80% 80%, rgba(123,77,255,.14), transparent 30%),
+    linear-gradient(135deg, #050811, #0a1020 50%, #050811);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-x: hidden;
+}
+
+/* ===== FUNDO ANIMADO ===== */
+
+.background {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.star {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: white;
+  border-radius: 50%;
+  opacity: .5;
+  animation: floatStar linear infinite;
+}
+
+@keyframes floatStar {
+  from {
+    transform: translateY(0);
+    opacity: .2;
+  }
+
+  50% {
+    opacity: .9;
+  }
+
+  to {
+    transform: translateY(-120vh);
+    opacity: 0;
+  }
+}
+
+/* ===== CONTAINER ===== */
+
+.wrapper {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 430px;
+  padding: 20px;
+}
+
+.card {
+  width: 100%;
+  padding: 28px;
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,.1);
+
+  background: var(--card);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  box-shadow:
+    0 0 40px rgba(0,0,0,.45),
+    0 0 100px rgba(65,140,255,.08);
+
+  animation: cardAppear .7s ease;
+}
+
+@keyframes cardAppear {
+  from {
+    opacity: 0;
+    transform: translateY(25px) scale(.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 7px;
+  font-size: 30px;
+  font-weight: 800;
+
+  background: linear-gradient(
+    90deg,
+    #ffffff,
+    #65a7ff,
+    #9b76ff,
+    #ffffff
+  );
+
+  background-size: 300% 300%;
+
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+
+  animation: titleGlow 5s ease infinite;
+}
+
+@keyframes titleGlow {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.subtitle {
+  text-align: center;
+  color: #9ba8c2;
+  margin: 0 0 22px;
+  font-size: 14px;
+}
+
+/* ===== CAPTCHA ===== */
+
+#captcha-area {
+  transition: .35s ease;
+}
+
+.cp {
+  background: rgba(255,255,255,.025);
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  padding: 17px;
+  position: relative;
+}
+
+.cp h2 {
+  color: white;
+  font-size: 15px;
+  margin: 0 0 12px;
+  font-weight: 500;
+}
+
+.cp .row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.cp canvas {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.cp button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--soft);
+  padding: 8px 10px;
+}
+
+.cp button:hover {
+  filter: brightness(1.15);
+}
+
+.cp button:disabled {
+  cursor: default;
+  opacity: .6;
+}
+
+.cp .primary {
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  color: white;
+  border: 0;
+  width: 100%;
+  margin-top: 10px;
+  padding: 11px;
+  font-weight: bold;
+  box-shadow: 0 0 20px rgba(65,140,255,.15);
+}
+
+.cp input[type=text],
+.cp input[type=number] {
+  font: inherit;
+  flex: 1;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #0c1220;
+  color: white;
+}
+
+.cp input[type=range] {
+  flex: 1;
+  accent-color: var(--accent);
+}
+
+.cp .q {
+  font-size: 1.6rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 12px;
+  background: var(--soft);
+  border-radius: 8px;
+}
+
+.cp .grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.cp .grid button {
+  padding: 0;
+  overflow: hidden;
+  line-height: 0;
+  aspect-ratio: 1;
+}
+
+.cp img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.cp .grid button[aria-pressed=true] {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 3px var(--accent);
+}
+
+.cp .grid button[aria-pressed=true] img {
+  opacity: .65;
+}
+
+.cp .big {
+  width: 140px;
+  height: 140px;
+  margin: 0 auto;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+
+.cp .msg {
+  min-height: 1.2em;
+  margin: 8px 0 0;
+  font-size: .9rem;
+}
+
+.cp .msg.ok {
+  color: var(--ok);
+}
+
+.cp .msg.err {
+  color: var(--err);
+}
+
+.cp .hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.cp.lock {
+  text-align: center;
+}
+
+/* ===== GET KEY ===== */
+
+#key-area {
+  display: none;
+  text-align: center;
+  animation: keyAppear .6s ease;
+}
+
+#key-area.show {
+  display: block;
+}
+
+@keyframes keyAppear {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(.94);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.success {
+  margin-bottom: 12px;
+  color: #54e09c;
+  font-size: 14px;
+}
+
+.get-key {
+  width: 100%;
+  padding: 15px;
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+
+  font-size: 17px;
+  font-weight: 800;
+  color: white;
+
+  background: linear-gradient(
+    90deg,
+    #1677ff,
+    #6046ff,
+    #1677ff
+  );
+
+  background-size: 200% auto;
+
+  box-shadow:
+    0 0 20px rgba(65,140,255,.25);
+
+  transition: .25s;
+  animation: buttonPulse 2.5s ease-in-out infinite;
+}
+
+.get-key:hover {
+  transform: translateY(-2px) scale(1.015);
+  box-shadow:
+    0 0 30px rgba(65,140,255,.45);
+}
+
+@keyframes buttonPulse {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* ===== CONTADOR ===== */
+
+.counter {
+  margin-top: 13px;
+  font-size: 13px;
+  color: #92a0b9;
+}
+
+.counter span {
+  color: white;
+  font-weight: bold;
+}
+
+/* ===== MINI LOGO LINKVERTISE ===== */
+
+.link-logo {
+  margin: 12px auto 0;
+
+  width: fit-content;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  transform: scale(.43);
+  transform-origin: top center;
+
+  margin-bottom: -28px;
+
+  opacity: .92;
+}
+
+/* Ícone */
+
+.logo-icon {
+  width: 56px;
+  height: 56px;
+
+  background-color: #ff7a00;
+  border-radius: 12px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  position: relative;
+
+  box-shadow:
+    0 0 15px rgba(255,122,0,.2);
+}
+
+.logo-icon svg {
+  width: 36px;
+  height: 36px;
+  fill: #333333;
+}
+
+/* Texto */
+
+.logo-text-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-text {
+  font-size: 42px;
+  font-weight: 700;
+  color: #d5d5d5;
+  letter-spacing: -0.5px;
+  line-height: 1;
+  position: relative;
+}
+
+.logo-text .i-dot {
+  color: #ff7a00;
+}
+
+.logo-line {
+  height: 4px;
+
+  background:
+    linear-gradient(
+      to right,
+      #ff7a00 0%,
+      #ff7a00 18%,
+      #d5d5d5 18%,
+      #d5d5d5 100%
+    );
+
+  margin-top: 4px;
+  border-radius: 2px;
+}
+
+/* ===== RODAPÉ ===== */
+
+.footer {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 11px;
+  color: #606c82;
+}
+</style>
 </head>
+
 <body>
-  <h1>Enderman Hub</h1>
-  <p>Bem-vindo ao meu site.</p>
-  <a href="keysystem.html">Key System</a>
+
+<!-- FUNDO -->
+<div class="background" id="background"></div>
+
+<div class="wrapper">
+
+  <div class="card">
+
+    <div class="title" id="title">
+      KEY SYSTEM
+    </div>
+
+    <p class="subtitle" id="subtitle">
+      Complete the verification to continue
+    </p>
+
+    <!-- CAPTCHA -->
+    <div id="captcha-area">
+      <div id="cap"></div>
+    </div>
+
+    <!-- GET KEY -->
+    <div id="key-area">
+
+      <div class="success" id="success-text">
+        ✔ Verification completed!
+      </div>
+
+      <button class="get-key" id="get-key">
+        Get Key
+      </button>
+
+      <!-- CONTADOR ACIMA DO LOGO -->
+      <div class="counter">
+        <span id="counter-number">0/1</span>
+      </div>
+
+      <!-- MINI LOGO -->
+      <div class="link-logo">
+
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M10.59 13.41a1 1 0 0 1 0 1.42l-2.12 2.12a3.5 3.5 0 0 1-4.95-4.95l2.12-2.12a1 1 0 0 1 1.42 1.42l-2.12 2.12a1.5 1.5 0 0 0 2.12 2.12l2.12-2.12a1 1 0 0 0 1.41 0zm8.83-8.83a3.5 3.5 0 0 0-4.95 0l-2.12 2.12a1 1 0 0 0 1.42 1.42l2.12-2.12a1.5 1.5 0 0 1 2.12 2.12l-2.12 2.12a1 1 0 0 0 1.42 1.42l2.12-2.12a3.5 3.5 0 0 0 0-4.95zm-3.18 3.18a1 1 0 0 0-1.42 0l-4.24 4.24a1 1 0 0 0 1.42 1.42l4.24-4.24a1 1 0 0 0 0-1.42z"/>
+          </svg>
+        </div>
+
+        <div class="logo-text-wrapper">
+          <div class="logo-text">
+            l<span class="i-dot">i</span>nkvert<span class="i-dot">i</span>se
+          </div>
+
+          <div class="logo-line"></div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="footer" id="footer">
+      Secure verification system
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+/* =========================================================
+   TRADUÇÕES
+========================================================= */
+
+const SITE_I18N = {
+
+  pt: {
+    title: "KEY SYSTEM",
+    subtitle: "Complete a verificação para continuar",
+    success: "✔ Verificação concluída!",
+    getKey: "Get Key",
+    counter: "0/1",
+    footer: "Sistema de verificação seguro"
+  },
+
+  en: {
+    title: "KEY SYSTEM",
+    subtitle: "Complete the verification to continue",
+    success: "✔ Verification completed!",
+    getKey: "Get Key",
+    counter: "0/1",
+    footer: "Secure verification system"
+  },
+
+  es: {
+    title: "KEY SYSTEM",
+    subtitle: "Completa la verificación para continuar",
+    success: "✔ ¡Verificación completada!",
+    getKey: "Get Key",
+    counter: "0/1",
+    footer: "Sistema de verificación seguro"
+  },
+
+  fr: {
+    title: "KEY SYSTEM",
+    subtitle: "Terminez la vérification pour continuer",
+    success: "✔ Vérification terminée !",
+    getKey: "Get Key",
+    counter: "0/1",
+    footer: "Système de vérification sécurisé"
+  },
+
+  de: {
+    title: "KEY SYSTEM",
+    subtitle: "Schließe die Überprüfung ab, um fortzufahren",
+    success: "✔ Überprüfung abgeschlossen!",
+    getKey: "Get Key",
+    counter: "0/1",
+    footer: "Sicheres Verifizierungssystem"
+  },
+
+  it: {
+    title: "KEY SYSTEM",
+    subtitle: "Completa la verifica per continuare",
+    success: "✔ Verifica completata!",
+    getKey: "Get Key",
+    counter: "0/1",
+    footer: "Sistema di verifica sicuro"
+  }
+
+};
+
+
+/* Detecta idioma do navegador */
+
+function getBrowserLanguage() {
+
+  const langs = navigator.languages || [
+    navigator.language || "en"
+  ];
+
+  for (const lang of langs) {
+
+    const short = lang
+      .slice(0, 2)
+      .toLowerCase();
+
+    if (SITE_I18N[short]) {
+      return short;
+    }
+
+  }
+
+  return "en";
+}
+
+
+/* Aplica tradução */
+
+const SITE_LANG = getBrowserLanguage();
+const T = SITE_I18N[SITE_LANG];
+
+document.documentElement.lang = SITE_LANG;
+
+document.getElementById("title").textContent =
+  T.title;
+
+document.getElementById("subtitle").textContent =
+  T.subtitle;
+
+document.getElementById("success-text").textContent =
+  T.success;
+
+document.getElementById("get-key").textContent =
+  T.getKey;
+
+document.getElementById("counter-number").textContent =
+  T.counter;
+
+document.getElementById("footer").textContent =
+  T.footer;
+
+
+/* =========================================================
+   FUNDO ANIMADO
+========================================================= */
+
+const background =
+  document.getElementById("background");
+
+for (let i = 0; i < 70; i++) {
+
+  const star = document.createElement("div");
+
+  star.className = "star";
+
+  star.style.left =
+    Math.random() * 100 + "%";
+
+  star.style.top =
+    Math.random() * 100 + "%";
+
+  star.style.width =
+    (Math.random() * 2 + 1) + "px";
+
+  star.style.height =
+    star.style.width;
+
+  star.style.animationDuration =
+    (Math.random() * 8 + 5) + "s";
+
+  star.style.animationDelay =
+    (Math.random() * 8) + "s";
+
+  background.appendChild(star);
+
+}
+
+
+/* =========================================================
+   CAPTCHA
+========================================================= */
+
+const CAPTCHA_I18N = {
+
+pt:{
+text:'Digite os caracteres da imagem',
+math:'Resolva a conta',
+slider:'Arraste o controle até o fim',
+image:'Selecione todas as imagens com: {e}',
+rotate:'Gire a imagem até ficar na posição correta',
+order:'Clique nos números em ordem crescente',
+code:'Código',
+answer:'Resposta',
+refresh:'Novo desafio',
+verify:'Verificar',
+ok:'Verificado!',
+err:'Incorreto. Tente novamente.',
+listen:'Ouvir código',
+wait:'Muitas tentativas. Aguarde {s}s.',
+expired:'Verificação expirada. Resolva novamente.',
+req:'Resolva o desafio para continuar.',
+names:{
+star:'estrela',
+heart:'coração',
+sun:'sol',
+cloud:'nuvem',
+tree:'árvore',
+house:'casa',
+fish:'peixe',
+key:'chave'
+}},
+
+en:{
+text:'Type the characters in the image',
+math:'Solve the math problem',
+slider:'Drag the slider all the way to the end',
+image:'Select all images with: {e}',
+rotate:'Rotate the image until it is upright',
+order:'Click the numbers in ascending order',
+code:'Code',
+answer:'Answer',
+refresh:'New challenge',
+verify:'Verify',
+ok:'Verified!',
+err:'Incorrect. Please try again.',
+listen:'Listen to code',
+wait:'Too many attempts. Wait {s}s.',
+expired:'Verification expired. Please solve again.',
+req:'Solve the challenge to continue.',
+names:{
+star:'star',
+heart:'heart',
+sun:'sun',
+cloud:'cloud',
+tree:'tree',
+house:'house',
+fish:'fish',
+key:'key'
+}},
+
+es:{
+text:'Escribe los caracteres de la imagen',
+math:'Resuelve la operación',
+slider:'Arrastra el control hasta el final',
+image:'Selecciona todas las imágenes con: {e}',
+rotate:'Gira la imagen hasta que quede derecha',
+order:'Haz clic en los números en orden creciente',
+code:'Código',
+answer:'Respuesta',
+refresh:'Nuevo desafío',
+verify:'Verificar',
+ok:'¡Verificado!',
+err:'Incorrecto. Inténtalo de nuevo.',
+listen:'Escuchar código',
+wait:'Demasiados intentos. Espera {s}s.',
+expired:'Verificación caducada. Resuélvelo de nuevo.',
+req:'Resuelve el desafío para continuar.',
+names:{
+star:'estrella',
+heart:'corazón',
+sun:'sol',
+cloud:'nube',
+tree:'árbol',
+house:'casa',
+fish:'pez',
+key:'llave'
+}},
+
+fr:{
+text:'Saisissez les caractères de l’image',
+math:'Résolvez le calcul',
+slider:'Faites glisser le curseur jusqu’au bout',
+image:'Sélectionnez toutes les images avec : {e}',
+rotate:'Faites pivoter l’image jusqu’à la position droite',
+order:'Cliquez sur les nombres dans l’ordre croissant',
+code:'Code',
+answer:'Réponse',
+refresh:'Nouveau défi',
+verify:'Vérifier',
+ok:'Vérifié !',
+err:'Incorrect. Réessayez.',
+listen:'Écouter le code',
+wait:'Trop de tentatives. Attendez {s}s.',
+expired:'Vérification expirée. Recommencez.',
+req:'Résolvez le défi pour continuer.',
+names:{
+star:'étoile',
+heart:'cœur',
+sun:'soleil',
+cloud:'nuage',
+tree:'arbre',
+house:'maison',
+fish:'poisson',
+key:'clé'
+}},
+
+de:{
+text:'Gib die Zeichen aus dem Bild ein',
+math:'Löse die Rechenaufgabe',
+slider:'Ziehe den Regler ganz bis zum Ende',
+image:'Wähle alle Bilder mit: {e}',
+rotate:'Drehe das Bild, bis es aufrecht steht',
+order:'Klicke die Zahlen in aufsteigender Reihenfolge',
+code:'Code',
+answer:'Antwort',
+refresh:'Neue Aufgabe',
+verify:'Prüfen',
+ok:'Bestätigt!',
+err:'Falsch. Bitte erneut versuchen.',
+listen:'Code anhören',
+wait:'Zu viele Versuche. Warte {s}s.',
+expired:'Prüfung abgelaufen. Bitte erneut lösen.',
+req:'Löse die Aufgabe, um fortzufahren.',
+names:{
+star:'Stern',
+heart:'Herz',
+sun:'Sonne',
+cloud:'Wolke',
+tree:'Baum',
+house:'Haus',
+fish:'Fisch',
+key:'Schlüssel'
+}},
+
+it:{
+text:'Digita i caratteri dell’immagine',
+math:'Risolvi il calcolo',
+slider:'Trascina il cursore fino alla fine',
+image:'Seleziona tutte le immagini con: {e}',
+rotate:'Ruota l’immagine fino alla posizione corretta',
+order:'Clicca i numeri in ordine crescente',
+code:'Codice',
+answer:'Risposta',
+refresh:'Nuova sfida',
+verify:'Verifica',
+ok:'Verificato!',
+err:'Errato. Riprova.',
+listen:'Ascolta il codice',
+wait:'Troppi tentativi. Attendi {s}s.',
+expired:'Verifica scaduta. Riprova.',
+req:'Risolvi la sfida per continuare.',
+names:{
+star:'stella',
+heart:'cuore',
+sun:'sole',
+cloud:'nuvola',
+tree:'albero',
+house:'casa',
+fish:'pesce',
+key:'chiave'
+}}
+
+};
+
+
+/* =========================================================
+   ÍCONES CAPTCHA
+========================================================= */
+
+const CAPTCHA_ICONS = {
+
+star:c=>`<path d="M12 2l3 7 7 .6-5.3 4.7 1.7 7.2L12 17.7 5.6 21.5l1.7-7.2L2 9.6 9 9z" fill="${c}"/>`,
+
+heart:c=>`<path d="M12 21s-8-5.5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.5-8 11-8 11z" fill="${c}"/>`,
+
+sun:c=>`<circle cx="12" cy="12" r="5" fill="${c}"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4M4.2 4.2l2.8 2.8M17 17l2.8 2.8M4.2 19.8L7 17M17 7l2.8-2.8" stroke="${c}" stroke-width="2" stroke-linecap="round"/>`,
+
+cloud:c=>`<path d="M7 19a4 4 0 0 1-.5-8A6 6 0 0 1 18 9.5 4.5 4.5 0 0 1 17.5 19z" fill="${c}"/>`,
+
+tree:c=>`<path d="M12 1l6 9h-3l5 7H4l5-7H6z" fill="${c}"/><rect x="10.5" y="17" width="3" height="5" fill="${c}"/>`,
+
+house:c=>`<path d="M12 3l10 9h-3v9H5v-9H2z" fill="${c}"/><rect x="10" y="14" width="4" height="7" fill="#fff"/>`,
+
+fish:c=>`<ellipse cx="10" cy="12" rx="8" ry="5" fill="${c}"/><path d="M17 12l6-5v10z" fill="${c}"/><circle cx="6" cy="11" r="1.2" fill="#fff"/>`,
+
+key:c=>`<circle cx="7" cy="12" r="4" fill="none" stroke="${c}" stroke-width="2.5"/><path d="M11 12h11M18 12v4M21 12v3" stroke="${c}" stroke-width="2.5" stroke-linecap="round"/>`
+
+};
+
+
+/* =========================================================
+   CAPTCHA ENGINE
+========================================================= */
+
+const Captcha = (() => {
+
+const rnd=(a,b)=>Math.random()*(b-a)+a;
+
+const int=(a,b)=>Math.floor(rnd(a,b+1));
+
+const pick=a=>a[int(0,a.length-1)];
+
+const shuffle=a=>
+a.map(v=>[Math.random(),v])
+.sort((x,y)=>x[0]-y[0])
+.map(x=>x[1]);
+
+const CHARS='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+const NAMES=Object.keys(CAPTCHA_ICONS);
+
+const jit=()=>rnd(-1.5,1.5).toFixed(1);
+
+const uri=s=>
+'data:image/svg+xml;charset=utf-8,'+
+encodeURIComponent(s);
+
+function mkTile(){
+
+  const h=int(0,360);
+
+  let n='';
+
+  for(let i=0;i<4;i++){
+
+    n+=`<path
+    d="M${int(0,24)} ${int(0,24)}
+    Q${int(0,24)} ${int(0,24)}
+    ${int(0,24)} ${int(0,24)}"
+    stroke="hsl(${int(0,360)},40%,65%)"
+    stroke-width="${rnd(.3,.9).toFixed(2)}"
+    fill="none"/>`;
+
+  }
+
+  return{
+    col:`hsl(${h},65%,38%)`,
+    bg:`hsl(${(h+int(60,300))%360},35%,90%)`,
+    n
+  };
+}
+
+const tileURI=(inner,T,rot=0,sc=.72,dx=0,dy=0)=>
+uri(
+`<svg xmlns="http://www.w3.org/2000/svg"
+viewBox="0 0 24 24">
+<rect width="24" height="24" fill="${T.bg}"/>
+${T.n}
+<g transform="translate(${dx} ${dy})
+translate(12 12)
+rotate(${rot})
+scale(${sc})
+translate(-12 -12)">
+${inner}
+</g>
+</svg>`
+);
+
+const iconURI=(nm,T,r,s,x,y)=>
+tileURI(
+  CAPTCHA_ICONS[nm](T.col),
+  T,r,s,x,y
+);
+
+
+function create(target,o={}){
+
+const root=
+typeof target==='string'
+?document.querySelector(target)
+:target;
+
+const types=
+o.types||
+['text','math','slider','image','rotate','order'];
+
+const D={
+  easy:0,
+  normal:1,
+  hard:2
+}[o.difficulty||'normal']??1;
+
+const S={
+  ok:false,
+  fails:0,
+  lock:0,
+  last:null,
+  tok:'',
+  tm:[],
+  iv:0
+};
+
+let t,type,t0,hid,key;
+
+const sync=()=>{
+  if(hid) hid.value=S.tok;
+};
+
+const clr=()=>{
+  S.tm.forEach(clearTimeout);
+  S.tm=[];
+  clearInterval(S.iv);
+};
+
+const lang=()=>{
+
+  for(
+    const l of [
+      o.lang,
+      ...(navigator.languages||
+      [navigator.language||'en'])
+    ]
+  ){
+
+    const k=
+      (l||'')
+      .slice(0,2)
+      .toLowerCase();
+
+    if(CAPTCHA_I18N[k]) return k;
+
+  }
+
+  return 'en';
+};
+
+const rb=()=>
+`<button
+type="button"
+class="refresh"
+title="${t('refresh')}"
+aria-label="${t('refresh')}">↻</button>`;
+
+const only=()=>
+`<div class="row"
+style="justify-content:flex-end">${rb()}</div>`;
+
+
+function result(ok){
+
+  if(
+    Date.now()-t0<800||
+    root.querySelector('.hp').value
+  ){
+    ok=false;
+  }
+
+  root
+    .querySelectorAll(
+      '.cp button:not(.refresh),.cp input:not(.hp)'
+    )
+    .forEach(e=>e.disabled=true);
+
+  S.ok=ok;
+
+  const m=root.querySelector('.msg');
+
+  m.className=
+    'msg '+
+    (ok?'ok':'err');
+
+  m.textContent=
+    ok?t('ok'):t('err');
+
+  if(ok){
+
+    S.fails=0;
+
+    S.tok=
+      btoa(
+        JSON.stringify({
+          id:Array.from(
+            crypto.getRandomValues(
+              new Uint8Array(8)
+            ),
+            b=>b
+            .toString(16)
+            .padStart(2,'0')
+          ).join(''),
+          type,
+          ms:Date.now()-t0,
+          ts:Date.now()
+        })
+      );
+
+    S.tm.push(
+      setTimeout(()=>{
+
+        S.ok=false;
+        S.tok='';
+        sync();
+
+        o.onExpire&&o.onExpire();
+        o.onVerify&&o.onVerify(false);
+
+        render(t('expired'));
+
+      },120000)
+    );
+
+  }else{
+
+    S.tok='';
+
+    if(++S.fails>=5)
+      S.lock=Date.now()+30000;
+
+    S.tm.push(
+      setTimeout(
+        ()=>render(),
+        800
+      )
+    );
+
+  }
+
+  sync();
+
+  o.onVerify&&o.onVerify(ok);
+
+  root.dispatchEvent(
+    new CustomEvent(
+      'captcha:result',
+      {
+        detail:{
+          ok,
+          token:S.tok
+        },
+        bubbles:true
+      }
+    )
+  );
+}
+
+
+const V={
+
+text(){
+
+  const n=5+D;
+
+  const code=
+    Array.from(
+      crypto.getRandomValues(
+        new Uint32Array(n)
+      ),
+      x=>CHARS[x%CHARS.length]
+    ).join('');
+
+  const sp=
+    'speechSynthesis' in window
+    ?`<button
+      type="button"
+      class="listen"
+      title="${t('listen')}"
+      aria-label="${t('listen')}">🔊</button>`
+    :'';
+
+  return{
+
+    html:`
+      <canvas
+        width="280"
+        height="90">
+      </canvas>
+
+      <div class="row">
+
+        <input
+          type="text"
+          maxlength="${n}"
+          autocomplete="off"
+          placeholder="${t('code')}"
+          aria-label="${t('code')}">
+
+        ${sp}
+
+        ${rb()}
+
+      </div>
+    `,
+
+    init(){
+
+      const x=
+        root.querySelector(
+          'canvas'
+        ).getContext('2d');
+
+      const st=250/n;
+
+      const lines=k=>{
+
+        for(let i=0;i<k;i++){
+
+          x.strokeStyle=
+            `hsl(${rnd(0,360)},40%,60%)`;
+
+          x.lineWidth=
+            rnd(1,2.5);
+
+          x.beginPath();
+
+          x.moveTo(
+            rnd(0,280),
+            rnd(0,90)
+          );
+
+          x.bezierCurveTo(
+            rnd(0,280),
+            rnd(0,90),
+            rnd(0,280),
+            rnd(0,90),
+            rnd(0,280),
+            rnd(0,90)
+          );
+
+          x.stroke();
+        }
+      };
+
+      x.fillStyle='#eef1f6';
+      x.fillRect(0,0,280,90);
+
+      lines(4+2*D);
+
+      [...code].forEach((c,i)=>{
+
+        x.save();
+
+        x.translate(
+          14+i*st,
+          55+rnd(-8,8)
+        );
+
+        x.rotate(
+          rnd(-.4,.4)
+        );
+
+        x.font=
+          `bold ${int(30,40)}px Georgia,serif`;
+
+        x.fillStyle=
+          `hsl(${rnd(200,260)},60%,${rnd(20,38)}%)`;
+
+        x.fillText(c,0,0);
+
+        x.restore();
+
+      });
+
+      if(D) lines(2*D);
+
+      for(let i=0;i<60;i++){
+
+        x.fillStyle=
+          `rgba(0,0,0,${rnd(.1,.4)})`;
+
+        x.fillRect(
+          rnd(0,280),
+          rnd(0,90),
+          2,2
+        );
+      }
+
+      const ls=
+        root.querySelector('.listen');
+
+      if(ls){
+
+        ls.onclick=()=>{
+
+          speechSynthesis.cancel();
+
+          const u=
+            new SpeechSynthesisUtterance(
+              [...code].join(', ')
+            );
+
+          u.lang=key;
+
+          speechSynthesis.speak(u);
+        };
+      }
+    },
+
+    check:()=>
+      root
+        .querySelector(
+          'input[type=text]'
+        )
+        .value
+        .trim()
+        .toUpperCase()===code
+
+  };
+},
+
+
+math(){
+
+  let ans,q;
+
+  const a=
+    int(2,D?12:9);
+
+  const b=
+    int(2,D?12:9);
+
+  if(D===2){
+
+    const c=int(1,20);
+
+    ans=a*b+c;
+
+    q=`${a} × ${b} + ${c}`;
+
+  }else{
+
+    const op=
+      pick(
+        D
+        ?['+','−','×']
+        :['+','−']
+      );
+
+    const [x,y]=
+      op==='−'&&a<b
+      ?[b,a]
+      :[a,b];
+
+    ans=
+      op==='+'
+      ?x+y
+      :op==='−'
+      ?x-y
+      :x*y;
+
+    q=`${x} ${op} ${y}`;
+
+  }
+
+  return{
+
+    html:`
+      <div class="q">
+        ${q} = ?
+      </div>
+
+      <div class="row">
+
+        <input
+          type="number"
+          inputmode="numeric"
+          placeholder="${t('answer')}"
+          aria-label="${t('answer')}">
+
+        ${rb()}
+
+      </div>
+    `,
+
+    check:()=>{
+
+      const v=
+        root.querySelector(
+          'input[type=number]'
+        ).value;
+
+      return(
+        v!=='' &&
+        Number(v)===ans
+      );
+    }
+
+  };
+},
+
+
+slider(){
+
+  return{
+
+    html:`
+      <div
+        class="row"
+        style="margin-top:0">
+
+        <input
+          type="range"
+          min="0"
+          max="100"
+          value="0"
+          aria-label="${t('slider')}">
+
+        ${rb()}
+
+      </div>
+    `,
+
+    init(){
+
+      const r=
+        root.querySelector(
+          'input[type=range]'
+        );
+
+      r.onchange=()=>{
+
+        if(+r.value<100){
+
+          r.value=0;
+          return;
+
+        }
+
+        result(true);
+
+      };
+    }
+  };
+},
+
+
+image(){
+
+  const tg=pick(NAMES);
+
+  const oth=
+    NAMES.filter(
+      n=>n!==tg
+    );
+
+  const n=
+    int(2,4);
+
+  const cells=
+    shuffle(
+      Array.from(
+        {length:9},
+        (_,i)=>
+          i<n
+          ?tg
+          :pick(oth)
+      )
+    );
+
+  const ans=
+    new Set(
+      cells.flatMap(
+        (c,i)=>
+          c===tg?[i]:[]
+      )
+    );
+
+  const got=new Set();
+
+  const r=
+    D?45:30;
+
+  return{
+
+    title:
+      t('image')
+      .replace(
+        '{e}',
+        `<strong>
+          ${t('names')[tg]}
+        </strong>`
+      ),
+
+    html:`
+      <div class="grid">
+
+        ${cells.map((c,i)=>`
+          <button
+            type="button"
+            data-i="${i}"
+            aria-pressed="false">
+
+            <img
+              alt=""
+              draggable="false"
+              src="${iconURI(
+                c,
+                mkTile(),
+                int(-r,r),
+                rnd(.55,.85),
+                jit(),
+                jit()
+              )}">
+
+          </button>
+        `).join('')}
+
+      </div>
+
+      ${only()}
+    `,
+
+    init(){
+
+      root
+        .querySelectorAll(
+          '.grid button'
+        )
+        .forEach(b=>{
+
+          b.onclick=()=>{
+
+            const i=
+              +b.dataset.i;
+
+            const on=
+              !got.has(i);
+
+            on
+              ?got.add(i)
+              :got.delete(i);
+
+            b.setAttribute(
+              'aria-pressed',
+              on
+            );
+
+          };
+        });
+    },
+
+    check:()=>
+      got.size===ans.size &&
+      [...got].every(
+        i=>ans.has(i)
+      )
+  };
+},
+
+
+rotate(){
+
+  const nm=
+    pick([
+      'tree',
+      'house',
+      'heart'
+    ]);
+
+  const T=mkTile();
+
+  const a0=
+    10*int(6,30);
+
+  const tol=
+    D>1?0:10;
+
+  let v=0;
+
+  const src=()=>
+    iconURI(
+      nm,
+      T,
+      (a0+v)%360,
+      .8,0,0
+    );
+
+  return{
+
+    html:`
+      <div class="big">
+
+        <img
+          alt=""
+          draggable="false"
+          src="${src()}">
+
+      </div>
+
+      <div class="row">
+
+        <input
+          type="range"
+          min="0"
+          max="350"
+          step="10"
+          value="0"
+          aria-label="${t('rotate')}">
+
+        ${rb()}
+
+      </div>
+    `,
+
+    init(){
+
+      const r=
+        root.querySelector(
+          'input[type=range]'
+        );
+
+      const im=
+        root.querySelector(
+          '.big img'
+        );
+
+      r.oninput=()=>{
+
+        v=+r.value;
+        im.src=src();
+
+      };
+    },
+
+    check:()=>{
+
+      const d=
+        (a0+v)%360;
+
+      return(
+        Math.min(
+          d,
+          360-d
+        )<=tol
+      );
+    }
+  };
+},
+
+
+order(){
+
+  const n=4+D;
+
+  const ids=
+    shuffle(
+      Array.from(
+        {length:n},
+        (_,i)=>i+1
+      )
+    );
+
+  let nx=1;
+
+  return{
+
+    html:`
+      <div class="grid">
+
+        ${ids.map(i=>{
+
+          const T=mkTile();
+
+          return`
+            <button
+              type="button">
+
+              <img
+                alt=""
+                draggable="false"
+                src="${tileURI(
+                  `<text
+                    x="12"
+                    y="17.5"
+                    font-size="16"
+                    font-weight="700"
+                    text-anchor="middle"
+                    font-family="Georgia,serif"
+                    fill="${T.col}">
+                    ${i}
+                  </text>`,
+                  T,
+                  int(-25,25),
+                  .8,
+                  jit(),
+                  jit()
+                )}">
+
+            </button>
+          `;
+        }).join('')}
+
+      </div>
+
+      ${only()}
+    `,
+
+    init(){
+
+      root
+        .querySelectorAll(
+          '.grid button'
+        )
+        .forEach((b,k)=>{
+
+          b.onclick=()=>{
+
+            if(ids[k]!==nx){
+
+              result(false);
+              return;
+
+            }
+
+            b.setAttribute(
+              'aria-pressed',
+              'true'
+            );
+
+            b.disabled=true;
+
+            if(++nx>n)
+              result(true);
+
+          };
+        });
+    }
+  };
+}
+
+};
+
+
+function lockView(){
+
+  root.innerHTML=`
+    <div class="cp lock">
+      <p
+        class="msg err"
+        role="status">
+      </p>
+    </div>
+  `;
+
+  const p=
+    root.querySelector('.msg');
+
+  const tick=()=>{
+
+    const s=
+      Math.ceil(
+        (S.lock-Date.now())/1000
+      );
+
+    if(s<=0){
+
+      S.fails=0;
+      render();
+
+      return;
+    }
+
+    p.textContent=
+      t('wait')
+      .replace(
+        '{s}',
+        s
+      );
+  };
+
+  tick();
+
+  S.iv=
+    setInterval(
+      tick,
+      500
+    );
+}
+
+
+function render(note){
+
+  clr();
+
+  if(S.ok){
+
+    S.ok=false;
+
+    o.onVerify&&
+      o.onVerify(false);
+
+  }
+
+  S.tok='';
+
+  sync();
+
+  key=lang();
+
+  const L=
+    CAPTCHA_I18N[key];
+
+  t=x=>L[x];
+
+  if(Date.now()<S.lock){
+
+    lockView();
+    return;
+
+  }
+
+  do{
+
+    type=
+      pick(types);
+
+  }while(
+    types.length>1 &&
+    type===S.last
+  );
+
+  S.last=type;
+
+  const v=V[type]();
+
+  t0=Date.now();
+
+  root.innerHTML=`
+    <div
+      class="cp"
+      tabindex="-1"
+      role="group"
+      aria-label="Captcha">
+
+      <h2>
+        ${v.title||t(type)}
+      </h2>
+
+      ${v.html}
+
+      <p
+        class="msg"
+        role="status"
+        aria-live="polite">
+        ${note||''}
+      </p>
+
+      ${
+        v.check
+        ?`
+          <button
+            type="button"
+            class="primary verify">
+            ${t('verify')}
+          </button>
+        `
+        :''
+      }
+
+      <input
+        class="hp"
+        name="website"
+        tabindex="-1"
+        autocomplete="off"
+        aria-hidden="true">
+
+    </div>
+  `;
+
+  v.init&&v.init();
+
+  root
+    .querySelector('.refresh')
+    .onclick=
+      ()=>render();
+
+  const vb=
+    root.querySelector(
+      '.verify'
+    );
+
+  if(vb){
+
+    vb.onclick=
+      ()=>result(
+        v.check()
+      );
+
+  }
+
+  const inp=
+    root.querySelector(
+      'input[type=text],input[type=number]'
+    );
+
+  if(inp){
+
+    inp.onkeydown=e=>{
+
+      if(e.key==='Enter'){
+
+        e.preventDefault();
+
+        result(
+          v.check()
+        );
+
+      }
+    };
+  }
+}
+
+
+const lc=()=>render();
+
+addEventListener(
+  'languagechange',
+  lc
+);
+
+render();
+
+
+return{
+
+  isVerified:()=>S.ok,
+
+  getToken:()=>S.tok,
+
+  reset:()=>render(),
+
+  destroy(){
+
+    clr();
+
+    removeEventListener(
+      'languagechange',
+      lc
+    );
+
+    if(hid)
+      hid.remove();
+
+    root.innerHTML='';
+  }
+
+};
+
+}
+
+return{
+  create
+};
+
+})();
+
+
+/* =========================================================
+   INICIAR CAPTCHA
+========================================================= */
+
+const cap =
+  Captcha.create(
+    '#cap',
+    {
+      difficulty:'normal',
+
+      onVerify(ok){
+
+        if(ok){
+
+          /* CAPTCHA SUMIU */
+
+          document
+            .getElementById(
+              'captcha-area'
+            )
+            .style.opacity='0';
+
+          document
+            .getElementById(
+              'captcha-area'
+            )
+            .style.transform=
+              'scale(.92)';
+
+          setTimeout(()=>{
+
+            document
+              .getElementById(
+                'captcha-area'
+              )
+              .style.display='none';
+
+            /* MOSTRA GET KEY */
+
+            document
+              .getElementById(
+                'key-area'
+              )
+              .classList.add(
+                'show'
+              );
+
+          },350);
+
+        }
+
+      }
+    }
+  );
+
+
+/* =========================================================
+   BOTÃO GET KEY
+========================================================= */
+
+const getKey =
+  document.getElementById(
+    'get-key'
+  );
+
+let clicks=0;
+
+getKey.addEventListener(
+  'click',
+  ()=>{
+
+    if(clicks>=1)
+      return;
+
+    clicks++;
+
+    document
+      .getElementById(
+        'counter-number'
+      )
+      .textContent='1/1';
+
+    /*
+      LINK DO SEU DESTINO
+    */
+
+    window.location.href =
+      'https://link-target.net/1460648/dWUzkjHdG9DZ';
+
+  }
+);
+
+</script>
+
 </body>
 </html>
