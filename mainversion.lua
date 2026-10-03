@@ -49,10 +49,10 @@ local HitToken = tostring(LP.UserId):sub(2, 4) .. "078da"
 -- Janela
 ----------------------------------------------------------------------
 local Window = Fluent:CreateWindow({
-    Title = "Blox Fruits Hub",
-    SubTitle = "Fluent | porte Speed Hub X",
+    Title = "Enderman Hub [Blox Fruits]",
+    SubTitle = "by jane_doe sigma version: 0.2",
     TabWidth = 160,
-    Size = UDim2.fromOffset(620, 500),
+    Size = UDim2.fromOffset(450, 480),
     Acrylic = true,
     Theme = "Dark",
     MinimizeKey = Enum.KeyCode.LeftControl
