@@ -737,10 +737,10 @@ end
 local orbit = 0
 
 local function FarmPosition(base)
-    orbit = (orbit + 5) % 360
+    orbit = (orbit + 0) % 0
     local r = math.rad(orbit)
     local h = tonumber(O("Farm Distance", 20)) or 20
-    return base + Vector3.new(math.sin(r) * 35, h, math.cos(r) * 35)
+    return base + Vector3.new(math.sin(r) * 0, h, math.cos(r) * 0)
 end
 
 local function EngageEnemy(names)
