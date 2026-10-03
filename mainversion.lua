@@ -51,8 +51,8 @@ local HitToken = tostring(LP.UserId):sub(2, 4) .. "078da"
 local Window = Fluent:CreateWindow({
     Title = "Blox Fruits Hub",
     SubTitle = "Fluent | porte Speed Hub X",
-    TabWidth = 160,
-    Size = UDim2.fromOffset(620, 500),
+    TabWidth = 120,
+    Size = UDim2.fromOffset(540, 500),
     Acrylic = true,
     Theme = "Dark",
     MinimizeKey = Enum.KeyCode.LeftControl
@@ -737,10 +737,10 @@ end
 local orbit = 0
 
 local function FarmPosition(base)
-    orbit = (orbit + 0) % 0
+    orbit = (orbit + 5) % 360
     local r = math.rad(orbit)
     local h = tonumber(O("Farm Distance", 20)) or 20
-    return base + Vector3.new(math.sin(r) * 0, h, math.cos(r) * 0)
+    return base + Vector3.new(math.sin(r) * 35, h, math.cos(r) * 35)
 end
 
 local function EngageEnemy(names)
