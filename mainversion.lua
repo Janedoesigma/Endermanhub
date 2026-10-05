@@ -8,6 +8,7 @@ local Fluent
 local urls = {
     "https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua",
     "https://raw.githubusercontent.com/dawid-scripts/Fluent/master/main.lua"
+    "https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"
 }
 for _, url in ipairs(urls) do
     local ok, res = pcall(function()
