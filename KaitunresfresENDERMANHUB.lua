@@ -5,6 +5,7 @@ local function GetDefaultConfig()
     return {
         Team = "Pirates", Language = "pt-BR", AutoExecute = false,
         MultiHitM1 = true, SuperFixLag = false,
+        GirarFrutaV2 = false, RemoveNotifications = false,
         Configuration = { HopWhenIdle=false, AutoHop=false, AutoHopDelay=60, FpsBoost=false, blackscreen=false, LowGraphics=false },
         Items = { AutoFullyMelees=false, Saber=false, CursedDualKatana=false, SoulGuitar=false, RaceV2=false, AutoRaceV3=false, AutoRandomFruit=false },
         Sword = { ["Shark Saw"]=false, ["Wardens Sword"]=false, ["Pole (1st Form)"]=false, ["Gravity Blade"]=false, ["Longsword"]=false, ["Rengoku"]=false, ["Flail"]=false, ["Twin Hooks"]=false },
@@ -52,21 +53,17 @@ end
 LoadConfig()
 
 -- ============================================================
--- TRADUÇÕES COMPLETAS
+-- TRADUÇÕES
 -- ============================================================
 local Translations = {
     ["en-US"] = {
-        -- Tabs
         main="Main", items="Items", swords="Swords", bosses="Boss Weapons",
         melee="Melee & Ken", panic="Panic Mode", sea="Sea & Settings",
-        opt="Optimization", uiconfig="UI Config", exec="Execution",
-        -- Sections
+        opt="Optimization", uiconfig="UI Config", exec="Execution", update_tab="Update",
         time="Team", genconfig="General Config", haki="Haki",
         extras="Extras", managecfg="Manage Config",
-        -- Window
         window_title="EndermanHub Kaitun version",
         window_author="[BLOX FRUITS] by jane doe Sigma",
-        -- Titles
         hopidle="Hop When Idle", autohop="Auto Hop", hopdelay="Auto Hop Delay",
         fps="FPS Boost", blackscreen="Blackscreen", lowgfx="Low Graphics",
         autobuy="Auto Buy Melee", checkmastery="Check Mastery After Buy",
@@ -81,35 +78,35 @@ local Translations = {
         superfix="Super Fix Lag", superfixdesc="Removes fog, hides players and parts to reduce lag",
         restore="Restore Normal", restoredesc="Reset all visual modifications to default",
         execKaitun="Execute Kaitun", autoexec="Auto Execute on Rejoin",
-        multihit="Multi Hit M1 (Beta)", multihitdesc="Hits up to 2 nearby mobs per swing",
+        execKaitun_desc="Click only once. Recommend enabling Auto Execute after clicking.",
+        multihit="Multi Hit M1 (Beta)",
+        girar="Spin Fruit V2", girar_desc="Highly recommended over the other one",
+        rmnotif="Remove Notifications", rmnotif_desc="Recommended for videos",
         redeem="Redeem All Codes", redeemdesc="Redeem every working Blox Fruits code",
         save="Save Config", savedesc="Manually save current config",
         reset="Reset Config", resetdesc="Delete saved config (rejoin to apply)",
         language="Language", theme="Theme", transparent="Transparent",
         togglekey="Toggle UI Key",
-        -- Notif titles
         nt_kaitun="Kaitun", nt_codes="Codes", nt_autoexec="Auto Execute",
         nt_restore="Restore", nt_multihit="Multi Hit", nt_lang="Language",
-        nt_save="Saved", nt_reset="Reset",
-        -- Notif contents
+        nt_save="Saved", nt_reset="Reset", nt_girar="Spin Fruit", nt_rmnotif="Notifications",
         kaitunexec="Executing Kaitun...", rejoinmsg="Rejoining server...",
         rejoinfail="Rejoin failed. Searching for another server...",
         autoexec_on="Enabled! Kaitun will run alone on next inject.",
         autoexec_off="Disabled.",
-        redeem_start="Redeeming codes...",
-        redeem_done="Codes sent! Check chat for rewards.",
-        save_done="Config saved successfully.",
-        reset_done="Config deleted. Reinject the script.",
+        redeem_start="Redeeming codes...", redeem_done="Codes sent! Check chat for rewards.",
+        save_done="Config saved successfully.", reset_done="Config deleted. Reinject the script.",
         restore_done="Everything restored to normal!",
-        superfix_on="Super Fix Lag ENABLED",
-        superfix_off="Super Fix Lag DISABLED",
+        superfix_on="Super Fix Lag ENABLED", superfix_off="Super Fix Lag DISABLED",
         multihit_on="Enabled!", multihit_off="Disabled.",
+        girar_on="Spin Fruit V2 ENABLED", girar_off="Spin Fruit V2 DISABLED",
+        rmnotif_on="Notifications hidden!", rmnotif_off="Notifications restored.",
         lang_notify="Language changed to %s. Reinject to apply.",
     },
     ["vi-VN"] = {
         main="Chính", items="Vật Phẩm", swords="Kiếm", bosses="Vũ Khí Boss",
         melee="Cận Chiến & Ken", panic="Chế Độ Hoảng Loạn", sea="Biển & Cài Đặt",
-        opt="Tối Ưu Hóa", uiconfig="Cấu Hình UI", exec="Thực Thi",
+        opt="Tối Ưu Hóa", uiconfig="Cấu Hình UI", exec="Thực Thi", update_tab="Cập Nhật",
         time="Phe", genconfig="Cấu Hình Chung", haki="Haki",
         extras="Bổ Sung", managecfg="Quản Lý Cấu Hình",
         window_title="EndermanHub Kaitun version",
@@ -128,7 +125,10 @@ local Translations = {
         superfix="Siêu Fix Lag", superfixdesc="Xóa sương mù, ẩn người chơi và các bộ phận để giảm lag",
         restore="Khôi Phục Bình Thường", restoredesc="Đặt lại mọi thay đổi hình ảnh về mặc định",
         execKaitun="Chạy Kaitun", autoexec="Tự Chạy Khi Vào Lại",
-        multihit="Multi Hit M1 (Beta)", multihitdesc="Đánh tối đa 2 mob gần đó mỗi lần chém",
+        execKaitun_desc="Chỉ nhấn một lần. Khuyến nghị bật Tự Chạy sau khi nhấn.",
+        multihit="Multi Hit M1 (Beta)",
+        girar="Quay Trái V2", girar_desc="Rất khuyến nghị thay vì cái kia",
+        rmnotif="Xóa Thông Báo", rmnotif_desc="Khuyến nghị cho video",
         redeem="Nhập Tất Cả Code", redeemdesc="Nhập mọi code Blox Fruits còn hoạt động",
         save="Lưu Cấu Hình", savedesc="Lưu cấu hình hiện tại thủ công",
         reset="Đặt Lại Cấu Hình", resetdesc="Xóa cấu hình đã lưu (vào lại để áp dụng)",
@@ -136,25 +136,24 @@ local Translations = {
         togglekey="Phím Mở UI",
         nt_kaitun="Kaitun", nt_codes="Code", nt_autoexec="Tự Chạy",
         nt_restore="Khôi Phục", nt_multihit="Multi Hit", nt_lang="Ngôn Ngữ",
-        nt_save="Đã Lưu", nt_reset="Đặt Lại",
+        nt_save="Đã Lưu", nt_reset="Đặt Lại", nt_girar="Quay Trái", nt_rmnotif="Thông Báo",
         kaitunexec="Đang chạy Kaitun...", rejoinmsg="Đang vào lại server...",
         rejoinfail="Vào lại thất bại. Đang tìm server khác...",
         autoexec_on="Đã bật! Kaitun sẽ tự chạy khi tiêm lại.",
         autoexec_off="Đã tắt.",
-        redeem_start="Đang nhập code...",
-        redeem_done="Đã gửi code! Kiểm tra chat.",
-        save_done="Đã lưu cấu hình.",
-        reset_done="Đã xóa cấu hình. Tiêm lại script.",
+        redeem_start="Đang nhập code...", redeem_done="Đã gửi code! Kiểm tra chat.",
+        save_done="Đã lưu cấu hình.", reset_done="Đã xóa cấu hình. Tiêm lại script.",
         restore_done="Đã khôi phục mọi thứ!",
-        superfix_on="Siêu Fix Lag ĐÃ BẬT",
-        superfix_off="Siêu Fix Lag ĐÃ TẮT",
+        superfix_on="Siêu Fix Lag ĐÃ BẬT", superfix_off="Siêu Fix Lag ĐÃ TẮT",
         multihit_on="Đã bật!", multihit_off="Đã tắt.",
+        girar_on="Quay Trái V2 ĐÃ BẬT", girar_off="Quay Trái V2 ĐÃ TẮT",
+        rmnotif_on="Đã ẩn thông báo!", rmnotif_off="Đã khôi phục thông báo.",
         lang_notify="Đã đổi ngôn ngữ sang %s. Tiêm lại để áp dụng.",
     },
     ["pt-BR"] = {
         main="Principal", items="Itens", swords="Espadas", bosses="Armas de Boss",
         melee="Melee & Ken", panic="Modo Pânico", sea="Sea & Ajustes",
-        opt="Otimização", uiconfig="Config. da UI", exec="Execução",
+        opt="Otimização", uiconfig="Config. da UI", exec="Execução", update_tab="Update",
         time="Time", genconfig="Config. Geral", haki="Haki",
         extras="Extras", managecfg="Gerenciar Config",
         window_title="EndermanHub Kaitun version",
@@ -173,7 +172,10 @@ local Translations = {
         superfix="Super Fix Lag", superfixdesc="Remove neblina, esconde players e partes pra reduzir lag",
         restore="Voltar Tudo ao Normal", restoredesc="Restaura todas as modificações visuais ao padrão",
         execKaitun="Executar Kaitun", autoexec="Auto Executar ao Reinjetar",
-        multihit="Multi Hit M1 (Beta)", multihitdesc="Atinge até 2 mobs próximos por golpe",
+        execKaitun_desc="Aperte só uma vez. Recomendo ligar Auto Executar depois de clicar.",
+        multihit="Multi Hit M1 (Beta)",
+        girar="Girar Fruta V2", girar_desc="Recomendo muito em vez do outro",
+        rmnotif="Remover Notificações", rmnotif_desc="Recomendo para vídeos",
         redeem="Pegar Todos os Códigos", redeemdesc="Resgata todos os códigos ativos do Blox Fruits",
         save="Salvar Config", savedesc="Salvar config atual manualmente",
         reset="Resetar Config", resetdesc="Apagar config salva (reentre para aplicar)",
@@ -181,19 +183,18 @@ local Translations = {
         togglekey="Tecla de Abrir UI",
         nt_kaitun="Kaitun", nt_codes="Códigos", nt_autoexec="Auto Executar",
         nt_restore="Restaurar", nt_multihit="Multi Hit", nt_lang="Idioma",
-        nt_save="Salvo", nt_reset="Resetado",
+        nt_save="Salvo", nt_reset="Resetado", nt_girar="Girar Fruta", nt_rmnotif="Notificações",
         kaitunexec="Executando Kaitun...", rejoinmsg="Reentrando no servidor...",
         rejoinfail="Falha ao reentrar. Procurando outro servidor...",
         autoexec_on="Ativado! Kaitun vai rodar sozinho ao reinjetar.",
         autoexec_off="Desativado.",
-        redeem_start="Resgatando códigos...",
-        redeem_done="Códigos enviados! Veja o chat.",
-        save_done="Config salva com sucesso.",
-        reset_done="Config apagada. Reinjete o script.",
+        redeem_start="Resgatando códigos...", redeem_done="Códigos enviados! Veja o chat.",
+        save_done="Config salva com sucesso.", reset_done="Config apagada. Reinjete o script.",
         restore_done="Tudo restaurado ao normal!",
-        superfix_on="Super Fix Lag ATIVADO",
-        superfix_off="Super Fix Lag DESATIVADO",
+        superfix_on="Super Fix Lag ATIVADO", superfix_off="Super Fix Lag DESATIVADO",
         multihit_on="Ativado!", multihit_off="Desativado.",
+        girar_on="Girar Fruta V2 ATIVADO", girar_off="Girar Fruta V2 DESATIVADO",
+        rmnotif_on="Notificações escondidas!", rmnotif_off="Notificações restauradas.",
         lang_notify="Idioma alterado para %s. Reinjete para aplicar.",
     },
 }
@@ -202,7 +203,6 @@ local function T(key)
     local tbl = Translations[Config.Language] or Translations["pt-BR"]
     return tbl[key] or key
 end
-
 local function TF(key, ...) return string.format(T(key), ...) end
 
 -- ============================================================
@@ -211,28 +211,18 @@ local function TF(key, ...) return string.format(T(key), ...) end
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
 local Window = WindUI:CreateWindow({
-    Title = T("window_title"),
-    Icon = "door-open",
-    Author = T("window_author"),
-    Folder = "EndermanHub",
-    Size = UDim2.fromOffset(520, 480),
-    MinSize = Vector2.new(480, 350),
-    MaxSize = Vector2.new(850, 560),
-    Transparent = true,
-    Theme = "Dark",
-    Resizable = true,
-    SideBarWidth = 200,
-    HideSearchBar = false,
-    ScrollBarEnabled = false,
-    Background = "rbxassetid://8176158130",
-    BackgroundImageTransparency = 0.5,
+    Title = T("window_title"), Icon = "door-open", Author = T("window_author"),
+    Folder = "EndermanHub", Size = UDim2.fromOffset(520, 480),
+    MinSize = Vector2.new(480, 350), MaxSize = Vector2.new(850, 560),
+    Transparent = true, Theme = "Dark", Resizable = true, SideBarWidth = 200,
+    HideSearchBar = false, ScrollBarEnabled = false,
+    Background = "rbxassetid://8176158130", BackgroundImageTransparency = 0.5,
     User = { Enabled = true, Anonymous = false, Callback = function() print(":3") end },
     KeySystem = {
         Key = { "rpNVYJDO4U7DCEQh", "2vkz0nkSUkb7sbJP", "25VctsNED7CwwP26" },
         Note = "Get the key from the Link Vertise.",
         Thumbnail = { Image = "rbxassetid://6003957600", Title = "EndermanHub Key (permanent key)" },
-        URL = "https://discord.gg/SEU_DISCORD_AQUI",
-        SaveKey = true,
+        URL = "https://discord.gg/SEU_DISCORD_AQUI", SaveKey = false,
     },
 })
 
@@ -245,44 +235,6 @@ local function ExecuteKaitun()
     pcall(function()
         loadstring(game:HttpGet('https://raw.githubusercontent.com/Janedoesigma/Endermanhub/main/endermanhubkaitun.lua'))()
     end)
-end
-
-local function RejoinSameServer()
-    pcall(function()
-        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, game.Players.LocalPlayer)
-    end)
-end
-
-local function ServerHop()
-    local ok, result = pcall(function()
-        return HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
-    end)
-    if ok and result and result.data then
-        for _, server in pairs(result.data) do
-            if server.id ~= game.JobId and server.playing < server.maxPlayers then
-                pcall(function()
-                    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, server.id, game.Players.LocalPlayer)
-                end)
-                return true
-            end
-        end
-    end
-    return false
-end
-
-local function TryRejoin()
-    WindUI:Notify({ Title = T("nt_kaitun"), Content = T("rejoinmsg"), Duration = 3, Icon = "refresh-cw" })
-    local teleportFailed = false
-    local conn = game:GetService("TeleportService").TeleportInitFailed:Connect(function() teleportFailed = true end)
-    RejoinSameServer()
-    task.wait(5)
-    pcall(function() conn:Disconnect() end)
-    if teleportFailed or game.Players.LocalPlayer.Parent then
-        WindUI:Notify({ Title = T("nt_kaitun"), Content = T("rejoinfail"), Duration = 4, Icon = "alert-triangle" })
-        task.wait(2)
-        local t = 0
-        while not ServerHop() and t < 10 do t = t + 1; task.wait(3) end
-    end
 end
 
 -- ============================================================
@@ -360,6 +312,90 @@ local function StopMultiHit()
 end
 
 -- ============================================================
+-- GIRAR FRUTA V2
+-- ============================================================
+local GachaRunning = false
+local GachaThread = nil
+
+local function StartGacha()
+    if GachaRunning then return end
+    GachaRunning = true
+
+    task.spawn(function()
+        local pg = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+        local function getTextLabel(gui)
+            if gui:IsA("TextLabel") then return gui end
+            return gui:FindFirstChildOfClass("TextLabel")
+        end
+        local function aplicarBloqueio(notificationGui)
+            local label = getTextLabel(notificationGui)
+            if not label then return end
+            local function update()
+                notificationGui.Enabled = (label.Text ~= "Try again soon")
+            end
+            update()
+            label:GetPropertyChangedSignal("Text"):Connect(update)
+        end
+        pg.ChildAdded:Connect(function(child)
+            if child.Name == "Notifications" then
+                task.defer(function() aplicarBloqueio(child) end)
+            end
+        end)
+        local existente = pg:FindFirstChild("Notifications")
+        if existente then aplicarBloqueio(existente) end
+    end)
+
+    GachaThread = task.spawn(function()
+        while GachaRunning do
+            task.wait(0.2)
+            pcall(function()
+                local Event = game:GetService("ReplicatedStorage").Modules.Net["RF/GachaNetworkRF"]
+                Event:InvokeServer({ Context = "Purchase", BoxName = "ZiolesGacha" })
+            end)
+        end
+    end)
+end
+
+local function StopGacha()
+    GachaRunning = false
+    if GachaThread then
+        pcall(function() task.cancel(GachaThread) end)
+        GachaThread = nil
+    end
+end
+
+-- ============================================================
+-- REMOVER NOTIFICAÇÕES
+-- ============================================================
+local NotifRemoverRunning = false
+local NotifRemoverThread = nil
+
+local function StartNotifRemover()
+    if NotifRemoverRunning then return end
+    NotifRemoverRunning = true
+    NotifRemoverThread = task.spawn(function()
+        local lp = game:GetService("Players").LocalPlayer
+        while NotifRemoverRunning do
+            task.wait()
+            pcall(function()
+                lp.PlayerGui.Notifications.Enabled = false
+            end)
+        end
+    end)
+end
+
+local function StopNotifRemover()
+    NotifRemoverRunning = false
+    if NotifRemoverThread then
+        pcall(function() task.cancel(NotifRemoverThread) end)
+        NotifRemoverThread = nil
+    end
+    pcall(function()
+        game:GetService("Players").LocalPlayer.PlayerGui.Notifications.Enabled = true
+    end)
+end
+
+-- ============================================================
 -- SUPER FIX LAG
 -- ============================================================
 local SuperFixRunning = false
@@ -408,6 +444,8 @@ end
 
 local function RestoreEverything()
     StopMultiHit()
+    StopGacha()
+    StopNotifRemover()
     StopSuperFixLag()
     local Lighting = game:GetService("Lighting")
     Lighting.FogStart = OriginalFogStart or 0
@@ -454,7 +492,7 @@ for name, value in pairs(Config.Sword) do
 end
 
 -- ============================================================
--- ABA BOSS WEAPONS
+-- ABA BOSS
 -- ============================================================
 local BossTab = Window:Tab({ Title = T("bosses"), Icon = "skull" })
 for name, value in pairs(Config.BossWeapons) do
@@ -462,7 +500,7 @@ for name, value in pairs(Config.BossWeapons) do
 end
 
 -- ============================================================
--- ABA MELEE & KEN
+-- ABA MELEE
 -- ============================================================
 local MeleeTab = Window:Tab({ Title = T("melee"), Icon = "hand" })
 MeleeTab:Toggle({ Title = T("autobuy"), Value = Config.Melee.AutoBuy, Callback = function(v) Config.Melee.AutoBuy = v; SaveConfig() end })
@@ -498,8 +536,7 @@ SeaTab:Slider({ Title = T("raidice"), Value = { Min = 0, Max = 20000, Default = 
 local OptTab = Window:Tab({ Title = T("opt"), Icon = "zap" })
 OptTab:Toggle({ Title = T("superfix"), Desc = T("superfixdesc"), Value = Config.SuperFixLag,
     Callback = function(state)
-        Config.SuperFixLag = state
-        SaveConfig()
+        Config.SuperFixLag = state; SaveConfig()
         if state then
             StartSuperFixLag()
             WindUI:Notify({ Title = T("opt"), Content = T("superfix_on"), Duration = 3, Icon = "zap" })
@@ -519,8 +556,7 @@ UIConfigTab:Section({ Title = T("language") })
 UIConfigTab:Dropdown({
     Title = T("language"), Values = { "pt-BR", "en-US", "vi-VN" }, Value = Config.Language,
     Callback = function(opt)
-        Config.Language = opt
-        SaveConfig()
+        Config.Language = opt; SaveConfig()
         WindUI:Notify({ Title = T("nt_lang"), Content = TF("lang_notify", opt), Duration = 5, Icon = "languages" })
     end
 })
@@ -542,34 +578,32 @@ UIConfigTab:Keybind({ Title = T("togglekey"), Value = "RightShift", Callback = f
 -- ABA EXECUTION
 -- ============================================================
 local ExecTab = Window:Tab({ Title = T("exec"), Icon = "play" })
-local KaitunExecuted = false
-local ExecuteToggle, AutoExecToggle
 
-ExecuteToggle = ExecTab:Toggle({
-    Title = T("execKaitun"), Value = false,
-    Callback = function(state)
-        if not state then return end
+-- 🎯 BOTÃO "EXECUTAR KAITUN" (mudou de Toggle → Button)
+local ExecuteButton = ExecTab:Button({
+    Title = T("execKaitun"),
+    Desc = T("execKaitun_desc"),
+    Callback = function()
+        -- Desativa Auto Executar (mutuamente exclusivos)
         if Config.AutoExecute then
             Config.AutoExecute = false
             SaveConfig()
             if AutoExecToggle then pcall(function() AutoExecToggle:Set(false) end) end
         end
-        if not KaitunExecuted then
-            KaitunExecuted = true
-            ExecuteKaitun()
-        else
-            TryRejoin()
-        end
+
+        ExecuteKaitun()
+
+        -- Trava o botão após o click (não dá pra clicar de novo)
+        pcall(function() ExecuteButton:Lock() end)
     end
 })
 
-AutoExecToggle = ExecTab:Toggle({
+-- Toggle Auto Executar
+local AutoExecToggle = ExecTab:Toggle({
     Title = T("autoexec"), Value = Config.AutoExecute,
     Callback = function(state)
-        Config.AutoExecute = state
-        SaveConfig()
+        Config.AutoExecute = state; SaveConfig()
         if state then
-            if ExecuteToggle then pcall(function() ExecuteToggle:Set(false) end) end
             WindUI:Notify({ Title = T("nt_autoexec"), Content = T("autoexec_on"), Duration = 5, Icon = "zap" })
         else
             WindUI:Notify({ Title = T("nt_autoexec"), Content = T("autoexec_off"), Duration = 3, Icon = "zap" })
@@ -579,17 +613,48 @@ AutoExecToggle = ExecTab:Toggle({
 
 ExecTab:Section({ Title = T("extras") })
 ExecTab:Button({ Title = T("redeem"), Desc = T("redeemdesc"), Callback = function() RedeemAllCodes() end })
+
+-- Multi Hit M1
 ExecTab:Toggle({
-    Title = T("multihit"), Desc = T("multihitdesc"), Value = Config.MultiHitM1,
+    Title = T("multihit"), Value = Config.MultiHitM1,
     Callback = function(state)
-        Config.MultiHitM1 = state
-        SaveConfig()
+        Config.MultiHitM1 = state; SaveConfig()
         if state then
             StartMultiHit()
             WindUI:Notify({ Title = T("nt_multihit"), Content = T("multihit_on"), Duration = 3, Icon = "sword" })
         else
             StopMultiHit()
             WindUI:Notify({ Title = T("nt_multihit"), Content = T("multihit_off"), Duration = 3, Icon = "sword" })
+        end
+    end
+})
+
+-- Girar Fruta V2
+ExecTab:Toggle({
+    Title = T("girar"), Desc = T("girar_desc"), Value = Config.GirarFrutaV2,
+    Callback = function(state)
+        Config.GirarFrutaV2 = state; SaveConfig()
+        if state then
+            StartGacha()
+            WindUI:Notify({ Title = T("nt_girar"), Content = T("girar_on"), Duration = 3, Icon = "rotate-cw" })
+        else
+            StopGacha()
+            WindUI:Notify({ Title = T("nt_girar"), Content = T("girar_off"), Duration = 3, Icon = "rotate-cw" })
+        end
+    end
+})
+
+-- Remover Notificações
+ExecTab:Toggle({
+    Title = T("rmnotif"), Desc = T("rmnotif_desc"), Value = Config.RemoveNotifications,
+    Callback = function(state)
+        Config.RemoveNotifications = state; SaveConfig()
+        if state then
+            StartNotifRemover()
+            WindUI:Notify({ Title = T("nt_rmnotif"), Content = T("rmnotif_on"), Duration = 3, Icon = "bell-off" })
+        else
+            StopNotifRemover()
+            WindUI:Notify({ Title = T("nt_rmnotif"), Content = T("rmnotif_off"), Duration = 3, Icon = "bell" })
         end
     end
 })
@@ -613,10 +678,38 @@ ExecTab:Button({
 })
 
 -- ============================================================
+-- ABA UPDATE
+-- ============================================================
+local UpdateTab = Window:Tab({ Title = T("update_tab"), Icon = "file-text" })
+UpdateTab:Section({ Title = "Update 0.75" })
+UpdateTab:Paragraph({
+    Title = "Changelog 0.75",
+    Desc = [[+ Added "Girar Fruta V2" toggle (Execution tab)
++ Added "Remover Notificações" toggle (Execution tab)
++ Added "Update" tab with changelog
++ Changed "Executar Kaitun" from Toggle to Button (auto-locks after 1 click)
++ Removed Multi Hit M1 description
++ Updated translation system (PT-BR / EN-US / VI-VN)
++ Updated save system for new toggles]],
+    Color = "Blue",
+})
+UpdateTab:Section({ Title = "Update 0.74" })
+UpdateTab:Paragraph({
+    Title = "Changelog 0.74",
+    Desc = [[+ Added Bonus Moments auto-execute (PlaceId 994732206)
++ Fixed PlaceId from 2753915549 to 994732206
++ Fixed save system for MultiHitM1 and SuperFixLag
++ Full translation for all notifications]],
+    Color = "Green",
+})
+
+-- ============================================================
 -- RESTAURA ESTADOS SALVOS
 -- ============================================================
 if Config.MultiHitM1 then StartMultiHit() end
 if Config.SuperFixLag then StartSuperFixLag() end
+if Config.GirarFrutaV2 then StartGacha() end
+if Config.RemoveNotifications then StartNotifRemover() end
 
 -- ============================================================
 -- AUTO EXECUTE
@@ -631,32 +724,15 @@ end
 -- ============================================================
 -- BONUS MOMENTS AUTO (PlaceId 994732206)
 -- ============================================================
-while true do
-
-    local Event = game:GetService("ReplicatedStorage").Remotes.BonusMomentsRemoteFunction
-
-    Event:InvokeServer(
-        "Escape from Alcatraz",
-        "Provoke",
-        "Puncher"
-    )
-
-    task.wait(0.2)
-
-    Event:InvokeServer(
-        "Escape from Alcatraz",
-        "Provoke",
-        "Digger"
-    )
-
-    task.wait(0.2)
-
-    Event:InvokeServer(
-        "Escape from Alcatraz",
-        "Provoke",
-        "Raft"
-    )
-
-    task.wait(0.2)
-
+if game.PlaceId == 994732206 then
+    task.spawn(function()
+        while task.wait(0.2) do
+            pcall(function()
+                local Event = game:GetService("ReplicatedStorage").Remotes.BonusMomentsRemoteFunction
+                Event:InvokeServer("Escape from Alcatraz", "Provoke", "Puncher")
+                Event:InvokeServer("Escape from Alcatraz", "Provoke", "Raft")
+                Event:InvokeServer("Escape from Alcatraz", "Provoke", "Digger")
+            end)
+        end
+    end)
 end
