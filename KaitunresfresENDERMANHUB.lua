@@ -232,7 +232,7 @@ local Window = WindUI:CreateWindow({
         Note = "Get the key from the Link Vertise.",
         Thumbnail = { Image = "rbxassetid://6003957600", Title = "EndermanHub Key (permanent key)" },
         URL = "https://discord.gg/SEU_DISCORD_AQUI",
-        SaveKey = false,
+        SaveKey = true,
     },
 })
 
