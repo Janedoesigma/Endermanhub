@@ -804,19 +804,35 @@ function hoangtuveu()
     -- ============================================================
     -- UI TỪ DYNAMICISLAND_AXIOM-1.LUA (CÓ DISCORD + CONTAINER)
     -- ============================================================
+        -- ============================================================
+    -- UI — ENDERMAN HUB (KAITUN) — Redesigned (logic preserved)
+    -- ============================================================
     local gui = Instance.new('ScreenGui')
     gui.Name = "ENDERMAN HUB (KAITUN)"
     gui.Parent = game:GetService('CoreGui')
     gui.Enabled = true
     gui.ResetOnSpawn = true
     gui.DisplayOrder = 10
-    gui.IgnoreGuiInset = false
+    gui.IgnoreGuiInset = true
+    gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
+    -- ===== THEME =====
+    local Theme = {
+        Accent1     = Color3.fromRGB(138, 43, 226),
+        Accent2     = Color3.fromRGB(0, 200, 255),
+        BgPrimary   = Color3.fromRGB(18, 18, 22),
+        Stroke      = Color3.fromRGB(70, 70, 85),
+        TextPrimary = Color3.fromRGB(240, 240, 255),
+        TextAccent  = Color3.fromRGB(180, 150, 255),
+        TextSubtle  = Color3.fromRGB(160, 160, 180),
+    }
+
+    -- ===== CONTAINER =====
     local container = Instance.new("Frame")
     container.Name = "Container"
     container.Parent = gui
     container.AnchorPoint = Vector2.new(0.5, 0)
-    container.Position = UDim2.new(0.5, 0, 0.01, 0)
+    container.Position = UDim2.new(0.5, 0, 0.02, 0)
     container.AutomaticSize = Enum.AutomaticSize.XY
     container.Size = UDim2.new(0, 0, 0, 0)
     container.BackgroundTransparency = 1
@@ -827,47 +843,112 @@ function hoangtuveu()
     containerLayout.FillDirection = Enum.FillDirection.Vertical
     containerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-    
-
+    -- ===== MAIN CARD =====
     local frame = Instance.new("Frame")
     frame.Name = "Frame"
     frame.Parent = container
     frame.LayoutOrder = 2
     frame.AutomaticSize = Enum.AutomaticSize.XY
-    frame.Size = UDim2.new(0, 0, 0, 0)
-    frame.BackgroundColor3 = Color3.fromRGB(138, 43, 226)
-    frame.BackgroundTransparency = 0.25
+    frame.Size = UDim2.new(0, 340, 0, 0)
+    frame.BackgroundColor3 = Theme.BgPrimary
+    frame.BackgroundTransparency = 0.08
     frame.BorderSizePixel = 0
+    frame.Active = true
 
     local padding = Instance.new("UIPadding", frame)
-    padding.PaddingTop = UDim.new(0, 8)
-    padding.PaddingBottom = UDim.new(0, 8)
-    padding.PaddingLeft = UDim.new(0, 12)
-    padding.PaddingRight = UDim.new(0, 12)
+    padding.PaddingTop    = UDim.new(0, 14)
+    padding.PaddingBottom = UDim.new(0, 14)
+    padding.PaddingLeft   = UDim.new(0, 16)
+    padding.PaddingRight  = UDim.new(0, 16)
 
-    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 6)
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
 
     local stroke = Instance.new("UIStroke", frame)
-    stroke.Color = Color3.fromRGB(138, 43, 226)
+    stroke.Color = Theme.Accent1
     stroke.Thickness = 1.5
-    stroke.Transparency = 0
+    stroke.Transparency = 0.15
+    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+    local strokeGrad = Instance.new("UIGradient", stroke)
+    strokeGrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0.0, Theme.Accent1),
+        ColorSequenceKeypoint.new(0.5, Theme.Accent2),
+        ColorSequenceKeypoint.new(1.0, Theme.Accent1),
+    })
+    strokeGrad.Rotation = 45
+
+    task.spawn(function()
+        while frame.Parent do
+            task.wait(0.05)
+            strokeGrad.Rotation = (strokeGrad.Rotation + 2) % 360
+        end
+    end)
+
+    -- Soft shadow
+    local shadow = Instance.new("ImageLabel", frame)
+    shadow.Name = "Shadow"
+    shadow.AnchorPoint = Vector2.new(0.5, 0.5)
+    shadow.Position = UDim2.new(0.5, 0, 0.5, 0)
+    shadow.Size = UDim2.new(1, 30, 1, 30)
+    shadow.BackgroundTransparency = 1
+    shadow.Image = "rbxassetid://5028857472"
+    shadow.ImageColor3 = Color3.new(0, 0, 0)
+    shadow.ImageTransparency = 0.6
+    shadow.ZIndex = -1
 
     local layout = Instance.new("UIListLayout", frame)
     layout.SortOrder = Enum.SortOrder.LayoutOrder
-    layout.Padding = UDim.new(0, 4)
+    layout.Padding = UDim.new(0, 6)
     layout.FillDirection = Enum.FillDirection.Vertical
 
+    -- ===== HEADER =====
+    local headerFrame = Instance.new("Frame")
+    headerFrame.Name = "Header"
+    headerFrame.Parent = frame
+    headerFrame.LayoutOrder = 0
+    headerFrame.Size = UDim2.new(1, 0, 0, 24)
+    headerFrame.BackgroundTransparency = 1
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Name = "Title"
+    titleLabel.Parent = headerFrame
+    titleLabel.Size = UDim2.new(1, 0, 1, 0)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text = "ENDERMAN  •  KAITUN  v2.2"
+    titleLabel.TextSize = 15
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.TextColor3 = Theme.TextPrimary
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.TextYAlignment = Enum.TextYAlignment.Center
+
+    local titleGrad = Instance.new("UIGradient", titleLabel)
+    titleGrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0.0, Theme.TextAccent),
+        ColorSequenceKeypoint.new(1.0, Theme.Accent2),
+    })
+
+    -- ===== DIVIDER =====
+    local divider = Instance.new("Frame")
+    divider.Name = "Divider"
+    divider.Parent = frame
+    divider.LayoutOrder = 0.5
+    divider.Size = UDim2.new(1, 0, 0, 1)
+    divider.BackgroundColor3 = Theme.Stroke
+    divider.BorderSizePixel = 0
+    divider.BackgroundTransparency = 0.4
+
+    -- ===== FEATURES (status labels) =====
     local features = Instance.new("Frame")
     features.Name = "Features"
     features.Parent = frame
     features.LayoutOrder = 1
     features.AutomaticSize = Enum.AutomaticSize.XY
-    features.Size = UDim2.new(0, 0, 0, 0)
+    features.Size = UDim2.new(1, 0, 0, 0)
     features.BackgroundTransparency = 1
 
     local featLayout = Instance.new("UIListLayout", features)
     featLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    featLayout.Padding = UDim.new(0, 2)
+    featLayout.Padding = UDim.new(0, 4)
     featLayout.FillDirection = Enum.FillDirection.Vertical
 
     local taskLabel = Instance.new("TextLabel")
@@ -875,12 +956,12 @@ function hoangtuveu()
     taskLabel.Parent = features
     taskLabel.LayoutOrder = 1
     taskLabel.AutomaticSize = Enum.AutomaticSize.XY
-    taskLabel.Size = UDim2.new(0, 0, 0, 0)
+    taskLabel.Size = UDim2.new(1, 0, 0, 0)
     taskLabel.BackgroundTransparency = 1
     taskLabel.Text = "Status :"
     taskLabel.TextSize = 14
-    taskLabel.Font = Enum.Font.Ubuntu
-    taskLabel.TextColor3 = Color3.fromRGB(255, 170, 220)
+    taskLabel.Font = Enum.Font.GothamMedium
+    taskLabel.TextColor3 = Theme.TextAccent
     taskLabel.TextXAlignment = Enum.TextXAlignment.Left
 
     local subTaskLabel = Instance.new("TextLabel")
@@ -888,12 +969,12 @@ function hoangtuveu()
     subTaskLabel.Parent = features
     subTaskLabel.LayoutOrder = 2
     subTaskLabel.AutomaticSize = Enum.AutomaticSize.XY
-    subTaskLabel.Size = UDim2.new(0, 0, 0, 0)
+    subTaskLabel.Size = UDim2.new(1, 0, 0, 0)
     subTaskLabel.BackgroundTransparency = 1
     subTaskLabel.Text = "Sub Task :"
     subTaskLabel.TextSize = 13
-    subTaskLabel.Font = Enum.Font.Ubuntu
-    subTaskLabel.TextColor3 = Color3.fromRGB(147, 112, 219)
+    subTaskLabel.Font = Enum.Font.Gotham
+    subTaskLabel.TextColor3 = Theme.TextSubtle
     subTaskLabel.TextTransparency = 0
     subTaskLabel.TextXAlignment = Enum.TextXAlignment.Left
 
@@ -907,12 +988,11 @@ function hoangtuveu()
             if not label then return end
             if label.Text == text then return end
             local ts = game:GetService("TweenService")
-            local fadeOut = ts:Create(label, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 1, TextStrokeTransparency = 1})
+            local fadeOut = ts:Create(label, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 1})
             fadeOut:Play()
             fadeOut.Completed:Wait()
             label.Text = text
-            local t = 0
-            local fadeIn = ts:Create(label, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = t, TextStrokeTransparency = t})
+            local fadeIn = ts:Create(label, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0})
             fadeIn:Play()
         end)
     end
