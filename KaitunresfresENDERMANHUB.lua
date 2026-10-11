@@ -10,7 +10,7 @@ local function GetDefaultConfig()
         Items = { AutoFullyMelees=false, Saber=false, CursedDualKatana=false, SoulGuitar=false, RaceV2=false, AutoRaceV3=false, AutoRandomFruit=false },
         Sword = { ["Shark Saw"]=false, ["Wardens Sword"]=false, ["Pole (1st Form)"]=false, ["Gravity Blade"]=false, ["Longsword"]=false, ["Rengoku"]=false, ["Flail"]=false, ["Twin Hooks"]=false },
         BossWeapons = { ["Awakened Ice Admiral"]=false, ["Tide Keeper"]=false, ["Deandre"]=false, ["Urban"]=false, ["Diablo"]=false, ["Soul Reaper"]=false, ["Cake Prince"]=false, ["Core"]=false, ["Darkbeard"]=false, ["Katakuri"]=false, ["Beautiful Pirates"]=false },
-        Melee = { AutoBuy=false, CheckMasteryAfterBuy=false, RaidAtV1Mastery=500, GodhumanAtV2Mastery=400 },
+        Melee = { AutoBuy=false, CheckMasteryAfterBuy=false, RaidAtV1Mastery=400, GodhumanAtV2Mastery=400 },
         AutoKen = false, BringMobs = false,
         PanicMode = { Enabled=false, LowHealthPercent=20, SafeHealthPercent=75, EscapeHeight=2000, CheckInterval=1 },
         Settings = { StayInSea2UntilHaveDarkFragments = false },
@@ -211,7 +211,9 @@ local function TF(key, ...) return string.format(T(key), ...) end
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
 local Window = WindUI:CreateWindow({
-    Title = T("window_title"), Icon = "door-open", Author = T("window_author"),
+    Title = T("window_title"),
+    Icon = "pickaxe",   -- 🪓 ÍCONE DA JANELA (era "door-open")
+    Author = T("window_author"),
     Folder = "EndermanHub", Size = UDim2.fromOffset(520, 480),
     MinSize = Vector2.new(480, 350), MaxSize = Vector2.new(850, 560),
     Transparent = true, Theme = "Dark", Resizable = true, SideBarWidth = 200,
@@ -459,7 +461,7 @@ end
 -- ============================================================
 -- ABA PRINCIPAL
 -- ============================================================
-local MainTab = Window:Tab({ Title = T("main"), Icon = "home" })
+local MainTab = Window:Tab({ Title = T("main"), Icon = "pin" })   -- 📍 ÍCONE DA ABA PRINCIPAL (era "home")
 MainTab:Section({ Title = T("time") })
 MainTab:Dropdown({ Title = T("time"), Values = { "Pirates", "Marines" }, Value = Config.Team,
     Callback = function(opt) Config.Team = opt; SaveConfig() end })
@@ -505,8 +507,8 @@ end
 local MeleeTab = Window:Tab({ Title = T("melee"), Icon = "hand" })
 MeleeTab:Toggle({ Title = T("autobuy"), Value = Config.Melee.AutoBuy, Callback = function(v) Config.Melee.AutoBuy = v; SaveConfig() end })
 MeleeTab:Toggle({ Title = T("checkmastery"), Value = Config.Melee.CheckMasteryAfterBuy, Callback = function(v) Config.Melee.CheckMasteryAfterBuy = v; SaveConfig() end })
-MeleeTab:Slider({ Title = T("raidv1"), Value = { Min = 0, Max = 600, Default = Config.Melee.RaidAtV1Mastery }, Callback = function(v) Config.Melee.RaidAtV1Mastery = v; SaveConfig() end })
-MeleeTab:Slider({ Title = T("godhumanv2"), Value = { Min = 0, Max = 600, Default = Config.Melee.GodhumanAtV2Mastery }, Callback = function(v) Config.Melee.GodhumanAtV2Mastery = v; SaveConfig() end })
+MeleeTab:Slider({ Title = T("raidv1"), Value = { Min = 0, Max = 400, Default = Config.Melee.RaidAtV1Mastery }, Callback = function(v) Config.Melee.RaidAtV1Mastery = v; SaveConfig() end })
+MeleeTab:Slider({ Title = T("godhumanv2"), Value = { Min = 0, Max = 400, Default = Config.Melee.GodhumanAtV2Mastery }, Callback = function(v) Config.Melee.GodhumanAtV2Mastery = v; SaveConfig() end })
 MeleeTab:Section({ Title = T("haki") })
 MeleeTab:Toggle({ Title = T("autoken"), Value = Config.AutoKen, Callback = function(v) Config.AutoKen = v; SaveConfig() end })
 MeleeTab:Toggle({ Title = T("bringmobs"), Value = Config.BringMobs, Callback = function(v) Config.BringMobs = v; SaveConfig() end })
@@ -514,7 +516,7 @@ MeleeTab:Toggle({ Title = T("bringmobs"), Value = Config.BringMobs, Callback = f
 -- ============================================================
 -- ABA PANIC
 -- ============================================================
-local PanicTab = Window:Tab({ Title = T("panic"), Icon = "alert-triangle" })
+local PanicTab = Window:Tab({ Title = T("panic"), Icon = "heart-plus" })   -- ❤️ ÍCONE DO PANIC MODE (era "alert-triangle")
 PanicTab:Toggle({ Title = T("panicenable"), Value = Config.PanicMode.Enabled, Callback = function(v) Config.PanicMode.Enabled = v; SaveConfig() end })
 PanicTab:Slider({ Title = T("lowhp"), Value = { Min = 1, Max = 100, Default = Config.PanicMode.LowHealthPercent }, Callback = function(v) Config.PanicMode.LowHealthPercent = v; SaveConfig() end })
 PanicTab:Slider({ Title = T("safehp"), Value = { Min = 1, Max = 100, Default = Config.PanicMode.SafeHealthPercent }, Callback = function(v) Config.PanicMode.SafeHealthPercent = v; SaveConfig() end })
@@ -579,26 +581,20 @@ UIConfigTab:Keybind({ Title = T("togglekey"), Value = "RightShift", Callback = f
 -- ============================================================
 local ExecTab = Window:Tab({ Title = T("exec"), Icon = "play" })
 
--- 🎯 BOTÃO "EXECUTAR KAITUN" (mudou de Toggle → Button)
 local ExecuteButton = ExecTab:Button({
     Title = T("execKaitun"),
     Desc = T("execKaitun_desc"),
     Callback = function()
-        -- Desativa Auto Executar (mutuamente exclusivos)
         if Config.AutoExecute then
             Config.AutoExecute = false
             SaveConfig()
             if AutoExecToggle then pcall(function() AutoExecToggle:Set(false) end) end
         end
-
         ExecuteKaitun()
-
-        -- Trava o botão após o click (não dá pra clicar de novo)
         pcall(function() ExecuteButton:Lock() end)
     end
 })
 
--- Toggle Auto Executar
 local AutoExecToggle = ExecTab:Toggle({
     Title = T("autoexec"), Value = Config.AutoExecute,
     Callback = function(state)
@@ -614,7 +610,6 @@ local AutoExecToggle = ExecTab:Toggle({
 ExecTab:Section({ Title = T("extras") })
 ExecTab:Button({ Title = T("redeem"), Desc = T("redeemdesc"), Callback = function() RedeemAllCodes() end })
 
--- Multi Hit M1
 ExecTab:Toggle({
     Title = T("multihit"), Value = Config.MultiHitM1,
     Callback = function(state)
@@ -629,7 +624,6 @@ ExecTab:Toggle({
     end
 })
 
--- Girar Fruta V2
 ExecTab:Toggle({
     Title = T("girar"), Desc = T("girar_desc"), Value = Config.GirarFrutaV2,
     Callback = function(state)
@@ -644,7 +638,6 @@ ExecTab:Toggle({
     end
 })
 
--- Remover Notificações
 ExecTab:Toggle({
     Title = T("rmnotif"), Desc = T("rmnotif_desc"), Value = Config.RemoveNotifications,
     Callback = function(state)
@@ -681,6 +674,25 @@ ExecTab:Button({
 -- ABA UPDATE
 -- ============================================================
 local UpdateTab = Window:Tab({ Title = T("update_tab"), Icon = "file-text" })
+
+UpdateTab:Section({ Title = "Update 0.76.3" })
+UpdateTab:Paragraph({
+    Title = "Changelog 0.76.3",
+    Desc = [[- Changed window icon from "door-open" to "pickaxe"
+- Changed Main tab icon from "home" to "pin"
+- Changed Panic Mode tab icon from "alert-triangle" to "heart-plus"]],
+    Color = "Purple",
+})
+
+UpdateTab:Section({ Title = "Update 0.75.3" })
+UpdateTab:Paragraph({
+    Title = "Changelog 0.75.3",
+    Desc = [[- Changed "Raid em V1 Mastery" slider max from 600 to 400
+- Changed "Godhuman em V2 Mastery" slider max from 600 to 400
+- Updated default values (RaidAtV1Mastery = 400, GodhumanAtV2Mastery = 400)]],
+    Color = "Orange",
+})
+
 UpdateTab:Section({ Title = "Update 0.75" })
 UpdateTab:Paragraph({
     Title = "Changelog 0.75",
@@ -693,6 +705,7 @@ UpdateTab:Paragraph({
 + Updated save system for new toggles]],
     Color = "Blue",
 })
+
 UpdateTab:Section({ Title = "Update 0.74" })
 UpdateTab:Paragraph({
     Title = "Changelog 0.74",
