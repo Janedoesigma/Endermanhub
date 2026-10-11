@@ -287,7 +287,7 @@ local Translations = {
 }
 
 local function T(key)
-    local tbl = Translations[Config.Language] or Translations["pt-BR"]
+    local tbl = Translations[Config.Language] or Translations["en-US"]
     return tbl[key] or key
 end
 local function TF(key, ...) return string.format(T(key), ...) end
@@ -311,7 +311,7 @@ local Window = WindUI:CreateWindow({
         Key = { KEY_SECRET },
         Note = T("key_note"),
         Thumbnail = { Image = "rbxassetid://6003957600", Title = "EndermanHub Key" },
-        URL = "https://discord.gg/SEU_DISCORD_AQUI",
+        URL = "https://janedoesigma.github.io/creatkey/",
         SaveKey = true,
     },
 })
