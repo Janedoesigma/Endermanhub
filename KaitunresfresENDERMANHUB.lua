@@ -1,5 +1,64 @@
 -- ============================================================
--- DEFAULTS
+-- SERVICES
+-- ============================================================
+local HttpService = game:GetService("HttpService")
+local CoreGui = game:GetService("CoreGui")
+
+-- ============================================================
+-- KEY SYSTEM - DATA
+-- ============================================================
+local KEY_FILE     = "EndermanHub_KeyData.json"
+local KEY_PARTIAL  = "%120KEYcbcfbabc8934678"  -- aceita se CONTIVER isso
+local KEY_DURATION = 24 * 60 * 60
+
+local KeyData = { activeSeconds = 0, keyValue = "", burned = false }
+
+local function LoadKeyData()
+    pcall(function()
+        if isfile(KEY_FILE) then
+            local raw = readfile(KEY_FILE)
+            if raw and raw ~= "" then
+                local d = HttpService:JSONDecode(raw)
+                if type(d) == "table" then
+                    KeyData.activeSeconds = tonumber(d.activeSeconds) or 0
+                    KeyData.keyValue = tostring(d.keyValue or "")
+                    KeyData.burned = d.burned == true
+                end
+            end
+        end
+    end)
+end
+
+local function SaveKeyData()
+    pcall(function()
+        writefile(KEY_FILE, HttpService:JSONEncode(KeyData))
+    end)
+end
+
+-- Aceita se CONTIVER "%120KEYcbcfbabc8934678" em qualquer lugar
+local function ValidateKey(input)
+    if not input or input == "" then return false end
+    return string.find(input, KEY_PARTIAL, 1, true) ~= nil
+end
+
+local function PurgeWindUIKeySave()
+    pcall(function()
+        local paths = {
+            "EndermanHub/KeySystem.json", "EndermanHub/keys.json",
+            "EndermanHub/savekey.json", "EndermanHub/key.json",
+            "EndermanHub/SavedKey.json",
+        }
+        for _, path in ipairs(paths) do
+            if isfile(path) then delfile(path) end
+        end
+    end)
+end
+
+LoadKeyData()
+if KeyData.burned then PurgeWindUIKeySave() end
+
+-- ============================================================
+-- CONFIG
 -- ============================================================
 local function GetDefaultConfig()
     return {
@@ -20,14 +79,6 @@ end
 
 Config = GetDefaultConfig()
 
--- ============================================================
--- SERVICES
--- ============================================================
-local HttpService = game:GetService("HttpService")
-
--- ============================================================
--- SAVE / LOAD CONFIG
--- ============================================================
 local function GetConfigPath()
     return "EndermanHub_Config_" .. game.Players.LocalPlayer.Name .. ".json"
 end
@@ -54,65 +105,6 @@ local function LoadConfig()
 end
 
 LoadConfig()
-
--- ============================================================
--- KEY SYSTEM (custom 24h)
--- ============================================================
-local KEY_FILE = "EndermanHub_KeyData.json"
-local KEY_SECRET = "%120KEYcbcfbabc8934678"
-local KEY_DURATION = 24 * 60 * 60 -- 24h em segundos
-
-local KeyData = { activeSeconds = 0, keyValue = "", burned = false }
-
-local function LoadKeyData()
-    pcall(function()
-        if isfile(KEY_FILE) then
-            local raw = readfile(KEY_FILE)
-            if raw and raw ~= "" then
-                local d = HttpService:JSONDecode(raw)
-                if type(d) == "table" then
-                    KeyData.activeSeconds = tonumber(d.activeSeconds) or 0
-                    KeyData.keyValue = tostring(d.keyValue or "")
-                    KeyData.burned = d.burned == true
-                end
-            end
-        end
-    end)
-end
-
-local function SaveKeyData()
-    pcall(function()
-        writefile(KEY_FILE, HttpService:JSONEncode(KeyData))
-    end)
-end
-
-local function ContainsKeySecret(key)
-    if not key or key == "" then return false end
-    return string.find(key, KEY_SECRET, 1, true) ~= nil
-end
-
--- Deleta save de key do WindUI (tenta caminhos comuns)
-local function PurgeWindUIKeySave()
-    pcall(function()
-        local attempts = {
-            "EndermanHub/KeySystem.json",
-            "EndermanHub/keys.json",
-            "EndermanHub/savekey.json",
-            "EndermanHub/key.json",
-            "EndermanHub/SavedKey.json",
-        }
-        for _, path in ipairs(attempts) do
-            if isfile(path) then delfile(path) end
-        end
-    end)
-end
-
-LoadKeyData()
-
--- Se já expirou: purga o save do WindUI pra forçar nova key
-if KeyData.burned then
-    PurgeWindUIKeySave()
-end
 
 -- ============================================================
 -- TRADUÇÕES
@@ -165,14 +157,15 @@ local Translations = {
         girar_on="Spin Fruit V2 ENABLED", girar_off="Spin Fruit V2 DISABLED",
         rmnotif_on="Notifications hidden!", rmnotif_off="Notifications restored.",
         lang_notify="Language changed to %s. Reinject to apply.",
-        -- KEY SYSTEM
         key_note="Enter your key to continue.",
+        key_placeholder="Paste your key here...",
+        key_verify="Verify Key",
         key_valid_title="Key System",
         key_valid_msg="Key looks valid, enjoy!",
         key_invalid_title="Key System",
         key_invalid_msg="Invalid key, get another one!",
         key_expired_title="Key System",
-        key_expired_msg="Your key has expired (24h reached). Get a new one!",
+        key_expired_msg="Your key expired (24h). Get a new one!",
     },
     ["vi-VN"] = {
         main="Chính", items="Vật Phẩm", swords="Kiếm", bosses="Vũ Khí Boss",
@@ -222,12 +215,14 @@ local Translations = {
         rmnotif_on="Đã ẩn thông báo!", rmnotif_off="Đã khôi phục thông báo.",
         lang_notify="Đã đổi ngôn ngữ sang %s. Tiêm lại để áp dụng.",
         key_note="Nhập chìa khóa của bạn để tiếp tục.",
+        key_placeholder="Dán chìa khóa vào đây...",
+        key_verify="Xác Minh",
         key_valid_title="Hệ Thống Key",
         key_valid_msg="Chìa khóa có vẻ hợp lệ, tận hưởng!",
         key_invalid_title="Hệ Thống Key",
         key_invalid_msg="Chìa khóa không hợp lệ, lấy cái khác!",
         key_expired_title="Hệ Thống Key",
-        key_expired_msg="Chìa khóa của bạn đã hết hạn (24h). Lấy cái mới!",
+        key_expired_msg="Chìa khóa hết hạn (24h). Lấy cái mới!",
     },
     ["pt-BR"] = {
         main="Principal", items="Itens", swords="Espadas", bosses="Armas de Boss",
@@ -277,6 +272,8 @@ local Translations = {
         rmnotif_on="Notificações escondidas!", rmnotif_off="Notificações restauradas.",
         lang_notify="Idioma alterado para %s. Reinjete para aplicar.",
         key_note="Digite sua key para continuar.",
+        key_placeholder="Cole sua key aqui...",
+        key_verify="Verificar Key",
         key_valid_title="Sistema de Key",
         key_valid_msg="Chave parece válida, aproveite!",
         key_invalid_title="Sistema de Key",
@@ -287,10 +284,123 @@ local Translations = {
 }
 
 local function T(key)
-    local tbl = Translations[Config.Language] or Translations["en-US"]
+    local tbl = Translations[Config.Language] or Translations["pt-BR"]
     return tbl[key] or key
 end
 local function TF(key, ...) return string.format(T(key), ...) end
+
+-- ============================================================
+-- CUSTOM KEY PROMPT
+-- ============================================================
+local function BuildKeyPrompt(onSuccess)
+    local sg = Instance.new("ScreenGui")
+    sg.Name = "EndermanHubKeyPrompt"
+    sg.ResetOnSpawn = false
+    sg.IgnoreGuiInset = true
+    sg.DisplayOrder = 999
+    sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    pcall(function() sg.Parent = CoreGui end)
+    if not sg.Parent then sg.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui") end
+
+    local bg = Instance.new("Frame")
+    bg.Size = UDim2.new(1, 0, 1, 0)
+    bg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    bg.BackgroundTransparency = 0.45
+    bg.BorderSizePixel = 0
+    bg.Parent = sg
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 420, 0, 230)
+    frame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    frame.AnchorPoint = Vector2.new(0.5, 0.5)
+    frame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+    frame.BorderSizePixel = 0
+    frame.Parent = sg
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 14)
+
+    local stroke = Instance.new("UIStroke", frame)
+    stroke.Color = Color3.fromRGB(138, 43, 226)
+    stroke.Thickness = 2
+
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, -20, 0, 32)
+    title.Position = UDim2.new(0, 10, 0, 15)
+    title.BackgroundTransparency = 1
+    title.Text = "EndermanHub - " .. T("nt_key")
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.TextSize = 20
+    title.Font = Enum.Font.GothamBold
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.Parent = frame
+
+    local desc = Instance.new("TextLabel")
+    desc.Size = UDim2.new(1, -20, 0, 20)
+    desc.Position = UDim2.new(0, 10, 0, 48)
+    desc.BackgroundTransparency = 1
+    desc.Text = T("key_note")
+    desc.TextColor3 = Color3.fromRGB(180, 180, 180)
+    desc.TextSize = 13
+    desc.Font = Enum.Font.Gotham
+    desc.TextXAlignment = Enum.TextXAlignment.Left
+    desc.Parent = frame
+
+    local box = Instance.new("TextBox")
+    box.Size = UDim2.new(1, -20, 0, 42)
+    box.Position = UDim2.new(0, 10, 0, 78)
+    box.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+    box.BorderSizePixel = 0
+    box.Text = KeyData.keyValue ~= "" and KeyData.keyValue or ""
+    box.PlaceholderText = T("key_placeholder")
+    box.TextColor3 = Color3.fromRGB(255, 255, 255)
+    box.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
+    box.TextSize = 13
+    box.Font = Enum.Font.Gotham
+    box.ClearTextOnFocus = false
+    box.Parent = frame
+    Instance.new("UICorner", box).CornerRadius = UDim.new(0, 8)
+
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -20, 0, 42)
+    btn.Position = UDim2.new(0, 10, 0, 130)
+    btn.BackgroundColor3 = Color3.fromRGB(138, 43, 226)
+    btn.BorderSizePixel = 0
+    btn.Text = T("key_verify")
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 15
+    btn.Font = Enum.Font.GothamBold
+    btn.Parent = frame
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+
+    local status = Instance.new("TextLabel")
+    status.Size = UDim2.new(1, -20, 0, 22)
+    status.Position = UDim2.new(0, 10, 0, 180)
+    status.BackgroundTransparency = 1
+    status.Text = ""
+    status.TextColor3 = Color3.fromRGB(255, 80, 80)
+    status.TextSize = 12
+    status.Font = Enum.Font.Gotham
+    status.Parent = frame
+
+    btn.MouseButton1Click:Connect(function()
+        local input = box.Text
+        if ValidateKey(input) then
+            KeyData.keyValue = input
+            KeyData.activeSeconds = 0
+            KeyData.burned = false
+            SaveKeyData()
+            status.TextColor3 = Color3.fromRGB(80, 220, 100)
+            status.Text = "✔ " .. T("key_valid_msg")
+            task.wait(1)
+            sg:Destroy()
+            if onSuccess then onSuccess() end
+        else
+            status.TextColor3 = Color3.fromRGB(255, 80, 80)
+            status.Text = "✘ " .. T("key_invalid_msg")
+        end
+    end)
+
+    return sg
+end
 
 -- ============================================================
 -- WIND UI
@@ -307,53 +417,17 @@ local Window = WindUI:CreateWindow({
     HideSearchBar = false, ScrollBarEnabled = false,
     Background = "rbxassetid://8176158130", BackgroundImageTransparency = 0.5,
     User = { Enabled = true, Anonymous = false, Callback = function() print(":3") end },
-    KeySystem = {
-        Key = { KEY_SECRET },
-        Note = T("key_note"),
-        Thumbnail = { Image = "rbxassetid://6003957600", Title = "EndermanHub Key" },
-        URL = "https://janedoesigma.github.io/creatkey/",
-        SaveKey = true,
-    },
 })
 
 -- ============================================================
--- VALIDAÇÃO DE KEY (após abrir a janela)
+-- KEY SYSTEM FLOW
 -- ============================================================
-if KeyData.burned then
-    -- Key queimada (24h passou): avisa e trava tudo
-    WindUI:Notify({
-        Title = T("key_invalid_title"),
-        Content = T("key_invalid_msg"),
-        Duration = 8,
-        Icon = "x-circle",
-    })
-    -- Tenta destruir a janela pra não deixar o user usar
-    pcall(function()
-        for _, obj in ipairs(game:GetService("CoreGui"):GetDescendants()) do
-            if obj.Name == "WindUI" or (obj:IsA("ScreenGui") and obj.Name:find("WindUI")) then
-                obj.Enabled = false
-            end
-        end
-    end)
-    return
-else
-    -- Key válida: salva, notifica e inicia timer
-    if KeyData.keyValue == "" then
-        KeyData.keyValue = KEY_SECRET
-        SaveKeyData()
-    end
+local KeyTimerStarted = false
 
-    task.spawn(function()
-        task.wait(2)
-        WindUI:Notify({
-            Title = T("key_valid_title"),
-            Content = T("key_valid_msg"),
-            Duration = 5,
-            Icon = "check-circle",
-        })
-    end)
+local function StartKeyTimer()
+    if KeyTimerStarted then return end
+    KeyTimerStarted = true
 
-    -- Timer: 1s a cada segundo, salva a cada 30s
     task.spawn(function()
         local lastSave = os.time()
         while task.wait(1) do
@@ -381,10 +455,59 @@ else
     end)
 end
 
+local function ShowExpiredAndReprompt()
+    WindUI:Notify({
+        Title = T("key_invalid_title"),
+        Content = T("key_invalid_msg"),
+        Duration = 8,
+        Icon = "x-circle",
+    })
+    BuildKeyPrompt(function()
+        KeyData.burned = false
+        SaveKeyData()
+        StartKeyTimer()
+        WindUI:Notify({
+            Title = T("key_valid_title"),
+            Content = T("key_valid_msg"),
+            Duration = 5,
+            Icon = "check-circle",
+        })
+    end)
+end
+
+if KeyData.burned then
+    task.spawn(ShowExpiredAndReprompt)
+elseif ValidateKey(KeyData.keyValue) then
+    task.spawn(function()
+        task.wait(2)
+        WindUI:Notify({
+            Title = T("key_valid_title"),
+            Content = T("key_valid_msg"),
+            Duration = 5,
+            Icon = "check-circle",
+        })
+    end)
+    StartKeyTimer()
+else
+    BuildKeyPrompt(function()
+        StartKeyTimer()
+        WindUI:Notify({
+            Title = T("key_valid_title"),
+            Content = T("key_valid_msg"),
+            Duration = 5,
+            Icon = "check-circle",
+        })
+    end)
+end
+
 -- ============================================================
--- KAITUN + AUTO EXECUTE FIX
+-- KAITUN - COM PROTEÇÃO ANTI-DUPLO
 -- ============================================================
 local KAITUN_URL = "https://raw.githubusercontent.com/Janedoesigma/Endermanhub/main/endermanhubkaitun.lua"
+
+local function GetSessionFlag()
+    return "EH_KaitunRan_" .. tostring(game.JobId)
+end
 
 local function ExecuteKaitun()
     SaveConfig()
@@ -394,14 +517,29 @@ local function ExecuteKaitun()
     end)
 end
 
--- Re-agenda Kaitun no próximo teleport (fix Auto Execute)
+local function RunKaitunOnce()
+    local flag = GetSessionFlag()
+    if getgenv()[flag] then
+        return false
+    end
+    getgenv()[flag] = true
+    ExecuteKaitun()
+    return true
+end
+
 local function QueueKaitunForNextTeleport()
     pcall(function()
         if type(queue_on_teleport) == "function" then
-            queue_on_teleport(string.format([[
+            queue_on_teleport([[
                 task.wait(3)
-                loadstring(game:HttpGet("%s"))()
-            ]], KAITUN_URL))
+                local flag = "EH_KaitunRan_" .. tostring(game.JobId)
+                if not getgenv()[flag] then
+                    getgenv()[flag] = true
+                    pcall(function()
+                        loadstring(game:HttpGet("]] .. KAITUN_URL .. [["))()
+                    end)
+                end
+            ]])
         end
     end)
 end
@@ -727,11 +865,7 @@ local ExecuteButton = ExecTab:Button({
     Title = T("execKaitun"),
     Desc = T("execKaitun_desc"),
     Callback = function()
-        ExecuteKaitun()
-        -- Se AutoExecute estiver ligado, re-agenda no próximo teleport
-        if Config.AutoExecute then
-            QueueKaitunForNextTeleport()
-        end
+        RunKaitunOnce()
         pcall(function() ExecuteButton:Lock() end)
     end
 })
@@ -818,16 +952,23 @@ ExecTab:Button({
 local UpdateTab = Window:Tab({ Title = T("update_tab"), Icon = "file-text" })
 
 UpdateTab:Section({ Title = "Update 0.85 (Public Launch)" })
-UpdateTab:Paragraph({ Title = "Changelog 0.85", Desc = "+ Fixed Auto Execute Kaitun across rejoin (uses queue_on_teleport)\n+ Added 24h key system (persists across accounts)\n+ Key valid notification: 'Key looks valid, enjoy!'\n+ Key expired notification: 'Invalid key, get another!'\n+ Added full key system translation (PT/EN/VI)\n+ Fixed Update tab disappearing on language change\n+ More translations everywhere" })
+UpdateTab:Paragraph({ Title = "Changelog", Desc = "+ Fixed Auto Execute duplicate (session flag per JobId)" })
+UpdateTab:Paragraph({ Title = "", Desc = "+ Full 24h Key System with custom prompt" })
+UpdateTab:Paragraph({ Title = "", Desc = "+ Key accepts any input containing the secret" })
+UpdateTab:Paragraph({ Title = "", Desc = "+ Fixed BonusMoments loop (locked)" })
+UpdateTab:Paragraph({ Title = "", Desc = "+ More translations everywhere" })
 
 UpdateTab:Section({ Title = "Update 0.76.3" })
-UpdateTab:Paragraph({ Title = "Changelog 0.76.3", Desc = '- Changed window icon "door-open" -> "pickaxe"\n- Changed Main tab icon "home" -> "pin"\n- Changed Panic Mode tab icon "alert-triangle" -> "heart-plus"' })
+UpdateTab:Paragraph({ Title = "Changelog", Desc = "- Window icon: door-open -> pickaxe" })
+UpdateTab:Paragraph({ Title = "", Desc = "- Main tab icon: home -> pin" })
+UpdateTab:Paragraph({ Title = "", Desc = "- Panic tab icon: alert-triangle -> heart-plus" })
 
 UpdateTab:Section({ Title = "Update 0.75.3" })
-UpdateTab:Paragraph({ Title = "Changelog 0.75.3", Desc = '- Slider "Raid em V1 Mastery" max: 600 -> 400\n- Slider "Godhuman em V2 Mastery" max: 600 -> 400' })
+UpdateTab:Paragraph({ Title = "Changelog", Desc = "- Sliders max 600 -> 400" })
 
 UpdateTab:Section({ Title = "Update 0.75" })
-UpdateTab:Paragraph({ Title = "Changelog 0.75", Desc = "+ Added Girar Fruta V2 toggle\n+ Added Remover Notificações toggle\n+ Added Update tab\n+ Changed Executar Kaitun from Toggle to Button (locks after click)\n+ Removed Multi Hit M1 description" })
+UpdateTab:Paragraph({ Title = "Changelog", Desc = "+ Girar Fruta V2, Remove Notifications" })
+UpdateTab:Paragraph({ Title = "", Desc = "+ Update tab, button locking, translations" })
 
 -- ============================================================
 -- RESTAURA ESTADOS SALVOS
@@ -843,23 +984,43 @@ if Config.RemoveNotifications then StartNotifRemover() end
 if Config.AutoExecute then
     task.spawn(function()
         task.wait(2)
-        ExecuteKaitun()
+        RunKaitunOnce()
         QueueKaitunForNextTeleport()
     end)
 end
 
 -- ============================================================
--- BONUS MOMENTS AUTO (PlaceId 994732206)
+-- BONUS MOMENTS AUTO (PlaceId 994732206) — LÓGICA EXATA, INTOCADA
 -- ============================================================
 if game.PlaceId == 994732206 then
     task.spawn(function()
-        while task.wait(0.2) do
-            pcall(function()
-                local Event = game:GetService("ReplicatedStorage").Remotes.BonusMomentsRemoteFunction
-                Event:InvokeServer("Escape from Alcatraz", "Provoke", "Puncher")
-                Event:InvokeServer("Escape from Alcatraz", "Provoke", "Raft")
-                Event:InvokeServer("Escape from Alcatraz", "Provoke", "Digger")
-            end)
+        while true do
+            local Event = game:GetService("ReplicatedStorage").Remotes.BonusMomentsRemoteFunction
+            Event:InvokeServer(
+            "Escape from Alcatraz",
+            "Provoke",
+            "Puncher"
+            )
+
+            task.wait(0.2)
+
+            local Event = game:GetService("ReplicatedStorage").Remotes.BonusMomentsRemoteFunction
+            Event:InvokeServer(
+            "Escape from Alcatraz",
+            "Provoke",
+            "Digger"
+            )
+
+            task.wait(0.2)
+
+            local Event = game:GetService("ReplicatedStorage").Remotes.BonusMomentsRemoteFunction
+            Event:InvokeServer(
+            "Escape from Alcatraz",
+            "Provoke",
+            "Raft"
+            )
+
+            task.wait(0.2)
         end
     end)
 end
