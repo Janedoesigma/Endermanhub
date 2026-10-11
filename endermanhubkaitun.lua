@@ -801,11 +801,9 @@ function hoangtuveu()
     local W = {Instances = {}}
     repeat task.wait() until game.CoreGui
 
-    -- ============================================================
-    -- UI TỪ DYNAMICISLAND_AXIOM-1.LUA (CÓ DISCORD + CONTAINER)
-    -- ============================================================
+    
         -- ============================================================
-    -- UI — ENDERMAN HUB (KAITUN) — Redesigned (logic preserved)
+    -- UI — ENDERMAN HUB (KAITUN) — Compact Modern
     -- ============================================================
     local gui = Instance.new('ScreenGui')
     gui.Name = "ENDERMAN HUB (KAITUN)"
@@ -816,18 +814,17 @@ function hoangtuveu()
     gui.IgnoreGuiInset = true
     gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-    -- ===== THEME =====
     local Theme = {
-        Accent1     = Color3.fromRGB(138, 43, 226),
-        Accent2     = Color3.fromRGB(0, 200, 255),
-        BgPrimary   = Color3.fromRGB(18, 18, 22),
-        Stroke      = Color3.fromRGB(70, 70, 85),
-        TextPrimary = Color3.fromRGB(240, 240, 255),
-        TextAccent  = Color3.fromRGB(180, 150, 255),
-        TextSubtle  = Color3.fromRGB(160, 160, 180),
+        Bg          = Color3.fromRGB(22, 22, 28),
+        BgHeader    = Color3.fromRGB(30, 30, 40),
+        Accent      = Color3.fromRGB(150, 80, 255),
+        Accent2     = Color3.fromRGB(0, 210, 255),
+        Stroke      = Color3.fromRGB(55, 55, 70),
+        Text        = Color3.fromRGB(235, 235, 245),
+        TextDim     = Color3.fromRGB(150, 150, 170),
+        Green       = Color3.fromRGB(80, 220, 130),
     }
 
-    -- ===== CONTAINER =====
     local container = Instance.new("Frame")
     container.Name = "Container"
     container.Parent = gui
@@ -839,144 +836,214 @@ function hoangtuveu()
 
     local containerLayout = Instance.new("UIListLayout", container)
     containerLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    containerLayout.Padding = UDim.new(0, 4)
-    containerLayout.FillDirection = Enum.FillDirection.Vertical
     containerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-    -- ===== MAIN CARD =====
+    -- ===== CARD =====
     local frame = Instance.new("Frame")
     frame.Name = "Frame"
     frame.Parent = container
-    frame.LayoutOrder = 2
-    frame.AutomaticSize = Enum.AutomaticSize.XY
-    frame.Size = UDim2.new(0, 340, 0, 0)
-    frame.BackgroundColor3 = Theme.BgPrimary
-    frame.BackgroundTransparency = 0.08
+    frame.Size = UDim2.new(0, 280, 0, 0)
+    frame.AutomaticSize = Enum.AutomaticSize.Y
+    frame.BackgroundColor3 = Theme.Bg
+    frame.BackgroundTransparency = 0.05
     frame.BorderSizePixel = 0
     frame.Active = true
 
-    local padding = Instance.new("UIPadding", frame)
-    padding.PaddingTop    = UDim.new(0, 14)
-    padding.PaddingBottom = UDim.new(0, 14)
-    padding.PaddingLeft   = UDim.new(0, 16)
-    padding.PaddingRight  = UDim.new(0, 16)
-
-    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
+    local frameCorner = Instance.new("UICorner", frame)
+    frameCorner.CornerRadius = UDim.new(0, 10)
 
     local stroke = Instance.new("UIStroke", frame)
-    stroke.Color = Theme.Accent1
-    stroke.Thickness = 1.5
-    stroke.Transparency = 0.15
+    stroke.Color = Theme.Accent
+    stroke.Thickness = 1.2
+    stroke.Transparency = 0.3
     stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
     local strokeGrad = Instance.new("UIGradient", stroke)
     strokeGrad.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0.0, Theme.Accent1),
+        ColorSequenceKeypoint.new(0, Theme.Accent),
         ColorSequenceKeypoint.new(0.5, Theme.Accent2),
-        ColorSequenceKeypoint.new(1.0, Theme.Accent1),
+        ColorSequenceKeypoint.new(1, Theme.Accent),
     })
-    strokeGrad.Rotation = 45
+    strokeGrad.Rotation = 0
 
     task.spawn(function()
         while frame.Parent do
-            task.wait(0.05)
-            strokeGrad.Rotation = (strokeGrad.Rotation + 2) % 360
+            task.wait(0.03)
+            strokeGrad.Rotation = (strokeGrad.Rotation + 3) % 360
         end
     end)
 
-    -- Soft shadow
-    local shadow = Instance.new("ImageLabel", frame)
-    shadow.Name = "Shadow"
-    shadow.AnchorPoint = Vector2.new(0.5, 0.5)
-    shadow.Position = UDim2.new(0.5, 0, 0.5, 0)
-    shadow.Size = UDim2.new(1, 30, 1, 30)
-    shadow.BackgroundTransparency = 1
-    shadow.Image = "rbxassetid://5028857472"
-    shadow.ImageColor3 = Color3.new(0, 0, 0)
-    shadow.ImageTransparency = 0.6
-    shadow.ZIndex = -1
-
-    local layout = Instance.new("UIListLayout", frame)
-    layout.SortOrder = Enum.SortOrder.LayoutOrder
-    layout.Padding = UDim.new(0, 6)
-    layout.FillDirection = Enum.FillDirection.Vertical
-
     -- ===== HEADER =====
-    local headerFrame = Instance.new("Frame")
-    headerFrame.Name = "Header"
-    headerFrame.Parent = frame
-    headerFrame.LayoutOrder = 0
-    headerFrame.Size = UDim2.new(1, 0, 0, 24)
-    headerFrame.BackgroundTransparency = 1
+    local header = Instance.new("Frame")
+    header.Name = "Header"
+    header.Parent = frame
+    header.Size = UDim2.new(1, 0, 0, 30)
+    header.BackgroundColor3 = Theme.BgHeader
+    header.BackgroundTransparency = 0.1
+    header.BorderSizePixel = 0
+    header.ZIndex = 2
 
-    local titleLabel = Instance.new("TextLabel")
-    titleLabel.Name = "Title"
-    titleLabel.Parent = headerFrame
-    titleLabel.Size = UDim2.new(1, 0, 1, 0)
-    titleLabel.BackgroundTransparency = 1
-    titleLabel.Text = "ENDERMAN  •  KAITUN  v2.2"
-    titleLabel.TextSize = 15
-    titleLabel.Font = Enum.Font.GothamBold
-    titleLabel.TextColor3 = Theme.TextPrimary
-    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    titleLabel.TextYAlignment = Enum.TextYAlignment.Center
+    local headerCorner = Instance.new("UICorner", header)
+    headerCorner.CornerRadius = UDim.new(0, 10)
 
-    local titleGrad = Instance.new("UIGradient", titleLabel)
+    -- fix bottom corners of header to be square
+    local headerFix = Instance.new("Frame", header)
+    headerFix.Size = UDim2.new(1, 0, 0, 10)
+    headerFix.Position = UDim2.new(0, 0, 1, -10)
+    headerFix.BackgroundColor3 = Theme.BgHeader
+    headerFix.BackgroundTransparency = 0.1
+    headerFix.BorderSizePixel = 0
+    headerFix.ZIndex = 2
+
+    local headerGrad = Instance.new("UIGradient", header)
+    headerGrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(45, 25, 75)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 45, 70)),
+    })
+    headerGrad.Rotation = 0
+
+    -- Dot indicator
+    local dot = Instance.new("Frame")
+    dot.Name = "Dot"
+    dot.Parent = header
+    dot.AnchorPoint = Vector2.new(0, 0.5)
+    dot.Position = UDim2.new(0, 12, 0.5, 0)
+    dot.Size = UDim2.new(0, 8, 0, 8)
+    dot.BackgroundColor3 = Theme.Green
+    dot.BorderSizePixel = 0
+    dot.ZIndex = 3
+    Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
+
+    task.spawn(function()
+        while dot.Parent do
+            task.wait(0.8)
+            local t = game:GetService("TweenService")
+            t:Create(dot, TweenInfo.new(0.4), {BackgroundTransparency = 0.6}):Play()
+            task.wait(0.4)
+            if dot.Parent then
+                t:Create(dot, TweenInfo.new(0.4), {BackgroundTransparency = 0}):Play()
+            end
+        end
+    end)
+
+    local title = Instance.new("TextLabel")
+    title.Parent = header
+    title.BackgroundTransparency = 1
+    title.Position = UDim2.new(0, 26, 0, 0)
+    title.Size = UDim2.new(1, -36, 1, 0)
+    title.Font = Enum.Font.GothamBold
+    title.Text = "ENDERMAN HUB"
+    title.TextSize = 13
+    title.TextColor3 = Theme.Text
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.ZIndex = 3
+
+    local titleGrad = Instance.new("UIGradient", title)
     titleGrad.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0.0, Theme.TextAccent),
-        ColorSequenceKeypoint.new(1.0, Theme.Accent2),
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(200, 150, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(120, 220, 255)),
     })
 
-    -- ===== DIVIDER =====
-    local divider = Instance.new("Frame")
-    divider.Name = "Divider"
-    divider.Parent = frame
-    divider.LayoutOrder = 0.5
-    divider.Size = UDim2.new(1, 0, 0, 1)
-    divider.BackgroundColor3 = Theme.Stroke
-    divider.BorderSizePixel = 0
-    divider.BackgroundTransparency = 0.4
+    local version = Instance.new("TextLabel")
+    version.Parent = header
+    version.BackgroundTransparency = 1
+    version.AnchorPoint = Vector2.new(1, 0.5)
+    version.Position = UDim2.new(1, -12, 0.5, 0)
+    version.Size = UDim2.new(0, 60, 0, 16)
+    version.Font = Enum.Font.GothamMedium
+    version.Text = "KAITUN v2.2"
+    version.TextSize = 10
+    version.TextColor3 = Theme.TextDim
+    version.TextXAlignment = Enum.TextXAlignment.Right
+    version.ZIndex = 3
 
-    -- ===== FEATURES (status labels) =====
-    local features = Instance.new("Frame")
-    features.Name = "Features"
-    features.Parent = frame
-    features.LayoutOrder = 1
-    features.AutomaticSize = Enum.AutomaticSize.XY
-    features.Size = UDim2.new(1, 0, 0, 0)
-    features.BackgroundTransparency = 1
+    -- ===== BODY =====
+    local body = Instance.new("Frame")
+    body.Name = "Body"
+    body.Parent = frame
+    body.Position = UDim2.new(0, 0, 0, 30)
+    body.Size = UDim2.new(1, 0, 0, 0)
+    body.AutomaticSize = Enum.AutomaticSize.Y
+    body.BackgroundTransparency = 1
 
-    local featLayout = Instance.new("UIListLayout", features)
-    featLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    featLayout.Padding = UDim.new(0, 4)
-    featLayout.FillDirection = Enum.FillDirection.Vertical
+    local bodyPadding = Instance.new("UIPadding", body)
+    bodyPadding.PaddingTop    = UDim.new(0, 10)
+    bodyPadding.PaddingBottom = UDim.new(0, 12)
+    bodyPadding.PaddingLeft   = UDim.new(0, 14)
+    bodyPadding.PaddingRight  = UDim.new(0, 14)
+
+    local bodyLayout = Instance.new("UIListLayout", body)
+    bodyLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    bodyLayout.Padding = UDim.new(0, 8)
+    bodyLayout.FillDirection = Enum.FillDirection.Vertical
+
+    -- ===== SECTION: STATUS =====
+    local function makeSection(text)
+        local wrap = Instance.new("Frame")
+        wrap.BackgroundTransparency = 1
+        wrap.Size = UDim2.new(1, 0, 0, 0)
+        wrap.AutomaticSize = Enum.AutomaticSize.Y
+        wrap.Parent = body
+
+        local lbl = Instance.new("TextLabel")
+        lbl.BackgroundTransparency = 1
+        lbl.Size = UDim2.new(1, 0, 0, 12)
+        lbl.Font = Enum.Font.GothamBold
+        lbl.Text = string.upper(text)
+        lbl.TextSize = 10
+        lbl.TextColor3 = Theme.Accent
+        lbl.TextXAlignment = Enum.TextXAlignment.Left
+        lbl.Parent = wrap
+
+        local line = Instance.new("Frame")
+        line.BackgroundColor3 = Theme.Stroke
+        line.BackgroundTransparency = 0.5
+        line.BorderSizePixel = 0
+        line.Size = UDim2.new(1, 0, 0, 1)
+        line.Position = UDim2.new(0, 0, 0, 15)
+        line.Parent = wrap
+
+        local layoutInner = Instance.new("UIListLayout", wrap)
+        layoutInner.SortOrder = Enum.SortOrder.LayoutOrder
+        layoutInner.Padding = UDim.new(0, 6)
+
+        local spacer = Instance.new("Frame", wrap)
+        spacer.BackgroundTransparency = 1
+        spacer.Size = UDim2.new(1, 0, 0, 8)
+        spacer.LayoutOrder = 1
+
+        return wrap
+    end
+
+    local statusSection = makeSection("Status")
 
     local taskLabel = Instance.new("TextLabel")
     taskLabel.Name = "Task"
-    taskLabel.Parent = features
-    taskLabel.LayoutOrder = 1
-    taskLabel.AutomaticSize = Enum.AutomaticSize.XY
+    taskLabel.Parent = statusSection
+    taskLabel.LayoutOrder = 2
     taskLabel.Size = UDim2.new(1, 0, 0, 0)
+    taskLabel.AutomaticSize = Enum.AutomaticSize.Y
     taskLabel.BackgroundTransparency = 1
     taskLabel.Text = "Status :"
-    taskLabel.TextSize = 14
+    taskLabel.TextSize = 12
     taskLabel.Font = Enum.Font.GothamMedium
-    taskLabel.TextColor3 = Theme.TextAccent
+    taskLabel.TextColor3 = Theme.Text
     taskLabel.TextXAlignment = Enum.TextXAlignment.Left
+    taskLabel.TextWrapped = true
 
     local subTaskLabel = Instance.new("TextLabel")
     subTaskLabel.Name = "SubTask"
-    subTaskLabel.Parent = features
-    subTaskLabel.LayoutOrder = 2
-    subTaskLabel.AutomaticSize = Enum.AutomaticSize.XY
+    subTaskLabel.Parent = statusSection
+    subTaskLabel.LayoutOrder = 3
     subTaskLabel.Size = UDim2.new(1, 0, 0, 0)
+    subTaskLabel.AutomaticSize = Enum.AutomaticSize.Y
     subTaskLabel.BackgroundTransparency = 1
     subTaskLabel.Text = "Sub Task :"
-    subTaskLabel.TextSize = 13
+    subTaskLabel.TextSize = 11
     subTaskLabel.Font = Enum.Font.Gotham
-    subTaskLabel.TextColor3 = Theme.TextSubtle
-    subTaskLabel.TextTransparency = 0
+    subTaskLabel.TextColor3 = Theme.TextDim
     subTaskLabel.TextXAlignment = Enum.TextXAlignment.Left
+    subTaskLabel.TextWrapped = true
 
     W.Instances['Task1'] = taskLabel
     W.Instances['Task2'] = subTaskLabel
@@ -988,14 +1055,39 @@ function hoangtuveu()
             if not label then return end
             if label.Text == text then return end
             local ts = game:GetService("TweenService")
-            local fadeOut = ts:Create(label, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 1})
-            fadeOut:Play()
-            fadeOut.Completed:Wait()
+            ts:Create(label, TweenInfo.new(0.2), {TextTransparency = 0.7}):Play()
+            task.wait(0.2)
             label.Text = text
-            local fadeIn = ts:Create(label, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0})
-            fadeIn:Play()
+            ts:Create(label, TweenInfo.new(0.2), {TextTransparency = 0}):Play()
         end)
     end
+
+    -- ===== DRAG =====
+    local dragging, dragStart, startPos
+    header.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1
+        or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = container.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+    header.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement
+        or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
+            container.Position = UDim2.new(
+                startPos.X.Scale, startPos.X.Offset + delta.X,
+                startPos.Y.Scale, startPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+
     getgenv().alert = function() end
     W.SetText = SetText
     W.ToggleUI = function() end
