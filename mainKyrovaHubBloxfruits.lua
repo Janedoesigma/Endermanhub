@@ -1,2422 +1,1447 @@
---[[
-    ██╗  ██╗██╗   ██╗██████╗  ██████╗ ██╗   ██╗ █████╗ 
-    ██║ ██╔╝╚██╗ ██╔╝██╔══██╗██╔═══██╗██║   ██║██╔══██╗
-    █████╔╝  ╚████╔╝ ██████╔╝██║   ██║██║   ██║███████║
-    ██╔═██╗   ╚██╔╝  ██╔══██╗██║   ██║╚██╗ ██╔╝██╔══██║
-    ██║  ██╗   ██║   ██║  ██║╚██████╔╝ ╚████╔╝ ██║  ██║
-    ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝   ╚═══╝  ╚═╝  ╚═╝
-    
-    Kyrova Hub  |  UI: Vind UI Reborn
-    Logic merged from: Speed Hub X + OK Hub
-    Icon: rbxassetid://71647128089295
---]]
+--═══════════════════════════════════════════════════════════════════
+--  KYROVA HUB • Blox Fruits
+--  UI: Vind UI Reborn  |  Engine: Speed Hub X (fiel ao original)
+--  Icon/Fundo: 71647128089295  |  Toggle: RightShift
+--═══════════════════════════════════════════════════════════════════
 
---============================================================
--- ANTI-DETECTION / LOADER (Speed Hub X)
---============================================================
+if _G.__KyrovaLoaded then return end
+_G.__KyrovaLoaded = true
+
 repeat task.wait() until game:IsLoaded()
 
-local tbl = {
-    IsDetected = false,
-    _unpack = function(arg, arg2, arg3)
-        arg2 = arg2 or 1
-        local n = arg3 or #arg
-        if n < arg2 then return end
-        return arg[arg2], tbl._unpack(arg, arg2 + 1, n)
-    end,
-    _pcall = function(arg, ...)
-        local args = { ... }
-        local ok, result = pcall(function()
-            return arg(tbl._unpack(args))
-        end)
-        if not ok then return false, result end
-        return true, result
-    end,
-}
-
-local function _fn() return true end
-local v, v2 = tbl._pcall(debug.info, _fn, "f")
-if not v or v2 ~= _fn then tbl.IsDetected = true; if LPH_CRASH then LPH_CRASH() end end
-
-local cloneref_ = (cloneref or function(a) return a end)
-local RunService_ = cloneref_(game:GetService("RunService"))
-if RunService_:IsStudio() then tbl.IsDetected = true end
-if RunService_:IsServer() then tbl.IsDetected = true end
-
-pcall(function()
-    loadstring([[
-        function LPH_NO_VIRTUALIZE(f) return f end;
-        function LPH_JIT_MAX(f) return f end;
-        function LPH_JIT(f) return f end;
-        function LPH_ENCNUM(n, ...) return n end;
-        function LPH_ENCSTR(s, ...) return s end;
-        function LPH_ENCFUNC(f, ...) return f end;
-        function LPH_ENCBUF(b, ...) return b end;
-        function LPH_ATTRIBUTES(...) end;
-        function LPH_REWRITE(expr, ...) return expr end;
-        function LPH_STACKALLOC(size, zeroOrOne) return {} end;
-        function LPH_PRECHECK(...) end;
-        function VM(...) end; function PRESET(...) end;
-        function ENCRYPT(...) end; function OPTIMIZE(...) end;
-        function ERROR_HANDLING(...) end; function TRANSFORM(...) end;
-        NONE, OPAL, ONYX = 0, 1, 2; FAST, SECURE = 0, 1;
-        CONTROL_FLOW, EXTRACT, INLINE, UNROLL, NO_UPVALUES, level = 0, 0, 0, 0, 0, 0;
-    ]])()
-end)
-
---============================================================
--- SERVICES & SETUP
---============================================================
+-- // Services
 local Players           = game:GetService("Players")
-local LocalPlayer       = Players.LocalPlayer
+local RS                = game:GetService("ReplicatedStorage")
+local TS                = game:GetService("TweenService")
 local RunService        = game:GetService("RunService")
-local TweenService      = game:GetService("TweenService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Workspace         = game:GetService("Workspace")
+local CollectionService = game:GetService("CollectionService")
+local TeleportService   = game:GetService("TeleportService")
 local VIM               = game:GetService("VirtualInputManager")
 local VU                = game:GetService("VirtualUser")
 local Lighting          = game:GetService("Lighting")
-local TPS               = game:GetService("TeleportService")
-local CS                = game:GetService("CollectionService")
-local Http              = game:GetService("HttpService")
-local UIS               = game:GetService("UserInputService")
-local StarterGui        = game:GetService("StarterGui")
 
-repeat task.wait() until LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+local LocalPlayer = Players.LocalPlayer
+local playerGui   = LocalPlayer:WaitForChild("PlayerGui")
 
-local PlaceId = game.PlaceId
-local World1  = PlaceId == 2753915549 or PlaceId == 85211729168715
-local World2  = PlaceId == 4442272183 or PlaceId == 79091703265657
-local World3  = PlaceId == 7449423635 or PlaceId == 100117331123089
+local Remotes        = RS:WaitForChild("Remotes")
+local CommF_         = Remotes:WaitForChild("CommF_")
+local Net            = RS:WaitForChild("Modules"):WaitForChild("Net")
+local RegisterAttack = Net:WaitForChild("RE/RegisterAttack")
+local RegisterHit    = Net:WaitForChild("RE/RegisterHit")
 
-local CommF_  = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
-local Net     = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Net")
-local RegAttack = Net:WaitForChild("RE/RegisterAttack", 10)
-local RegHit    = Net:WaitForChild("RE/RegisterHit", 10)
+repeat task.wait() until LocalPlayer:FindFirstChild("Data")
 
---============================================================
--- GLOBAL STATE
---============================================================
-getgenv().K = getgenv().K or {}
-local K = getgenv().K
+local World1 = game.PlaceId == 2753915549 or game.PlaceId == 85211729168715
+local World2 = game.PlaceId == 4442272183 or game.PlaceId == 79091703265657
+local World3 = game.PlaceId == 7449423635 or game.PlaceId == 100117331123089
+local Enemies = workspace:WaitForChild("Enemies", 30)
+local Unloaded = false
 
-K.WeaponTool      = "Melee"
-K.SelectWeapon    = nil
-K.TweenSpeed      = 350
-K.BringMob        = true
-K.BringMobRadius  = 300
-K.FastAttack      = true
-K.FastAttackDelay = 0
-K.FarmDistance    = 20
-K.StopItems       = true
-K.SafeMode        = false
-K._B              = true
-K.Seriality       = true
-K.RandomCFrame    = false
-K.MousePos        = Vector3.zero
-K.SoulGuitar      = false
+--════════════════════════ SETTINGS ════════════════════════
+local Settings = {
+    ["Weapon Tool"] = "Melee", ["Tween Speed"] = 350,
+    ["Bring Mob"] = false, ["Bring Radius"] = 300,
+    ["Fast Attack"] = false, ["Fast Attack Delay"] = 0,
+    ["Kill Aura"] = false, ["Disable Notify"] = false,
+    ["Stop On Rare Items"] = false, ["Anti AFK"] = false, ["Anti Admin"] = false,
+    ["Auto Turn On Buso"] = false, ["Auto Ken"] = false,
+    ["Auto Turn V3"] = false, ["Auto Turn V4"] = false,
+    ["Choose Chip"] = "Flame", ["Choose Material"] = "", ["Choose Boss"] = "",
+    ["Choose Fruit"] = "", ["Stat Select"] = "Melee", ["Stat Points"] = 10,
+    ["Stack Farming Enabled"] = false,
+    ["WalkSpeed"] = 16, ["JumpPower"] = 50,
+}
 
--- Speed Hub style block
-local TweenBlock = Workspace:FindFirstChild("KyrovaTweenBlock") or Instance.new("Part")
-TweenBlock.Name = "KyrovaTweenBlock"
-TweenBlock.Size = Vector3.new(1,1,1)
-TweenBlock.Anchored = true
-TweenBlock.CanCollide = false
-TweenBlock.CanTouch = false
-TweenBlock.Transparency = 1
-TweenBlock.Parent = Workspace
+local BossList = World1 and {"The Gorilla King","Bobby","The Saw","Yeti","Mob Leader","Vice Admiral","Saber Expert","Warden","Chief Warden","Swan","Magma Admiral","Fishman Lord","Wysper","Thunder God","Cyborg","Ice Admiral","Greybeard"}
+    or World2 and {"Diamond","Jeremy","Orbitus","Don Swan","Smoke Admiral","Awakened Ice Admiral","Tide Keeper","Darkbeard","Cursed Captain","Order"}
+    or {"Stone","Hydra Leader","Kilo Admiral","Captain Elephant","Beautiful Pirate","Cake Queen","Dough King","Longma","Soul Reaper","rip_indra True Form","Tyrant of the Skies"}
 
--- No clip / highlight state
-task.spawn(function()
-    while task.wait() do
-        pcall(function()
-            local char = LocalPlayer.Character
-            if not char then return end
-            if K.shouldTween then
-                if not char:FindFirstChild("KyrovaHighlight") then
-                    local h = Instance.new("Highlight")
-                    h.Name = "KyrovaHighlight"
-                    h.Enabled = true
-                    h.FillColor = Color3.fromRGB(0,255,254)
-                    h.OutlineColor = Color3.fromRGB(0,255,254)
-                    h.FillTransparency = 0.5
-                    h.OutlineTransparency = 0.2
-                    h.Parent = char
-                end
-                for _, p in pairs(char:GetDescendants()) do
-                    if p:IsA("BasePart") then p.CanCollide = false end
-                end
-            else
-                if char:FindFirstChild("KyrovaHighlight") then
-                    char.KyrovaHighlight:Destroy()
-                end
+local MaterialList = World1 and {"Leather + Scrap Metal","Angel Wings","Magma Ore","Fish Tail"}
+    or World2 and {"Leather + Scrap Metal","Radioactive Material","Ectoplasm","Mystic Droplet","Magma Ore","Vampire Fang"}
+    or {"Scrap Metal","Demonic Wisp","Conjured Cocoa","Dragon Scale","Gunpowder","Fish Tail","Mini Tusk"}
+
+local MaterialNPCs = {
+    ["Leather + Scrap Metal"] = {"Pirate","Brute"},
+    ["Angel Wings"] = {"God's Guard"},
+    ["Magma Ore"] = {"Military Soldier","Military Detective"},
+    ["Fish Tail"] = {"Fishman Warrior","Fishman Commando"},
+    ["Radioactive Material"] = {"Factory Staff"},
+    ["Ectoplasm"] = {"Ship Deckhand","Ship Engineer","Ship Steward","Ship Officer"},
+    ["Mystic Droplet"] = {"Water Fighter"},
+    ["Vampire Fang"] = {"Vampire"},
+    ["Scrap Metal"] = {"Pirate","Brute"},
+    ["Demonic Wisp"] = {"Demonic Soul"},
+    ["Conjured Cocoa"] = {"Cocoa Warrior","Chocolate Bar Battler"},
+    ["Dragon Scale"] = {"Dragon Crew Warrior","Dragon Crew Archer"},
+    ["Gunpowder"] = {"Jungle Pirate","Arctic Warrior"},
+    ["Mini Tusk"] = {"Mythological Pirate"},
+}
+
+local FruitList = {"Rocket Fruit","Spin Fruit","Chop Fruit","Spring Fruit","Bomb Fruit","Smoke Fruit","Spike Fruit","Flame Fruit","Falcon Fruit","Ice Fruit","Sand Fruit","Dark Fruit","Ghost Fruit","Diamond Fruit","Light Fruit","Rubber Fruit","Barrier Fruit","Magma Fruit","Quake Fruit","Buddha Fruit","Love Fruit","Spider Fruit","Sound Fruit","Phoenix Fruit","Portal Fruit","Rumble Fruit","Pain Fruit","Blizzard Fruit","Gravity Fruit","Mammoth Fruit","T-Rex Fruit","Dough Fruit","Shadow Fruit","Venom Fruit","Control Fruit","Spirit Fruit","Dragon Fruit","Leopard Fruit","Yeti Fruit","Kitsune Fruit","Gas Fruit"}
+local ChipList = {"Flame","Ice","Quake","Light","Dark","Spider","Rumble","Magma","Buddha","Sand","Phoenix","Dough"}
+
+-- ponte Settings → _G (lógicas do OK Hub coladas na extensão leem essas _G)
+local G_NAMES = {
+    ["Auto Saber"]="AutoSaber",["Auto Pole"]="AutoPole",["Auto Pole V2"]="AutoPoleV2",
+    ["Auto Saw"]="AutoSaw",["Auto Trident"]="AutoTridentW2",["Auto Yama"]="Auto_Yama",
+    ["Auto Tushita"]="Auto_Tushita",["Auto CDK"]="CDK",["Auto Soul Guitar"]="Auto_Soul_Guitar",
+    ["Auto Serpent Bow"]="AutoSerpentBow",["Auto Superhuman"]="Auto_SuperHuman",
+    ["Auto Death Step"]="AutoDeathStep",["Auto Sharkman"]="Auto_SharkMan_Karate",
+    ["Auto Electric Claw"]="Auto_Electric_Claw",["Auto Dragon Talon"]="AutoDragonTalon",
+    ["Auto God Human"]="Auto_God_Human",["Auto Rainbow Haki"]="Auto_Rainbow_Haki",
+    ["Auto Bartilo"]="Bartilo_Quest",["Auto Citizen"]="CitizenQuest",
+    ["Auto Elite Hunter"]="FarmEliteHunt",["Auto Cavender"]="Auto_Cavender",
+    ["Auto Dough King"]="AutoDoughKing",["Auto Cake Prince"]="Auto_Cake_Prince",
+    ["Auto Soul Reaper"]="AutoMatSoul",["Auto Factory"]="AutoFactory",
+    ["Auto Ectoplasm"]="AutoEctoplasm",["Auto Collect Chest"]="AutoFarmChest",
+    ["Auto Farm Level"]="Level",["Auto Farm Nearest"]="AutoFarmNear",
+    ["Auto Farm Bones"]="AutoFarm_Bone",["Auto Raid"]="AutoFarmRaid",
+    ["Auto Sea Beast"]="SeaBeast1",["Auto Shark"]="Shark",["Auto Terrorshark"]="TerrorShark",
+    ["Auto Piranha"]="Piranha",["Auto Fish Crew"]="MobCrew",
+}
+
+local function Notify(title, text, ntype)
+    if Settings["Disable Notify"] then return end
+    pcall(function() VindUI:Notify({Title=title, Text=text, Type=ntype or "info", Duration=3}) end)
+end
+
+--════════════════════════ ENGINE (Speed Hub X) ════════════════════════
+
+local function IsEntityAlive(m) local h = m and m:FindFirstChildOfClass("Humanoid") return h and h.Health > 0 end
+local function GetDistance(target)
+    local char = LocalPlayer.Character
+    if not char or not char.PrimaryPart then return math.huge end
+    local pos = typeof(target)=="CFrame" and target.Position or target
+    return (char.PrimaryPart.Position - pos).Magnitude
+end
+local function FireRemote(...) return CommF_:InvokeServer(select(2, ...)) end
+
+local function FindEnemy(names)
+    local list = type(names)=="table" and names or {names}
+    for _, v in ipairs(Enemies:GetChildren()) do
+        if table.find(list, v.Name) and v:FindFirstChild("HumanoidRootPart") and IsEntityAlive(v) then return v end
+    end
+end
+
+-- // Tween Controller — verbatim Speed Hub X
+local ActiveController = nil
+local function DestroyTween()
+    if ActiveController then pcall(function() ActiveController:Destroy() end) ActiveController = nil end
+end
+
+local function CreateTweenController(hrp)
+    if not hrp or not hrp.Parent then return nil end
+    local ctrl = {}
+    local originalVel = hrp.AssemblyLinearVelocity
+    local savedCollide, savedAnchor = {}, {}
+    local tween, bv, conn, flag = nil, nil, nil, false
+
+    local function cleanup()
+        if conn then conn:Disconnect() conn = nil end
+        if tween then tween:Cancel() tween = nil end
+        if bv then bv:Destroy() bv = nil end
+        for _, d in ipairs(hrp.Parent:GetDescendants()) do
+            if d:IsA("BasePart") then
+                d.CanCollide = savedCollide[d] ~= nil and savedCollide[d] or true
+                savedCollide[d] = nil
+                if savedAnchor[d] ~= nil then d.Anchored = savedAnchor[d] savedAnchor[d] = nil end
             end
-        end)
-    end
-end)
-
--- Block follower (Speed Hub style)
-task.spawn(function()
-    local lp = LocalPlayer
-    repeat task.wait() until lp.Character and lp.Character.PrimaryPart
-    TweenBlock.CFrame = lp.Character.PrimaryPart.CFrame
-    while task.wait() do
+        end
         pcall(function()
-            if K.shouldTween then
-                local b = lp.Character and lp.Character.PrimaryPart
-                if b then
-                    if (b.Position - TweenBlock.Position).Magnitude <= 200 then
-                        b.CFrame = TweenBlock.CFrame
-                    else
-                        TweenBlock.CFrame = b.CFrame
-                    end
-                end
-            end
+            hrp.AssemblyLinearVelocity = originalVel
+            hrp.AssemblyAngularVelocity = Vector3.zero
         end)
+        flag = false
     end
-end)
 
---============================================================
--- CORE HELPERS
---============================================================
-local function Root()
-    local c = LocalPlayer.Character
-    return c and c:FindFirstChild("HumanoidRootPart")
-end
-K.Root = Root
-
-local function IsAlive(model)
-    if not model then return false end
-    local h = model:FindFirstChildOfClass("Humanoid")
-    return h and h.Health > 0
-end
-K.IsAlive = IsAlive
-
-local function EquipWeapon(name)
-    if not name then return end
-    local bp = LocalPlayer.Backpack
-    local tool = bp and bp:FindFirstChild(name)
-    if tool then
-        local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-        if hum then hum:EquipTool(tool) end
+    function ctrl.ExecuteTween(target, speed)
+        if flag then cleanup() end
+        originalVel = hrp.AssemblyLinearVelocity
+        for _, d in ipairs(hrp.Parent:GetDescendants()) do
+            if d:IsA("BasePart") then
+                savedCollide[d] = d.CanCollide
+                savedAnchor[d] = d.Anchored
+                d.CanCollide = false
+            end
+        end
+        pcall(function()
+            hrp.AssemblyLinearVelocity = Vector3.zero
+            hrp.AssemblyAngularVelocity = Vector3.zero
+        end)
+        bv = Instance.new("BodyVelocity")
+        bv.MaxForce = Vector3.new(4000,4000,4000)
+        bv.Velocity = Vector3.zero
+        bv.Parent = hrp
+        local t = math.max(0.05, (hrp.CFrame.Position - target.Position).Magnitude / math.max(speed or 100, 0.01))
+        flag = true
+        tween = TS:Create(hrp, TweenInfo.new(t, Enum.EasingStyle.Linear), {CFrame = target})
+        conn = tween.Completed:Connect(cleanup)
+        tween:Play()
     end
+    function ctrl.Destroy() cleanup() end
+    return ctrl
 end
-K.EquipWeapon = EquipWeapon
 
-local function weaponSc(tip)
-    local bp = LocalPlayer.Backpack
-    if not bp then return end
-    for _, v in pairs(bp:GetChildren()) do
-        if v:IsA("Tool") and v.ToolTip == tip then
-            EquipWeapon(v.Name)
-            K.SelectWeapon = v.Name
+-- // FindNearestTeleporter — verbatim Speed Hub X
+local function FindNearestTeleporter(targetCF)
+    local pos, spots = targetCF.Position, {}
+    if game.PlaceId == 7449423635 then
+        spots = {["Castle On The Sea"]=Vector3.new(-5058.775,314.5155,-3155.8833),Hydra=Vector3.new(5756.8374,610.424,-253.9254),Mansion=Vector3.new(-12463.874,374.9145,-7523.774),["Great Tree"]=Vector3.new(28282.57,14896.851,105.1043),["Temple Clock"]=Vector3.new(28282.57,14896.851,105.10427)}
+    elseif game.PlaceId == 4442272183 then
+        spots = {Mansion=Vector3.new(-288.4625,306.1306,597.9988),Flamingo=Vector3.new(2284.912,15.152,905.4829),["122"]=Vector3.new(923.2125,126.976,32852.832),["3032"]=Vector3.new(-6508.558,89.035,-132.8395)}
+    elseif game.PlaceId == 2753915549 then
+        spots = {["1"]=Vector3.new(-7894.62,5545.4917,-380.2467),["2"]=Vector3.new(-4607.8228,872.5423,-1667.5569),["3"]=Vector3.new(61163.85,11.7595,1819.7842),["4"]=Vector3.new(3876.2805,35.1061,-1939.3202)}
+    end
+    if not next(spots) then return nil end
+    local huge, best = math.huge, nil
+    for _, v in pairs(spots) do
+        local mag = (v - pos).Magnitude
+        if mag < huge then huge, best = mag, v end
+    end
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return nil end
+    if huge <= (pos - hrp.Position).Magnitude then return best end
+    return nil
+end
+
+-- // ExecuteTween — verbatim Speed Hub X (Submerged Island + teleporters)
+local Teleporting = false
+local function ExecuteTween(targetCF)
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not (char and hrp) then return end
+    if typeof(targetCF) == "Vector3" then targetCF = CFrame.new(targetCF) end
+
+    DestroyTween()
+    ActiveController = CreateTweenController(hrp)
+    local speed = tonumber(Settings["Tween Speed"]) or 100
+    if speed <= 0 then speed = 100 end
+
+    local position = targetCF.Position
+    if (Vector3.new(10213.701,-1733.5026,9940.189) - position).Magnitude <= 3500
+        and LocalPlayer:DistanceFromCharacter(Vector3.new(10213.701,-1733.5026,9940.189)) > 3500 then
+        if LocalPlayer:DistanceFromCharacter(Vector3.new(-16267,25,1371)) > 5 then
+            if ActiveController then ActiveController:ExecuteTween(CFrame.new(-16267,25,1371), speed) end
+        else
+            Net:FindFirstChild("RF/SubmarineWorkerSpeak"):InvokeServer("TravelToSubmergedIsland")
+        end
+        return
+    end
+    if LocalPlayer:GetAttribute("CurrentLocation") == "Submerged Island"
+        and (Vector3.new(10213.701,-1733.5026,9940.189) - position).Magnitude > 3500 then
+        if LocalPlayer:DistanceFromCharacter(Vector3.new(11426,-2155,9730)) > 5 then
+            if ActiveController then ActiveController:ExecuteTween(CFrame.new(11426,-2155,9730), speed) end
+        else
+            Net:FindFirstChild("RF/SubmarineTransportation"):InvokeServer("InitiateTeleport","Tiki Outpost")
+        end
+        return
+    end
+
+    if not _G.Teleporting then
+        local tp = FindNearestTeleporter(targetCF)
+        if tp then
+            _G.Teleporting = true
+            hrp.AssemblyLinearVelocity = Vector3.zero
+            hrp.AssemblyAngularVelocity = Vector3.zero
+            CommF_:InvokeServer("requestEntrance", tp)
+            task.delay(1, function() _G.Teleporting = false end)
             return
         end
     end
-end
-K.weaponSc = weaponSc
-
-local function EquipSelected()
-    if K.SelectWeapon and LocalPlayer.Backpack:FindFirstChild(K.SelectWeapon) then
-        EquipWeapon(K.SelectWeapon)
-    else
-        weaponSc(K.WeaponTool)
-    end
-end
-K.Equip = EquipSelected
-
-local function SendKey(key, dur)
-    dur = dur or 0.05
-    VIM:SendKeyEvent(true, key, false, game)
-    task.wait(dur)
-    VIM:SendKeyEvent(false, key, false, game)
-end
-K.SendKey = SendKey
-
-local function SendMouseClick()
-    VIM:SendMouseButtonEvent(0, 0, 0, true, game, 1)
-    task.wait(0.05)
-    VIM:SendMouseButtonEvent(0, 0, 0, false, game, 1)
-    task.wait(0.05)
-end
-K.SendMouseClick = SendMouseClick
-
-local function ActivateHaki()
-    local c = LocalPlayer.Character
-    if c and not c:FindFirstChild("HasBuso") then
-        CommF_:InvokeServer("Buso")
-    end
-end
-K.ActivateHaki = ActivateHaki
-
---============================================================
--- TWEEN (Speed Hub X style _tp)
---============================================================
-function K.Tp(target)
-    local cf
-    if typeof(target) == "Vector3" then cf = CFrame.new(target)
-    elseif typeof(target) == "CFrame" then cf = target
-    elseif target and target.CFrame then cf = target.CFrame
-    else return end
-
-    local hrp = Root()
-    if not hrp then return end
-
-    local dist = (cf.Position - hrp.Position).Magnitude
-    if dist > 5000 then
-        pcall(function()
-            CommF_:InvokeServer("requestEntrance", cf.Position)
-        end)
-    end
-
-    TweenBlock.CFrame = hrp.CFrame
-    local tw = TweenService:Create(TweenBlock, TweenInfo.new(dist/math.max(K.TweenSpeed,1), Enum.EasingStyle.Linear), { CFrame = cf })
-    tw:Play()
-
-    task.spawn(function()
-        while tw.PlaybackState == Enum.PlaybackState.Playing do
-            if K.shouldTween == false and dist > 500 then break end
-            RunService.Heartbeat:Wait()
-        end
-    end)
-end
-getgenv()._tp = K.Tp
-getgenv().toPos = K.Tp
-
-function K.Notween(cf)
-    local hrp = Root()
-    if hrp then hrp.CFrame = cf end
-end
-getgenv().notween = K.Notween
-
---============================================================
--- BRING ENEMY (Speed Hub + OK Hub merge)
---============================================================
-function K.BringEnemy(target)
-    if not K.BringMob and not K._B then return end
-    local hrp = Root(); if not hrp then return end
-
-    local function Network(part)
-        if isnetworkowner then return isnetworkowner(part) end
-        return part.ReceiveAge == 0 and not part.Anchored and part.Velocity.Magnitude > 0
-    end
-
-    -- If no target, find closest
-    if not target then
-        local closest, dist = nil, math.huge
-        for _, e in ipairs(Workspace.Enemies:GetChildren()) do
-            if IsAlive(e) and e:FindFirstChild("HumanoidRootPart") then
-                local d = (e.HumanoidRootPart.Position - hrp.Position).Magnitude
-                if d < dist then dist = d; closest = e end
-            end
-        end
-        target = closest
-    end
-    if not target or not target:FindFirstChild("HumanoidRootPart") then return end
-
-    pcall(function()
-        if sethiddenproperty then
-            sethiddenproperty(LocalPlayer, "SimulationRadius", math.huge)
-            sethiddenproperty(LocalPlayer, "MaxSimulationRadius", math.huge)
-        end
-    end)
-
-    local targetPos = target.HumanoidRootPart.Position
-    local radius = K.BringMobRadius or 300
-    local r2 = radius * radius
-
-    for _, v in ipairs(Workspace.Enemies:GetChildren()) do
-        if v ~= target and IsAlive(v) and v.Name == target.Name then
-            local vhrp = v:FindFirstChild("HumanoidRootPart")
-            local vhum = v:FindFirstChildOfClass("Humanoid")
-            if vhrp and vhum then
-                local dx = vhrp.Position.X - targetPos.X
-                local dy = vhrp.Position.Y - targetPos.Y
-                local dz = vhrp.Position.Z - targetPos.Z
-                if dx*dx + dy*dy + dz*dz <= r2 then
-                    if not vhrp:GetAttribute("KyrovaBring") then
-                        vhrp:SetAttribute("KyrovaBring", true)
-                        vhrp.CanCollide = false
-                        vhum.WalkSpeed = 0
-                        vhum.JumpPower = 0
-                        pcall(function()
-                            if Network(vhrp) then
-                                vhrp.CFrame = CFrame.new(targetPos)
-                            end
-                            vhum:ChangeState(Enum.HumanoidStateType.Physics)
-                        end)
-                        task.delay(0.15, function()
-                            if vhrp and vhrp.Parent then
-                                vhrp:SetAttribute("KyrovaBring", false)
-                            end
-                        end)
-                    end
-                end
-            end
-        end
-    end
-
-    if target:FindFirstChild("HumanoidRootPart") then
-        target.HumanoidRootPart.CanCollide = false
-        local th = target:FindFirstChildOfClass("Humanoid")
-        if th then th.WalkSpeed = 0; th.JumpPower = 0 end
-    end
-end
-getgenv().BringEnemy = K.BringEnemy
-
---============================================================
--- ATTACK.KILL (Speed Hub + OK Hub)
---============================================================
-K.Attack = K.Attack or {}
-
-function K.Attack.Alive(model)
-    return IsAlive(model)
+    if ActiveController then ActiveController:ExecuteTween(targetCF, speed) end
 end
 
-function K.Attack.Kill(model, enabled)
-    if not enabled or not model or not IsAlive(model) then return end
-    local hrp = Root(); if not hrp then return end
-    local thrp = model:FindFirstChild("HumanoidRootPart"); if not thrp then return end
-
-    EquipSelected()
-    ActivateHaki()
-    K.BringEnemy(model)
-
-    local tool = LocalPlayer.Character:FindFirstChildOfClass("Tool")
-    local tip = tool and tool.ToolTip or "Melee"
-
-    if tip == "Blox Fruit" then
-        K.Tp(thrp.CFrame * CFrame.new(0, 10, 0) * CFrame.Angles(0, math.rad(90), 0))
-    else
-        K.Tp(thrp.CFrame * CFrame.new(0, 30, 0) * CFrame.Angles(0, math.rad(180), 0))
-    end
-
-    if K.RandomCFrame then
-        task.wait(0.3)
-        K.Tp(thrp.CFrame * CFrame.new(0, 30, 25))
-        task.wait(0.3)
-        K.Tp(thrp.CFrame * CFrame.new(25, 30, 0))
-        task.wait(0.3)
-        K.Tp(thrp.CFrame * CFrame.new(-25, 30, 0))
-    end
-end
-
-function K.Attack.KillSea(model, enabled)
-    if not enabled or not model then return end
-    local hrp = Root(); if not hrp then return end
-    local thrp = model:FindFirstChild("HumanoidRootPart"); if not thrp then return end
-
-    EquipSelected()
-    local tool = LocalPlayer.Character:FindFirstChildOfClass("Tool")
-    local tip = tool and tool.ToolTip or "Melee"
-
-    if tip == "Blox Fruit" then
-        K.Tp(thrp.CFrame * CFrame.new(0, 10, 0) * CFrame.Angles(0, math.rad(90), 0))
-    else
-        K.Notween(thrp.CFrame * CFrame.new(0, 50, 8))
-        task.wait(0.85)
-        K.Notween(thrp.CFrame * CFrame.new(0, 400, 0))
-        task.wait(1)
-    end
-end
-
-K.Attack.Melee = K.Attack.Kill
-getgenv().Attack = K.Attack
-
---============================================================
--- FAST ATTACK (Register Hit - Speed Hub X)
---============================================================
-task.spawn(function()
-    while task.wait() do
-        pcall(function()
-            if not K.FastAttack then return end
-            local char = LocalPlayer.Character
-            local tool = char and char:FindFirstChildOfClass("Tool")
-            if not tool then return end
-            if not RegAttack or not RegHit then return end
-
-            local hrp = char:FindFirstChild("HumanoidRootPart")
-            if not hrp then return end
-
-            local hits = {}
-            for _, e in ipairs(Workspace.Enemies:GetChildren()) do
-                local ehrp = e:FindFirstChild("HumanoidRootPart")
-                local ehum = e:FindFirstChildOfClass("Humanoid")
-                if ehrp and ehum and ehum.Health > 0 and e ~= char then
-                    if (ehrp.Position - hrp.Position).Magnitude <= 60 then
-                        table.insert(hits, {e, ehrp})
-                    end
-                end
-            end
-            for _, p in ipairs(Workspace.Characters:GetChildren()) do
-                if p ~= char and IsAlive(p) then
-                    local phrp = p:FindFirstChild("HumanoidRootPart")
-                    if phrp and (phrp.Position - hrp.Position).Magnitude <= 60 then
-                        table.insert(hits, {p, phrp})
-                    end
-                end
-            end
-
-            if #hits > 0 then
-                RegAttack:FireServer(K.FastAttackDelay or 0)
-                RegHit:FireServer(hits[1][2], hits)
-            end
-        end)
-    end
-end)
-
---============================================================
--- SKILLS (OK Hub)
---============================================================
-function K.UseSkills(weapon, skill)
-    weaponSc(weapon)
-    if skill then
-        SendKey(skill)
-    end
-end
-getgenv().Useskills = K.UseSkills
-
---============================================================
--- STATS
---============================================================
-K.statsSettings = function(stat, value)
-    if LocalPlayer.Data.Points.Value ~= 0 then
-        CommF_:InvokeServer("AddPoint", stat, value)
-    end
-end
-getgenv().statsSetings = K.statsSettings
-
---============================================================
--- GET HELPERS (OK Hub)
---============================================================
-function K.GetBP(name)
-    return LocalPlayer.Backpack:FindFirstChild(name) or LocalPlayer.Character:FindFirstChild(name)
-end
-getgenv().GetBP = K.GetBP
-
-function K.GetM(name)
-    for _, tab in pairs(CommF_:InvokeServer("getInventory")) do
-        if type(tab) == "table" and tab.Type == "Material" and tab.Name == name then
-            return tab.Count
-        end
-    end
-    return 0
-end
-getgenv().GetM = K.GetM
-
-function K.GetWP(name)
-    for _, v in pairs(CommF_:InvokeServer("getInventory")) do
-        if type(v) == "table" and v.Type == "Sword" and v.Name == name then
-            return true
-        end
+-- // Feature flags → noclip (lista do Speed Hub X + extras)
+local FeatureFlags = {
+    "Auto Farm Level","Auto Farm Nearest","Auto Farm Mastery","Auto Collect Chest",
+    "Auto Collect Berry","Auto Factory","Auto Attack Boss","Auto Attack All Boss",
+    "Auto Pirates Sea","Auto Farm Material","Auto Get Sword","Auto Get Serpent Bow",
+    "Auto Farm Bones","Auto Cake Prince","Auto Dough King","Auto Elite Hunter",
+    "Auto Soul Reaper","Auto Citizen Quest","Auto Summon Kitsune Island",
+    "Tween to Kitsune Island","Auto Collect Azure Ember","Auto Farm Sea",
+    "Tween to Frozen Dimension","Auto Find Leviathan","Auto Attack Leviathan",
+    "Auto Attack Leviathan Segment","Auto Attack Leviathan Tail","Auto Wood Planks",
+    "Tween To Island","Auto Find Fruit","Auto Gets Fruit Spawner",
+    "Auto Summon Mirage Island","Tween To Mirage Island","Auto Raid",
+    "Auto Collect Gift","Auto Summon Prehistoric Island","Tween To Prehistoric Island",
+    "Auto Dragon Hunter Quests","Auto Kill Player After Trial","Auto Trial","Auto V2","Auto V3",
+    "Auto Factory Raid","Auto Farm Ectoplasma","Auto Shark","Auto Terrorshark",
+    "Auto Piranha","Auto Fish Crew","Auto Sea Beast",
+}
+local function IsAnyFeatureActive()
+    for _, f in ipairs(FeatureFlags) do
+        if Settings[f] then return true end
     end
     return false
 end
-getgenv().GetWP = K.GetWP
 
-function K.GetConnectionEnemies(names)
-    if type(names) == "string" then names = {names} end
-    for _, v in ipairs(ReplicatedStorage:GetChildren()) do
-        if v:IsA("Model") and table.find(names, v.Name) and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 then
-            return v
+-- // Noclip — sistema Stepped verbatim Speed Hub X
+local Noclip = {parts = {}, charConn = nil, currentChar = nil, lastUpdate = 0}
+local function DisableParts(char)
+    if not char or not char.Parent then return end
+    for _, d in ipairs(char:GetDescendants()) do
+        if d:IsA("BasePart") and d.CanCollide and not Noclip.parts[d] then
+            Noclip.parts[d] = true
+            d.CanCollide = false
         end
     end
-    for _, v in ipairs(Workspace.Enemies:GetChildren()) do
-        if v:IsA("Model") and table.find(names, v.Name) and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 then
-            return v
+    if Noclip.charConn then Noclip.charConn:Disconnect() Noclip.charConn = nil end
+    Noclip.charConn = char.DescendantAdded:Connect(function(d)
+        if d:IsA("BasePart") and d.CanCollide and not Noclip.parts[d] then
+            Noclip.parts[d] = true
+            task.defer(function() d.CanCollide = false end)
+        end
+    end)
+end
+local function RestoreParts(char)
+    if not char then return end
+    for part in pairs(Noclip.parts) do
+        if part and part.Parent and part:IsA("BasePart") then part.CanCollide = true end
+        Noclip.parts[part] = nil
+    end
+    if Noclip.charConn then Noclip.charConn:Disconnect() Noclip.charConn = nil end
+end
+RunService.Stepped:Connect(function()
+    if tick() - Noclip.lastUpdate < 0.2 then return end
+    Noclip.lastUpdate = tick()
+    if Unloaded then RestoreParts(Noclip.currentChar) return end
+    local char = LocalPlayer.Character
+    if IsAnyFeatureActive() and char and char ~= Noclip.currentChar then
+        if Noclip.currentChar then RestoreParts(Noclip.currentChar) end
+        Noclip.currentChar = char
+        DisableParts(char)
+    elseif not IsAnyFeatureActive() and Noclip.currentChar then
+        RestoreParts(Noclip.currentChar)
+        Noclip.currentChar = nil
+    end
+end)
+
+-- // Equip / Haki — verbatim Speed Hub X
+local function EquipToolByName(name)
+    local backpack, char = LocalPlayer:FindFirstChild("Backpack"), LocalPlayer.Character
+    if not (backpack and char) then return end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    local tool = backpack:FindFirstChild(name)
+    if hum and tool and tool:IsA("Tool") then hum:EquipTool(tool) end
+end
+local function EquipSelectedTool()
+    local backpack = LocalPlayer:FindFirstChild("Backpack")
+    if not backpack then return end
+    local want = Settings["Weapon Tool"]
+    for _, v in ipairs(backpack:GetChildren()) do
+        if v:IsA("Tool") and v.ToolTip == want then
+            EquipToolByName(v.Name) return
         end
     end
 end
-getgenv().GetConnectionEnemies = K.GetConnectionEnemies
+local function ActivateHaki()
+    local char = LocalPlayer.Character
+    if char and not char:FindFirstChild("HasBuso") then FireRemote("Buso") end
+end
+local function HasTool(name)
+    local char = LocalPlayer.Character
+    if not char then return false end
+    return char:FindFirstChild(name) ~= nil or LocalPlayer.Backpack:FindFirstChild(name) ~= nil
+end
 
---============================================================
--- HOP (OK Hub / Speed Hub)
---============================================================
-function K.Hop()
+-- // Attack System — verbatim Speed Hub X
+local HitKey = tostring(LocalPlayer.UserId):sub(2,4) .. "078da"
+
+local function GetGlobalHitThread()
+    local ok, result = pcall(function()
+        local global = RS:FindFirstChild("Global")
+        if global then
+            for _, v in pairs(getupvalues(require(global).SendHitsToServer)) do
+                if type(v) == "thread" and coroutine.status(v) ~= "dead" then return v end
+            end
+        end
+    end)
+    return ok and result or nil
+end
+
+local hitThread = coroutine.create(function()
     pcall(function()
-        local ok, servers = pcall(function()
-            return Http:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100")).data
-        end)
-        if ok and servers then
-            for _, s in ipairs(servers) do
-                if s.playing < s.maxPlayers and s.id ~= game.JobId then
-                    TPS:TeleportToPlaceInstance(game.PlaceId, s.id, LocalPlayer)
+        RegisterHit:FireServer(HitKey)
+        while true do
+            local target, list = coroutine.yield()
+            RegisterHit:FireServer(target, list, nil, HitKey)
+        end
+    end)
+end)
+coroutine.resume(hitThread)
+
+local function GetHits(radius)
+    local hits = {}
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return hits end
+    for _, fname in ipairs({"Enemies","Characters"}) do
+        local folder = workspace:FindFirstChild(fname)
+        if folder then
+            for _, child in ipairs(folder:GetChildren()) do
+                local hum = child:FindFirstChildOfClass("Humanoid")
+                local ehrp = child:FindFirstChild("HumanoidRootPart")
+                if child ~= char and hum and ehrp and hum.Health > 0
+                    and (ehrp.Position - hrp.Position).Magnitude <= radius then
+                    table.insert(hits, {child, child:FindFirstChild("Head") or ehrp})
+                end
+            end
+        end
+    end
+    return hits
+end
+
+local function ExecuteAttack()
+    local char = LocalPlayer.Character
+    local tool = char and char:FindFirstChildOfClass("Tool")
+    if not (tool and table.find({"Melee","Sword","Blox Fruit","Gun"}, tool.ToolTip)) then return end
+    local hits = GetHits(60)
+    if #hits > 0 then
+        RegisterAttack:FireServer(0)
+        local first = table.remove(hits, 1)[2]
+        local thread = GetGlobalHitThread() or hitThread
+        if thread then coroutine.resume(thread, first, hits)
+        else RegisterHit:FireServer(first, hits, nil, HitKey) end
+    end
+end
+
+local m1State = {last = 0, delay = 0}
+local function ExecuteFruitM1(tool)
+    pcall(function()
+        local now = tick()
+        if now - m1State.last <= 0.4 then m1State.delay = math.min(m1State.delay + 1, 4)
+        else m1State.delay = 1 end
+        m1State.last = now
+        local char = LocalPlayer.Character
+        local pp = char and char.PrimaryPart
+        if not pp then return end
+        local pos = pp.Position
+        for _, v in ipairs(Enemies:GetChildren()) do
+            local epp = v.PrimaryPart
+            if epp and IsEntityAlive(v) then
+                local dx, dy, dz = epp.Position.X-pos.X, epp.Position.Y-pos.Y, epp.Position.Z-pos.Z
+                if dx*dx + dy*dy + dz*dz <= 2500 then
+                    tool.LeftClickRemote:FireServer((epp.Position - pos).Unit, m1State.delay)
+                end
+            end
+        end
+    end)
+end
+
+local function ExecuteBladeHits()
+    xpcall(function()
+        local char = LocalPlayer.Character
+        if not char then return end
+        local tool = char:FindFirstChildWhichIsA("Tool")
+        if not tool then return end
+        if tool.ToolTip == "Blox Fruit" and tool:FindFirstChild("LeftClickRemote") then
+            ExecuteFruitM1(tool)
+        elseif tool.ToolTip ~= "Gun" then
+            ExecuteAttack()
+        end
+    end, function(err) warn("[Kyrova Attack] " .. tostring(err)) end)
+end
+
+-- // BringEnemyToPosition — Speed Hub X (final completado)
+local function BringEnemies(mob, cframe)
+    if not Settings["Bring Mob"] then return end
+    if not mob or not mob.Parent or not cframe then return end
+    local radius = tonumber(Settings["Bring Radius"]) or 300
+    local pos = cframe.Position
+    pcall(function()
+        sethiddenproperty(LocalPlayer, "SimulationRadius", math.huge)
+        sethiddenproperty(LocalPlayer, "MaxSimulationRadius", math.huge)
+    end)
+    for _, v in ipairs(Enemies:GetChildren()) do
+        if v.Name == mob.Name and not table.find({"Shark","Piranha","Terrorshark"}, v.Name) then
+            local hum = v:FindFirstChildOfClass("Humanoid")
+            local ehrp = v:FindFirstChild("HumanoidRootPart")
+            if hum and ehrp and v:FindFirstChild("CharacterReady") and hum.Health > 0 then
+                local d = (ehrp.Position - pos).Magnitude
+                if d <= radius * radius * 0.001 + radius then -- alcance do bring
+                    if not ehrp:FindFirstChild("BodyVelocity") then
+                        local bv = Instance.new("BodyVelocity")
+                        bv.MaxForce = Vector3.new(1e9,1e9,1e9)
+                        bv.Velocity = Vector3.zero
+                        bv.Parent = ehrp
+                    end
+                    local owned = true
+                    if isnetworkowner then owned = isnetworkowner(ehrp) end
+                    if d > 10 and owned then
+                        ehrp.CFrame = CFrame.new(pos + Vector3.new(math.random(-3,3),0,math.random(-3,3)))
+                    end
+                    ehrp.CanCollide = false
+                end
+            end
+        end
+    end
+end
+
+-- // CreateLoop — padrão Speed Hub X
+local Loops = {}
+local function CreateLoop(name, interval, fn)
+    if Loops[name] then return end
+    Loops[name] = true
+    task.spawn(function()
+        while true do
+            if not Unloaded and Loops[name] then
+                if Settings[name] then
+                    local ok, err = pcall(fn)
+                    if not ok then warn("[Kyrova:"..name.."] "..tostring(err)) end
+                end
+                task.wait(interval or 0.1)
+            else break end
+        end
+        Loops[name] = nil
+    end)
+end
+
+-- // ServerHop — verbatim Speed Hub X
+local function ServerHop()
+    pcall(function()
+        for i = 1, 100 do
+            local response = RS.__ServerBrowser:InvokeServer(i)
+            for k, v in pairs(response) do
+                if k ~= game.JobId and v.Count <= 8 and not string.find(tostring(v.Private), "true") then
+                    task.spawn(function() RS.__ServerBrowser:InvokeServer("teleport", k) end)
                     return
                 end
             end
         end
     end)
 end
-getgenv().Hop = K.Hop
 
---============================================================
--- GET QUEST DATA (OK Hub - simplified)
---============================================================
-function K.GetQuestInfo()
-    local lvl = LocalPlayer.Data.Level.Value
-    local Quests = require(ReplicatedStorage:WaitForChild("Quests"))
-    local GuideModule = require(ReplicatedStorage:WaitForChild("GuideModule"))
-    local blacklist = {"MarineQuest", "BartiloQuest", "CitizenQuest", "Trainees"}
-    local result = {mob = nil, id = nil, quest = nil, lvl = 0, cframe = nil}
-
-    local highLvl = 0
-    for name, quests in pairs(Quests) do
-        if not table.find(blacklist, name) then
-            for id, q in pairs(quests) do
-                if lvl >= q.LevelReq and q.LevelReq > highLvl then
-                    for mobName, _ in pairs(q.Task) do
-                        highLvl = q.LevelReq
-                        result.mob = mobName
-                        result.id = id
-                        result.quest = name
-                        result.lvl = q.LevelReq
-                    end
-                end
-            end
-        end
-    end
-
-    if GuideModule and GuideModule.Data and GuideModule.Data.LastClosestNPC then
-        for _, npc in pairs(Workspace.NPCs:GetChildren()) do
-            if npc.Name == GuideModule.Data.LastClosestNPC and npc:FindFirstChild("HumanoidRootPart") then
-                result.cframe = npc.HumanoidRootPart.CFrame
-            end
-        end
-        for _, npc in pairs(ReplicatedStorage.NPCs:GetChildren()) do
-            if npc.Name == GuideModule.Data.LastClosestNPC and npc:FindFirstChild("HumanoidRootPart") then
-                result.cframe = npc.HumanoidRootPart.CFrame
-            end
-        end
-    end
-
-    return result
-end
-
-function K.isQuestOn()
-    local gui = LocalPlayer.PlayerGui:FindFirstChild("Main")
-    if gui and gui:FindFirstChild("Quest") then
-        return gui.Quest.Visible
-    end
-    return false
-end
-getgenv().isQuestOn = K.isQuestOn
-
---============================================================
--- DYNAMIC WEAPON SELECT (Speed Hub style)
---============================================================
+-- // remove death effect / camera shake — Speed Hub X
 task.spawn(function()
-    while task.wait(0.5) do
-        pcall(function()
-            local bp = LocalPlayer.Backpack
-            if not bp then return end
-            for _, v in pairs(bp:GetChildren()) do
-                if v:IsA("Tool") and v.ToolTip == K.WeaponTool then
-                    K.SelectWeapon = v.Name
-                    break
-                end
-            end
-        end)
-    end
-end)
-
---============================================================
--- MONITOR SKILL USAGE (Speed Hub)
---============================================================
-task.spawn(function()
-    local function monitor(char)
-        if not char then return end
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if not hum then return end
-        local anim = hum:FindFirstChildOfClass("Animator")
-        if not anim then return end
-        anim.AnimationPlayed:Connect(function(track)
-            if K.AutoDodgeSkill and track and track.Animation then
-                local t = math.max(track.TimePosition or 1.5, 1.5)
-                if tick() < (_G.KDodgeTime or 0) then
-                    _G.KDodgeTime = _G.KDodgeTime + math.floor(t)
-                else
-                    _G.KDodgeTime = tick() + math.floor(t)
-                end
-            end
-        end)
-    end
-    if LocalPlayer.Character then monitor(LocalPlayer.Character) end
-    LocalPlayer.CharacterAdded:Connect(monitor)
-end)
-
---============================================================
--- NAME CALL HOOK (OK Hub - For Sea Beasts/Skills aiming)
---============================================================
-pcall(function()
-    local mt = getrawmetatable(game)
-    local old = mt.__namecall
-    setreadonly(mt, false)
-    mt.__namecall = newcclosure(function(...)
-        local method = getnamecallmethod()
-        local args = {...}
-        if tostring(method) == "FireServer" then
-            if tostring(args[1]) == "RemoteEvent" then
-                if tostring(args[2]) ~= "true" and tostring(args[2]) ~= "false" then
-                    if K.SeaAim or K.UseMousePos then
-                        args[2] = K.MousePos
-                        return old(unpack(args))
-                    end
-                end
-            end
-        end
-        return old(...)
+    pcall(function()
+        hookfunction(require(RS.Effect.Container:FindFirstChild("Death")), function() end)
+        require(RS.Util.CameraShaker):Stop()
     end)
-    setreadonly(mt, true)
 end)
 
---============================================================
--- VIND UI REBORN
---============================================================
-local VindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Skinny-yz/vindUI-Test/main/full.luau"))()
-
-VindUI:SetTheme("Dark")
-VindUI:PreloadIcons({ "Lucide", "Material", "Phosphor", "SF" })
-VindUI:SetScaleRange(0.75, 1.35)
-
-local Window = VindUI:CreateWindow({
-    Title     = "Kyrova Hub",
-    Subtitle  = "Blox Fruits · Powered by SpeedHubX + OKHub Logic",
-    Icon      = "rbxassetid://71647128089295",
-    Size      = UDim2.fromOffset(760, 520),
-    MinSize   = Vector2.new(600, 420),
-    Draggable = true,
-    Resizable = true,
-    UseBlur   = true,
-    DefaultTab= "Info",
-    TabWidth  = 155,
-    UserInfo  = { Enabled = true, Avatar = "player", NameMode = "display" },
-})
-
-VindUI:Notify({
-    Title = "Kyrova Hub",
-    Text  = "Carregado. Ícone: 71647128089295. Bom farm!",
-    Type  = "success",
-    Duration = 5,
-})
-
-local MainGroup = Window:AddTabGroup({ Name = "KYROVA HUB" })
-
---============================================================
--- TAB: INFO & STATUS
---============================================================
-local InfoTab = MainGroup:AddTab({ Name = "Info", Icon = "rbxassetid://71647128089295" })
-InfoTab:AddParagraph({
-    Title = "Kyrova Hub Status",
-    Icon  = "Lucide:sparkles",
-    Text  = "Monitoramento em tempo real do servidor.",
-})
-InfoTab:AddDivider()
-
-local pMirage   = InfoTab:AddParagraph({ Title = "Mirage Island", Text = "..." })
-local pKitsune  = InfoTab:AddParagraph({ Title = "Kitsune Island", Text = "..." })
-local pPrehis   = InfoTab:AddParagraph({ Title = "Prehistoric Island", Text = "..." })
-local pFrozen   = InfoTab:AddParagraph({ Title = "Frozen Dimension", Text = "..." })
-local pCake     = InfoTab:AddParagraph({ Title = "Cake Prince", Text = "..." })
-local pDough    = InfoTab:AddParagraph({ Title = "Dough King", Text = "..." })
-local pRip      = InfoTab:AddParagraph({ Title = "Rip Indra", Text = "..." })
-local pMoon     = InfoTab:AddParagraph({ Title = "Full Moon", Text = "..." })
-local pBones    = InfoTab:AddParagraph({ Title = "Bones", Text = "..." })
-local pTime     = InfoTab:AddParagraph({ Title = "Time", Text = "..." })
-local pElite    = InfoTab:AddParagraph({ Title = "Elite Hunter", Text = "..." })
-local pTyrant   = InfoTab:AddParagraph({ Title = "Tyrant of the Skies", Text = "..." })
-
-task.spawn(function()
-    while task.wait(1) do
-        pcall(function()
-            local w = Workspace._WorldOrigin
-            pMirage:Set({ Title = "Mirage Island", Text = w and w.Locations:FindFirstChild("Mirage Island") and "✅ Spawnado" or "❌" })
-            pKitsune:Set({ Title = "Kitsune Island", Text = Workspace.Map:FindFirstChild("KitsuneIsland") and "✅ Spawnado" or "❌" })
-            pPrehis:Set({ Title = "Prehistoric Island", Text = w and w.Locations:FindFirstChild("Prehistoric Island") and "✅ Spawnado" or "❌" })
-            pFrozen:Set({ Title = "Frozen Dimension", Text = w and w.Locations:FindFirstChild("Frozen Dimension") and "✅ Spawnado" or "❌" })
-        end)
-        pcall(function()
-            local cp = CommF_:InvokeServer("CakePrinceSpawner")
-            local txt = "Não spawnado"
-            if type(cp) == "string" and string.len(cp) >= 86 then
-                txt = "Killed: " .. tostring(cp):sub(39,41)
-            end
-            pCake:Set({ Title = "Cake Prince", Text = txt })
-        end)
-        pcall(function()
-            local d = ReplicatedStorage:FindFirstChild("Dough King") or Workspace.Enemies:FindFirstChild("Dough King")
-            pDough:Set({ Title = "Dough King", Text = d and "✅" or "❌" })
-        end)
-        pcall(function()
-            local r = ReplicatedStorage:FindFirstChild("rip_indra True Form") or Workspace.Enemies:FindFirstChild("rip_indra")
-            pRip:Set({ Title = "Rip Indra", Text = r and "✅" or "❌" })
-        end)
-        pcall(function()
-            local sky = Lighting:FindFirstChildOfClass("Sky")
-            local moon = sky and sky.MoonTextureId or ""
-            local t = "Desconhecido"
-            if moon:find("9709149431") then t = "5/5 Full Moon ✅"
-            elseif moon:find("9709149052") then t = "4/5"
-            elseif moon:find("9709143733") then t = "3/5"
-            elseif moon:find("9709150401") then t = "2/5"
-            elseif moon:find("9709149680") then t = "1/5" end
-            pMoon:Set({ Title = "Full Moon", Text = t })
-        end)
-        pcall(function()
-            local b = CommF_:InvokeServer("Bones", "Check")
-            pBones:Set({ Title = "Bones", Text = tostring(b) .. " bones" })
-        end)
-        pcall(function()
-            pTime:Set({ Title = "Time", Text = os.date("%d/%m/%Y %H:%M:%S") })
-        end)
-        pcall(function()
-            local prog = CommF_:InvokeServer("EliteHunter", "Progress")
-            pElite:Set({ Title = "Elite Hunter", Text = tostring(prog) .. "/30" })
-        end)
-        pcall(function()
-            pTyrant:Set({ Title = "Tyrant of the Skies", Text = Workspace.Enemies:FindFirstChild("Tyrant of the Skies") and "✅" or "❌" })
-        end)
+--════════════════════════ QUEST DATA (Auto Farm Level) ════════════════════════
+local QuestData = {
+    [1] = {
+        {L=1,Q="BanditQuest1",N=1,M="Bandit",QP=CFrame.new(1059.997,16.397,1549.288)},
+        {L=10,Q="JungleQuest",N=1,M="Monkey",QP=CFrame.new(-1598.169,36.852,153.388)},
+        {L=15,Q="JungleQuest",N=2,M="Gorilla",QP=CFrame.new(-1598.169,36.852,153.388)},
+        {L=30,Q="BuggyQuest1",N=1,M="Pirate",QP=CFrame.new(-1140.176,4.752,3827.406)},
+        {L=40,Q="BuggyQuest1",N=2,M="Brute",QP=CFrame.new(-1140.176,4.752,3827.406)},
+        {L=60,Q="DesertQuest",N=1,M="Desert Bandit",QP=CFrame.new(896.36,6.48,4375.77)},
+        {L=75,Q="DesertQuest",N=2,M="Desert Officer",QP=CFrame.new(896.36,6.48,4375.77)},
+        {L=90,Q="SnowQuest",N=1,M="Snow Bandit",QP=CFrame.new(1386.807,87.272,-1298.357)},
+        {L=105,Q="SnowQuest",N=2,M="Snowman",QP=CFrame.new(1386.807,87.272,-1298.357)},
+        {L=120,Q="MarineQuest2",N=1,M="Chief Petty Officer",QP=CFrame.new(-5036.247,28.678,4324.566)},
+        {L=150,Q="MarineQuest2",N=2,M="Vice Admiral",QP=CFrame.new(-5036.247,28.678,4324.566)},
+        {L=175,Q="SkyQuest",N=1,M="Sky Bandit",QP=CFrame.new(-4839.53,716.37,-2615.03)},
+        {L=190,Q="SkyQuest",N=2,M="Dark Master",QP=CFrame.new(-4839.53,716.37,-2615.03)},
+        {L=225,Q="PrisonerQuest",N=1,M="Prisoner",QP=CFrame.new(5304.94,2.96,471.66)},
+        {L=250,Q="PrisonerQuest",N=2,M="Dangerous Prisoner",QP=CFrame.new(5304.94,2.96,471.66)},
+        {L=275,Q="MagmaQuest",N=1,M="Military Soldier",QP=CFrame.new(-5314.622,12.262,8517.279)},
+        {L=300,Q="MagmaQuest",N=2,M="Military Detective",QP=CFrame.new(-5314.622,12.262,8517.279)},
+        {L=325,Q="FishmanQuest",N=1,M="Fishman Warrior",QP=CFrame.new(61122.652,18.497,1569.399)},
+        {L=350,Q="FishmanQuest",N=2,M="Fishman Commando",QP=CFrame.new(61122.652,18.497,1569.399)},
+        {L=375,Q="GodsGuardiansQuest",N=1,M="God's Guard",QP=CFrame.new(-4698.09,718.79,-1516.66)},
+        {L=400,Q="SkyExp2Quest",N=1,M="Royal Squad",QP=CFrame.new(-7903.383,5635.99,-1410.924)},
+        {L=425,Q="SkyExp2Quest",N=2,M="Royal Soldier",QP=CFrame.new(-7903.383,5635.99,-1410.924)},
+        {L=450,Q="FountainQuest",N=1,M="Galley Pirate",QP=CFrame.new(5258.279,38.527,4050.045)},
+        {L=500,Q="FountainQuest",N=2,M="Galley Captain",QP=CFrame.new(5258.279,38.527,4050.045)},
+    },
+    [2] = {
+        {L=875,Q="Area1Quest",N=1,M="Raider",QP=CFrame.new(-427.567,73.314,1835.421)},
+        {L=900,Q="Area1Quest",N=2,M="Mercenary",QP=CFrame.new(-427.567,73.314,1835.421)},
+        {L=925,Q="Area1Quest",N=3,M="Swan Pirate",QP=CFrame.new(-427.567,73.314,1835.421)},
+        {L=950,Q="Area2Quest",N=1,M="Factory Staff",QP=CFrame.new(636.799,73.414,918.004)},
+        {L=975,Q="Area2Quest",N=2,M="Marine Lieutenant",QP=CFrame.new(636.799,73.414,918.004)},
+        {L=1000,Q="Area2Quest",N=3,M="Marine Captain",QP=CFrame.new(636.799,73.414,918.004)},
+        {L=1050,Q="MarineQuest3",N=1,M="Zombie",QP=CFrame.new(-2441.986,73.359,-3217.532)},
+        {L=1075,Q="MarineQuest3",N=2,M="Vampire",QP=CFrame.new(-2441.986,73.359,-3217.532)},
+        {L=1100,Q="MarineQuest3",N=3,M="Snow Trooper",QP=CFrame.new(-2441.986,73.359,-3217.532)},
+    },
+    [3] = {
+        {L=1475,M="Pirate Millionaire",P=CFrame.new(-712.827,98.577,5711.954)},
+        {L=1525,M="Pistol Billionaire",P=CFrame.new(-723.433,147.429,5931.993)},
+        {L=1575,M="Dragon Crew Warrior",P=CFrame.new(7021.504,55.763,-730.129)},
+        {L=1625,M="Dragon Crew Archer",P=CFrame.new(6625,378,244)},
+        {L=1675,M="Female Islander",P=CFrame.new(4692.794,797.977,858.848)},
+        {L=1725,M="Venomous Assailant",P=CFrame.new(4902,670,39)},
+        {L=1775,M="Marine Commodore",P=CFrame.new(2401,123,-7589)},
+        {L=1825,M="Marine Rear Admiral",P=CFrame.new(3588,229,-7085)},
+        {L=1875,M="Fishman Raider",P=CFrame.new(-10941,332,-8760)},
+        {L=1925,M="Fishman Captain",P=CFrame.new(-11035,332,-9087)},
+        {L=1975,M="Forest Pirate",P=CFrame.new(-13446,413,-7760)},
+        {L=2025,M="Mythological Pirate",P=CFrame.new(-13510,584,-6987)},
+        {L=2075,M="Jungle Pirate",P=CFrame.new(-11778,426,-10592)},
+        {L=2125,M="Musketeer Pirate",P=CFrame.new(-13282,496,-9565)},
+        {L=2175,M="Reborn Skeleton",P=CFrame.new(-8764,142,5963)},
+        {L=2200,M="Living Zombie",P=CFrame.new(-10227,421,6161)},
+        {L=2225,M="Demonic Soul",P=CFrame.new(-9579,6,6194)},
+        {L=2250,M="Possessed Mummy",P=CFrame.new(-9579,6,6194)},
+        {L=2275,M="Peanut Scout",P=CFrame.new(-1993,187,-10103)},
+        {L=2300,M="Peanut President",P=CFrame.new(-2215,159,-10474)},
+        {L=2325,M="Ice Cream Chef",P=CFrame.new(-877,118,-11032)},
+        {L=2350,M="Ice Cream Commander",P=CFrame.new(-877,118,-11032)},
+        {L=2375,M="Cookie Crafter",P=CFrame.new(-2021,38,-12028)},
+        {L=2400,M="Cake Guard",P=CFrame.new(-2024,38,-12026)},
+        {L=2425,M="Baking Staff",P=CFrame.new(-1932,38,-12848)},
+        {L=2450,M="Head Baker",P=CFrame.new(-1932,38,-12848)},
+        {L=2475,M="Cocoa Warrior",P=CFrame.new(95,73,-12309)},
+        {L=2500,M="Chocolate Bar Battler",P=CFrame.new(647,42,-12401)},
+        {L=2525,M="Sweet Thief",P=CFrame.new(116,36,-12478)},
+        {L=2550,M="Candy Rebel",P=CFrame.new(47,61,-12889)},
+    },
+}
+local function GetQuestByLevel(level)
+    local data = World1 and QuestData[1] or World2 and QuestData[2] or QuestData[3]
+    local chosen = data[1]
+    for _, q in ipairs(data) do
+        if level >= q.L then chosen = q else break end
     end
-end)
-
---============================================================
--- TAB: MAIN (Farming)
---============================================================
-local MainTab = MainGroup:AddTab({ Name = "Main", Icon = "Lucide:swords" })
-
-MainTab:AddSection("Farming Core")
-MainTab:AddToggle({
-    Text = "Auto Farm Level",
-    Description = "Farm por quest/level (Speed Hub X)",
-    Flag = "AutoFarmLevel",
-    Default = false,
-    Callback = function(v) K.T_FarmLevel = v end,
-})
-MainTab:AddToggle({
-    Text = "Auto Farm Nearest",
-    Description = "Farm inimigo mais próximo",
-    Flag = "AutoFarmNearest",
-    Default = false,
-    Callback = function(v) K.T_FarmNearest = v end,
-})
-MainTab:AddToggle({
-    Text = "Auto Factory Raid",
-    Description = "Ataca o Core da Factory (World 2)",
-    Flag = "AutoFactory",
-    Default = false,
-    Callback = function(v) K.T_Factory = v end,
-})
-MainTab:AddToggle({
-    Text = "Auto Farm Ectoplasm",
-    Description = "Farm Ectoplasm no Cursed Ship",
-    Flag = "AutoEcto",
-    Default = false,
-    Callback = function(v) K.T_Ecto = v end,
-})
-
-MainTab:AddDivider()
-MainTab:AddSection("Chest & Rare Items")
-MainTab:AddToggle({
-    Text = "Auto Collect Chest",
-    Description = "Coleta todos os baús (Speed Hub)",
-    Flag = "AutoChest",
-    Default = false,
-    Callback = function(v) K.T_Chest = v end,
-})
-MainTab:AddToggle({
-    Text = "Stop on Rare Items",
-    Description = "Para o chest farm ao pegar Chalice/Fist",
-    Flag = "StopRare",
-    Default = true,
-    Callback = function(v) K.StopItems = v end,
-})
-
-MainTab:AddDivider()
-MainTab:AddSection("Berry")
-MainTab:AddToggle({
-    Text = "Auto Farm Berry",
-    Flag = "AutoBerry",
-    Default = false,
-    Callback = function(v) K.T_Berry = v end,
-})
-MainTab:AddToggle({
-    Text = "Auto Farm Berry + Hop",
-    Flag = "AutoBerryHop",
-    Default = false,
-    Callback = function(v) K.T_BerryHop = v end,
-})
-
-MainTab:AddDivider()
-MainTab:AddSection("Farm Mob")
-local mobList = World1 and {"Bandit","Monkey","Gorilla","Pirate","Brute","Desert Bandit","Desert Officer","Snow Bandit","Snowman","Chief Petty Officer"}
-    or World2 and {"Raider","Mercenary","Swan Pirate","Factory Staff","Marine Lieutenant","Marine Captain","Zombie","Vampire"}
-    or {"Pirate Millionaire","Dragon Crew Warrior","Dragon Crew Archer","Female Islander","Forest Pirate","Mythological Pirate","Reborn Skeleton","Living Zombie","Demonic Soul","Cookie Crafter"}
-
-MainTab:AddDropdown({
-    Text = "Select Mob",
-    Options = mobList,
-    Default = mobList[1],
-    Callback = function(v) K.SelectedMob = v end,
-})
-MainTab:AddToggle({
-    Text = "Auto Kill Mob",
-    Flag = "AutoKillMob",
-    Default = false,
-    Callback = function(v) K.T_KillMob = v end,
-})
-
-MainTab:AddDivider()
-MainTab:AddSection("Boss / Elite")
-MainTab:AddToggle({
-    Text = "Auto Farm Elite",
-    Flag = "AutoElite",
-    Default = false,
-    Callback = function(v) K.T_Elite = v end,
-})
-MainTab:AddToggle({
-    Text = "Auto Farm Elite + Hop",
-    Flag = "AutoEliteHop",
-    Default = false,
-    Callback = function(v) K.T_EliteHop = v end,
-})
-MainTab:AddToggle({
-    Text = "Auto Farm Cake Prince",
-    Flag = "AutoCakePrince",
-    Default = false,
-    Callback = function(v) K.T_CakePrince = v end,
-})
-MainTab:AddToggle({
-    Text = "Auto Summon Cake Prince",
-    Flag = "AutoSummonCP",
-    Default = false,
-    Callback = function(v) K.T_SummonCP = v end,
-})
-MainTab:AddToggle({
-    Text = "Auto Dough King",
-    Flag = "AutoDoughKing",
-    Default = false,
-    Callback = function(v) K.T_DoughKing = v end,
-})
-MainTab:AddToggle({
-    Text = "Auto Attack Rip Indra",
-    Flag = "AutoRipIndra",
-    Default = false,
-    Callback = function(v) K.T_RipIndra = v end,
-})
-MainTab:AddToggle({
-    Text = "Auto Farm Boss TOTS",
-    Description = "Tyrant of the Skies",
-    Flag = "AutoTyrant",
-    Default = false,
-    Callback = function(v) K.T_Tyrant = v end,
-})
-
-MainTab:AddDivider()
-MainTab:AddSection("Soul Reaper / Bones")
-MainTab:AddToggle({
-    Text = "Auto Soul Reaper",
-    Flag = "AutoSoulReaper",
-    Default = false,
-    Callback = function(v) K.T_SoulReaper = v end,
-})
-MainTab:AddToggle({
-    Text = "Auto Farm Bones",
-    Flag = "AutoFarmBones",
-    Default = false,
-    Callback = function(v) K.T_FarmBones = v end,
-})
-MainTab:AddToggle({
-    Text = "Auto Trade Bones",
-    Flag = "AutoTradeBones",
-    Default = false,
-    Callback = function(v) K.T_TradeBones = v end,
-})
-MainTab:AddToggle({
-    Text = "Auto Random Bones",
-    Flag = "AutoRandomBones",
-    Default = false,
-    Callback = function(v) K.T_RandomBones = v end,
-})
-MainTab:AddToggle({
-    Text = "Auto Try Luck Gravestone",
-    Flag = "TryLuck",
-    Default = false,
-    Callback = function(v) K.T_TryLuck = v end,
-})
-MainTab:AddToggle({
-    Text = "Auto Pray Gravestone",
-    Flag = "Pray",
-    Default = false,
-    Callback = function(v) K.T_Pray = v end,
-})
-
-MainTab:AddDivider()
-MainTab:AddSection("Mastery")
-MainTab:AddDropdown({
-    Text = "Mastery Island",
-    Options = {"Cake", "Bone"},
-    Default = "Bone",
-    Callback = function(v) K.MasteryIsland = v end,
-})
-MainTab:AddToggle({
-    Text = "Auto Mastery Fruit",
-    Flag = "MasteryFruit",
-    Default = false,
-    Callback = function(v) K.T_MasteryFruit = v end,
-})
-MainTab:AddToggle({
-    Text = "Auto Mastery Gun",
-    Flag = "MasteryGun",
-    Default = false,
-    Callback = function(v) K.T_MasteryGun = v end,
-})
-MainTab:AddToggle({
-    Text = "Auto Mastery Sword",
-    Flag = "MasterySword",
-    Default = false,
-    Callback = function(v) K.T_MasterySword = v end,
-})
-
---============================================================
--- TAB: FISHING
---============================================================
-local FishTab = MainGroup:AddTab({ Name = "Fishing", Icon = "Lucide:fish" })
-
-FishTab:AddDropdown({
-    Text = "Select Fishing Rod",
-    Options = {"Fishing Rod","Gold Rod","Shark Rod","Shell Rod","Treasure Rod"},
-    Default = "Fishing Rod",
-    Callback = function(v) K.Rod = v end,
-})
-FishTab:AddDropdown({
-    Text = "Select Bait",
-    Options = {"Basic Bait","Kelp Bait","Good Bait","Abyssal Bait","Frozen Bait","Epic Bait","Carnivore Bait"},
-    Default = "Basic Bait",
-    Callback = function(v) K.Bait = v end,
-})
-FishTab:AddToggle({ Text = "Auto Buy Bait", Flag = "AutoBuyBait", Default = false, Callback = function(v) K.T_BuyBait = v end })
-FishTab:AddToggle({ Text = "Auto Fishing", Flag = "AutoFishing", Default = false, Callback = function(v) K.T_Fishing = v end })
-FishTab:AddToggle({ Text = "Auto Quest Fishing", Flag = "AutoFishQuest", Default = false, Callback = function(v) K.T_FishQuest = v end })
-FishTab:AddToggle({ Text = "Auto Complete Quest", Flag = "AutoFishComplete", Default = false, Callback = function(v) K.T_FishComplete = v end })
-FishTab:AddToggle({ Text = "Auto Sell Fish", Flag = "AutoSellFish", Default = false, Callback = function(v) K.T_SellFish = v end })
-FishTab:AddToggle({ Text = "Auto Spam Skill Z", Flag = "AutoSpamZ", Default = false, Callback = function(v) K.T_SpamZ = v end })
-
---============================================================
--- TAB: QUESTS
---============================================================
-local QuestTab = MainGroup:AddTab({ Name = "Quests", Icon = "Lucide:scroll" })
-
-QuestTab:AddSection("Sea Progress")
-QuestTab:AddToggle({ Text = "Auto Quest Sea 2", Flag = "QuestSea2", Default = false, Callback = function(v) K.T_Sea2 = v end })
-QuestTab:AddToggle({ Text = "Auto Quest Sea 3", Flag = "QuestSea3", Default = false, Callback = function(v) K.T_Sea3 = v end })
-
-QuestTab:AddDivider()
-QuestTab:AddSection("Swords")
-local swordsToggles = {
-    {"Auto Saber", "T_Saber"},
-    {"Auto Tushita", "T_Tushita"},
-    {"Auto Yama", "T_Yama"},
-    {"Auto CDK (Last)", "T_CDK"},
-    {"Auto Yama CDK", "T_YamaCDK"},
-    {"Auto Tushita CDK", "T_TushitaCDK"},
-    {"Auto Saw", "T_Saw"},
-    {"Auto Bisento", "T_Bisento"},
-    {"Auto Warden Sword", "T_Warden"},
-    {"Auto Rengoku", "T_Rengoku"},
-    {"Auto Key Rengoku", "T_KeyRen"},
-    {"Auto Dragon Trident", "T_Trident"},
-    {"Auto Canvander", "T_Canvander"},
-    {"Auto Twin Hooks", "T_TwinHooks"},
-    {"Auto Serpent Bow", "T_SerpentBow"},
-    {"Auto Long Sword", "T_LongSword"},
-    {"Auto Dark Blade V3", "T_DarkBlade"},
-}
-for _, entry in ipairs(swordsToggles) do
-    QuestTab:AddToggle({
-        Text = entry[1], Flag = entry[2], Default = false,
-        Callback = function(v) K[entry[2]] = v end,
-    })
+    return chosen
 end
 
-QuestTab:AddDivider()
-QuestTab:AddSection("Fighting Styles")
-local stylesToggles = {
-    {"Auto Superhuman", "T_Superhuman"},
-    {"Auto Death Step", "T_DeathStep"},
-    {"Auto Sharkman Karate", "T_Sharkman"},
-    {"Auto Electric Claw", "T_ElectricClaw"},
-    {"Auto Dragon Talon", "T_DragonTalon"},
-    {"Auto Godhuman", "T_Godhuman"},
-    {"Auto Sanguine Art", "T_Sanguine"},
-}
-for _, entry in ipairs(stylesToggles) do
-    QuestTab:AddToggle({
-        Text = entry[1], Flag = entry[2], Default = false,
-        Callback = function(v) K[entry[2]] = v end,
-    })
+--════════════════════════ FARM HELPERS ════════════════════════
+-- ataque genérico: tween se longe, hit se perto (estilo Attack.Kill do OK Hub)
+local function AttackNearest(names, offsetY)
+    local enemy = FindEnemy(names)
+    if not enemy then DestroyTween() return false end
+    local ehrp = enemy:FindFirstChild("HumanoidRootPart")
+    if not ehrp then return false end
+    BringEnemies(enemy, ehrp.CFrame)
+    ActivateHaki()
+    EquipSelectedTool()
+    local target = ehrp.CFrame * CFrame.new(0, offsetY or 30, 0)
+    if GetDistance(target) > 150 then
+        ExecuteTween(target)
+    else
+        DestroyTween()
+        ExecuteBladeHits()
+    end
+    return true
 end
 
-QuestTab:AddDivider()
-QuestTab:AddSection("Race / Haki")
-QuestTab:AddToggle({ Text = "Auto V2", Flag = "AutoV2", Default = false, Callback = function(v) K.T_V2 = v end })
-QuestTab:AddToggle({ Text = "Auto V3", Flag = "AutoV3", Default = false, Callback = function(v) K.T_V3 = v end })
-QuestTab:AddToggle({ Text = "Auto Trial", Flag = "AutoTrial", Default = false, Callback = function(v) K.T_Trial = v end })
-QuestTab:AddToggle({ Text = "Auto Kill Player After Trial", Flag = "KillAfterTrial", Default = false, Callback = function(v) K.T_KillAfterTrial = v end })
-QuestTab:AddToggle({ Text = "Auto Observation (Ken)", Flag = "AutoKen", Default = false, Callback = function(v) K.T_Ken = v end })
-QuestTab:AddToggle({ Text = "Auto Rainbow Haki", Flag = "AutoRainbowHaki", Default = false, Callback = function(v) K.T_RainbowHaki = v end })
-QuestTab:AddToggle({ Text = "Auto Pull Lever", Flag = "PullLever", Default = false, Callback = function(v) K.T_PullLever = v end })
-QuestTab:AddToggle({ Text = "Auto Train V4", Flag = "TrainV4", Default = false, Callback = function(v) K.T_TrainV4 = v end })
-
-QuestTab:AddDivider()
-QuestTab:AddSection("Misc Quests")
-QuestTab:AddToggle({ Text = "Auto Bartilo Quest", Flag = "Bartilo", Default = false, Callback = function(v) K.T_Bartilo = v end })
-QuestTab:AddToggle({ Text = "Auto Citizen Quest", Flag = "Citizen", Default = false, Callback = function(v) K.T_Citizen = v end })
-QuestTab:AddToggle({ Text = "Auto Training Dummy", Flag = "Dummy", Default = false, Callback = function(v) K.T_Dummy = v end })
-QuestTab:AddToggle({ Text = "Auto Skull Guitar", Flag = "SkullGuitar", Default = false, Callback = function(v) K.T_SkullGuitar = v end })
-QuestTab:AddToggle({ Text = "Auto Farm Material Skull Guitar", Flag = "SkullGuitarMat", Default = false, Callback = function(v) K.T_SkullGuitarMat = v end })
-
---============================================================
--- TAB: VOLCANO / PREHISTORIC
---============================================================
-local VolTab = MainGroup:AddTab({ Name = "Volcano", Icon = "Lucide:flame" })
-
-VolTab:AddButton({
-    Text = "Teleport To Dragon Dojo",
-    Callback = function()
-        CommF_:InvokeServer("requestEntrance", Vector3.new(5661.53, 1013.09, -334.96))
-        K.Tp(CFrame.new(5814.43, 1208.33, 884.58))
-    end,
-})
-VolTab:AddToggle({ Text = "Auto Dojo Trainer", Flag = "Dojo", Default = false, Callback = function(v) K.T_Dojo = v end })
-VolTab:AddToggle({ Text = "Auto Dragon Hunter", Flag = "BlazeEM", Default = false, Callback = function(v) K.T_DragonHunter = v end })
-VolTab:AddToggle({ Text = "Tween To Upgrade Drago Trial", Flag = "UpgradeDrago", Default = false, Callback = function(v) K.T_UpgradeDrago = v end })
-VolTab:AddToggle({ Text = "Auto Drago V1", Flag = "DragoV1", Default = false, Callback = function(v) K.T_DragoV1 = v end })
-VolTab:AddToggle({ Text = "Auto Drago V2", Flag = "DragoV2", Default = false, Callback = function(v) K.T_DragoV2 = v end })
-VolTab:AddToggle({ Text = "Auto Drago V3", Flag = "DragoV3", Default = false, Callback = function(v) K.T_DragoV3 = v end })
-VolTab:AddToggle({ Text = "Auto Train Drago V4", Flag = "TrainDrago", Default = false, Callback = function(v) K.T_TrainDrago = v end })
-VolTab:AddToggle({ Text = "Swap Drago Race", Flag = "SwapDrago", Default = false, Callback = function(v) K.T_SwapDrago = v end })
-VolTab:AddToggle({ Text = "Upgrade Dragon Talon With Uzoth", Flag = "TalonUzoth", Default = false, Callback = function(v) K.T_TalonUzoth = v end })
-
-VolTab:AddDivider()
-VolTab:AddSection("Prehistoric")
-VolTab:AddToggle({ Text = "Auto Find Prehistoric Island", Flag = "FindPrehis", Default = false, Callback = function(v) K.T_FindPrehis = v end })
-VolTab:AddToggle({ Text = "Auto Summon Prehistoric Island", Flag = "SummonPrehis", Default = false, Callback = function(v) K.T_SummonPrehis = v end })
-VolTab:AddToggle({ Text = "Tween To Prehistoric Island", Flag = "TweenPrehis", Default = false, Callback = function(v) K.T_TweenPrehis = v end })
-VolTab:AddToggle({ Text = "Auto Start Prehistoric Event", Flag = "StartPrehis", Default = false, Callback = function(v) K.T_StartPrehis = v end })
-VolTab:AddToggle({ Text = "Auto Patch Prehistoric Event", Flag = "PatchPrehis", Default = false, Callback = function(v) K.T_PatchPrehis = v end })
-VolTab:AddToggle({ Text = "Auto Collect Dino Bones", Flag = "DinoBones", Default = false, Callback = function(v) K.T_DinoBones = v end })
-VolTab:AddToggle({ Text = "Auto Collect Dragon Eggs", Flag = "DragonEggs", Default = false, Callback = function(v) K.T_DragonEggs = v end })
-VolTab:AddButton({ Text = "Craft Dragonheart", Callback = function() CommF_:InvokeServer("CraftItem", "Craft", "Dragonheart") end })
-VolTab:AddButton({ Text = "Craft Dragonstorm", Callback = function() CommF_:InvokeServer("CraftItem", "Craft", "Dragonstorm") end })
-VolTab:AddButton({ Text = "Craft Dino Hood", Callback = function() CommF_:InvokeServer("CraftItem", "Craft", "DinoHood") end })
-VolTab:AddButton({ Text = "Craft T-Rex Skull", Callback = function() CommF_:InvokeServer("CraftItem", "Craft", "TRexSkull") end })
-
---============================================================
--- TAB: ESP / STATS
---============================================================
-local EspTab = MainGroup:AddTab({ Name = "ESP & Stats", Icon = "Lucide:eye" })
-
-EspTab:AddSection("Stats Upgrade")
-local statsValue = 10
-EspTab:AddSlider({
-    Text = "Stats Value", Min = 0, Max = 1000, Default = 10,
-    Callback = function(v) statsValue = v end,
-})
-local statToggles = {
-    {"Auto Melee", "AutoMelee", "Melee"},
-    {"Auto Sword", "AutoSword", "Sword"},
-    {"Auto Gun", "AutoGun", "Gun"},
-    {"Auto Blox Fruit", "AutoDevil", "Demon Fruit"},
-    {"Auto Defense", "AutoDefense", "Defense"},
+-- Stack Farming — portado do CheckStackPriority do Speed Hub X
+local PriorityTable = {
+    {name="Auto Farm Level",p=1,check=function() local q=GetQuestByLevel(LocalPlayer.Data.Level.Value) return q and FindEnemy(q.M) ~= nil end},
+    {name="Auto Farm Nearest",p=2,check=function() return #Enemies:GetChildren() > 0 end},
+    {name="Auto Farm Mastery",p=3,check=function() return FindEnemy({"Reborn Skeleton","Demonic Soul","Living Zombie","Possessed Mummy"}) ~= nil end},
+    {name="Auto Collect Chest",p=4,check=function()
+        for _, c in ipairs(CollectionService:GetTagged("_ChestTagged")) do
+            if c and not c:GetAttribute("IsDisabled") then return true end
+        end
+        return false
+    end},
+    {name="Auto Farm Material",p=6,check=function()
+        local npcs = MaterialNPCs[Settings["Choose Material"]]
+        return npcs and FindEnemy(npcs) ~= nil
+    end},
+    {name="Auto Farm Bones",p=7,check=function() return FindEnemy({"Soul Reaper"}) ~= nil or FindEnemy({"Reborn Skeleton","Living Zombie","Demonic Soul","Possessed Mummy"}) ~= nil end},
+    {name="Auto Attack Boss",p=8,check=function() return Settings["Choose Boss"] ~= "" and FindEnemy(Settings["Choose Boss"]) ~= nil end},
+    {name="Auto Attack All Boss",p=9,check=function()
+        for _, v in ipairs(RS:GetChildren()) do
+            if v:GetAttribute("IsBoss") and v:FindFirstChild("HumanoidRootPart") then return true end
+        end
+        return FindEnemy(function() end) ~= nil
+    end},
+    {name="Auto Soul Reaper",p=10,check=function() return FindEnemy({"Soul Reaper"}) ~= nil or HasTool("Hallow Essence") end},
+    {name="Auto Elite Hunter",p=11,check=function() return FindEnemy({"Diablo","Deandre","Urban"}) ~= nil end},
+    {name="Auto Citizen Quest",p=13,check=function() return FindEnemy({"Stone","Island Empress","Kilo Admiral","Captain Elephant","Beautiful Pirate"}) ~= nil end},
+    {name="Auto Dough King",p=14,check=function() return HasTool("God's Chalice") or HasTool("Sweet Chalice") or FindEnemy({"Dough King"}) ~= nil end},
+    {name="Auto Cake Prince",p=15,check=function() return FindEnemy({"Cake Prince","Dough King"}) ~= nil or FindEnemy({"Baking Staff","Head Baker","Cake Guard","Cookie Crafter"}) ~= nil end},
 }
-for _, s in ipairs(statToggles) do
-    EspTab:AddToggle({
-        Text = s[1], Flag = s[2], Default = false,
-        Callback = function(v) K[s[2]] = v; K[s[2].."_stat"] = s[3] end,
-    })
-end
-
-EspTab:AddDivider()
-EspTab:AddSection("ESP Visual")
-
-local EspNumber = math.random(1, 1e6)
-local function clearESP(classifier)
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") then
-            local tag = p.Character.Head:FindFirstChild("KyrovaESP" .. EspNumber)
-            if tag then tag:Destroy() end
+local function CanFarm(featureName)
+    if not Settings["Stack Farming Enabled"] then return true end
+    local me
+    for _, e in ipairs(PriorityTable) do if e.name == featureName then me = e break end end
+    if not me or not Settings[featureName] then return false end
+    for _, e in ipairs(PriorityTable) do
+        if Settings[e.name] and e.p < me.p then
+            local ok, res = pcall(e.check)
+            if ok and res then return false end
         end
     end
-    for _, c in ipairs(CS:GetTagged("_ChestTagged")) do
-        local tag = c:FindFirstChild("KyrovaChestESP")
-        if tag then tag:Destroy() end
-    end
+    return true
 end
 
-local function espLoop()
-    task.spawn(function()
-        while K.T_EspPlayer or K.T_EspChest or K.T_EspFruit do
-            local head = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Head")
-            if head then
-                if K.T_EspPlayer then
-                    for _, p in ipairs(Players:GetPlayers()) do
-                        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") then
-                            local ph = p.Character.Head
-                            if not ph:FindFirstChild("KyrovaESP" .. EspNumber) then
-                                local bb = Instance.new("BillboardGui", ph)
-                                bb.Name = "KyrovaESP" .. EspNumber
-                                bb.Size = UDim2.new(1, 200, 1, 30)
-                                bb.StudsOffset = Vector3.new(0, 3, 0)
-                                bb.AlwaysOnTop = true
-                                local lbl = Instance.new("TextLabel", bb)
-                                lbl.Size = UDim2.new(1,0,1,0)
-                                lbl.BackgroundTransparency = 1
-                                lbl.TextStrokeTransparency = 0.5
-                                lbl.TextColor3 = p.Team == LocalPlayer.Team and Color3.new(0,0,1) or Color3.new(1,0,0)
-                                lbl.Font = Enum.Font.Code
-                                lbl.TextSize = 14
-                                lbl.Text = p.Name
-                            end
-                        end
-                    end
-                end
-                if K.T_EspChest then
-                    for _, chest in ipairs(CS:GetTagged("_ChestTagged")) do
-                        if not chest:GetAttribute("IsDisabled") and not chest:FindFirstChild("KyrovaChestESP") then
-                            local bb = Instance.new("BillboardGui", chest)
-                            bb.Name = "KyrovaChestESP"
-                            bb.Size = UDim2.new(1, 200, 1, 30)
-                            bb.StudsOffset = Vector3.new(0, 3, 0)
-                            bb.AlwaysOnTop = true
-                            local lbl = Instance.new("TextLabel", bb)
-                            lbl.Size = UDim2.new(1,0,1,0)
-                            lbl.BackgroundTransparency = 1
-                            lbl.TextColor3 = Color3.fromRGB(255, 255, 0)
-                            lbl.Font = Enum.Font.Code
-                            lbl.Text = "Chest"
-                        end
-                    end
-                end
-                if K.T_EspFruit then
-                    for _, f in ipairs(Workspace:GetChildren()) do
-                        if f.Name:find("Fruit") and f:FindFirstChild("Handle") and not f.Handle:FindFirstChild("KyrovaFruitESP") then
-                            local bb = Instance.new("BillboardGui", f.Handle)
-                            bb.Name = "KyrovaFruitESP"
-                            bb.Size = UDim2.new(1, 200, 1, 30)
-                            bb.StudsOffset = Vector3.new(0, 2, 0)
-                            bb.AlwaysOnTop = true
-                            local lbl = Instance.new("TextLabel", bb)
-                            lbl.Size = UDim2.new(1,0,1,0)
-                            lbl.BackgroundTransparency = 1
-                            lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
-                            lbl.Font = Enum.Font.Code
-                            lbl.Text = f.Name
-                        end
+-- item raro (Stop On Rare Items)
+local function HasRareItem()
+    local rare = {"God's Chalice","Fist of Darkness","Sweet Chalice","Hallow Essence"}
+    for _, cont in ipairs({LocalPlayer:FindFirstChild("Backpack"), LocalPlayer.Character}) do
+        if cont then
+            for _, it in ipairs(cont:GetChildren()) do
+                if it:IsA("Tool") then
+                    for _, rn in ipairs(rare) do
+                        if string.find(it.Name, rn, 1, true) then return it.Name end
                     end
                 end
             end
-            task.wait(1)
         end
-    end)
+    end
 end
 
-EspTab:AddToggle({
-    Text = "ESP Player", Flag = "EspPlayer", Default = false,
-    Callback = function(v) K.T_EspPlayer = v; if v then espLoop() else clearESP() end end,
-})
-EspTab:AddToggle({
-    Text = "ESP Chest", Flag = "EspChest", Default = false,
-    Callback = function(v) K.T_EspChest = v; if v then espLoop() end end,
-})
-EspTab:AddToggle({
-    Text = "ESP Fruit", Flag = "EspFruit", Default = false,
-    Callback = function(v) K.T_EspFruit = v; if v then espLoop() end end,
-})
-
---============================================================
--- TAB: FRUITS & RAID
---============================================================
-local FruitTab = MainGroup:AddTab({ Name = "Fruits & Raid", Icon = "Lucide:apple" })
-
-FruitTab:AddSection("Fruit Options")
-FruitTab:AddToggle({ Text = "Auto Random Fruit", Flag = "RandomFruit", Default = false, Callback = function(v) K.T_RandomFruit = v end })
-FruitTab:AddToggle({ Text = "Auto Drop Fruit", Flag = "DropFruit", Default = false, Callback = function(v) K.T_DropFruit = v end })
-FruitTab:AddToggle({ Text = "Auto Store Fruit", Flag = "StoreFruit", Default = false, Callback = function(v) K.T_StoreFruit = v end })
-FruitTab:AddToggle({ Text = "Auto Tween to Fruit", Flag = "TweenFruit", Default = false, Callback = function(v) K.T_TweenFruit = v end })
-FruitTab:AddToggle({ Text = "Auto Collect Fruit", Flag = "CollectFruit", Default = false, Callback = function(v) K.T_CollectFruit = v end })
-FruitTab:AddToggle({ Text = "Auto Buy Fruits Sniper", Flag = "FruitSniper", Default = false, Callback = function(v) K.T_FruitSniper = v end })
-
-FruitTab:AddDivider()
-FruitTab:AddSection("Raid")
-
-local chipList = {"Flame","Ice","Quake","Light","Dark","String","Rumble","Magma","Human: Buddha","Sand","Bird: Phoenix","Dough"}
-FruitTab:AddDropdown({
-    Text = "Select Chip",
-    Options = chipList,
-    Default = "Flame",
-    Callback = function(v) K.SelectedChip = v end,
-})
-FruitTab:AddToggle({ Text = "Auto Buy Chip [Beli]", Flag = "ChipBeli", Default = false, Callback = function(v) K.T_ChipBeli = v end })
-FruitTab:AddToggle({ Text = "Auto Buy Chip [Fruit]", Flag = "ChipFruit", Default = false, Callback = function(v) K.T_ChipFruit = v end })
-FruitTab:AddToggle({ Text = "Auto Start Raid", Flag = "StartRaid", Default = false, Callback = function(v) K.T_StartRaid = v end })
-FruitTab:AddToggle({ Text = "Auto Raid + Next Island", Flag = "Raiding", Default = false, Callback = function(v) K.T_Raiding = v end })
-FruitTab:AddToggle({ Text = "Auto Farm Dungeon", Flag = "FarmDungeon", Default = false, Callback = function(v) K.T_FarmDungeon = v end })
-FruitTab:AddToggle({ Text = "Auto Awakening", Flag = "Awakening", Default = false, Callback = function(v) K.T_Awakening = v end })
-FruitTab:AddButton({ Text = "Buy Microchip Law", Callback = function() CommF_:InvokeServer("BlackbeardReward","Microchip","2") end })
-
---============================================================
--- TAB: LOCAL PLAYER
---============================================================
-local LPTab = MainGroup:AddTab({ Name = "Local Player", Icon = "Lucide:user" })
-
-LPTab:AddSection("Combat")
-LPTab:AddToggle({ Text = "Auto Enable PvP", Flag = "AutoPvP", Default = false, Callback = function(v) K.T_AutoPvP = v end })
-LPTab:AddToggle({ Text = "Auto Safe Mode", Flag = "SafeMode", Default = false, Callback = function(v) K.SafeMode = v end })
-LPTab:AddToggle({ Text = "Auto Kill Player Quest", Flag = "AutoKillPlayer", Default = false, Callback = function(v) K.T_AutoKillPlayer = v end })
-LPTab:AddToggle({ Text = "Auto Get PlayerQuest", Flag = "AutoGetPlayerQuest", Default = false, Callback = function(v) K.T_AutoGetPlayerQuest = v end })
-
-LPTab:AddDivider()
-LPTab:AddSection("Infinite Abilities")
-LPTab:AddToggle({ Text = "Instance Energy [INF]", Flag = "InfEnergy", Default = false, Callback = function(v) K.T_InfEnergy = v end })
-LPTab:AddToggle({ Text = "Instance Soru [INF]", Flag = "InfSoru", Default = false, Callback = function(v) K.T_InfSoru = v end })
-LPTab:AddToggle({ Text = "Instance Observation Range [INF]", Flag = "InfObRange", Default = false, Callback = function(v) K.T_InfObRange = v end })
-LPTab:AddToggle({ Text = "Instance Mink V3 [INF]", Flag = "InfMink", Default = false, Callback = function(v) K.T_InfMink = v end })
-LPTab:AddToggle({ Text = "Dash No Cooldown", Flag = "NoCD", Default = false, Callback = function(v) K.T_NoCD = v end })
-
---============================================================
--- TAB: TELEPORT
---============================================================
-local TpTab = MainGroup:AddTab({ Name = "Teleport", Icon = "Lucide:map-pin" })
-
-TpTab:AddSection("Worlds")
-TpTab:AddButton({ Text = "World 1 (East Blue)", Callback = function() CommF_:InvokeServer("TravelMain") end })
-TpTab:AddButton({ Text = "World 2 (Dressrosa)", Callback = function() CommF_:InvokeServer("TravelDressrosa") end })
-TpTab:AddButton({ Text = "World 3 (Zou)", Callback = function() CommF_:InvokeServer("TravelZou") end })
-
-TpTab:AddDivider()
-TpTab:AddSection("Islands")
-
-local islands = {}
-for _, v in ipairs(Workspace._WorldOrigin.Locations:GetChildren()) do
-    table.insert(islands, v.Name)
-end
-
-TpTab:AddDropdown({
-    Text = "Select Island",
-    Options = islands,
-    Default = islands[1] or "Starting Island",
-    Callback = function(v) K.SelectedIsland = v end,
-})
-TpTab:AddToggle({
-    Text = "Auto Travel", Flag = "AutoTravel", Default = false,
-    Callback = function(v) K.T_AutoTravel = v end,
-})
-
-TpTab:AddDivider()
-TpTab:AddSection("NPCs")
-local npcList = {}
-for _, v in ipairs(ReplicatedStorage:FindFirstChild("NPCs"):GetChildren()) do table.insert(npcList, v.Name) end
-TpTab:AddDropdown({
-    Text = "Select NPC",
-    Options = npcList,
-    Default = npcList[1] or "",
-    Callback = function(v) K.SelectedNPC = v end,
-})
-TpTab:AddToggle({ Text = "Auto Tween To NPC", Flag = "TweenNPC", Default = false, Callback = function(v) K.T_TweenNPC = v end })
-
---============================================================
--- TAB: SHOP
---============================================================
-local ShopTab = MainGroup:AddTab({ Name = "Shop", Icon = "Lucide:shopping-cart" })
-
-ShopTab:AddSection("Haki")
-ShopTab:AddButton({ Text = "Buy Buso", Callback = function() CommF_:InvokeServer("BuyHaki","Buso") end })
-ShopTab:AddButton({ Text = "Buy Geppo", Callback = function() CommF_:InvokeServer("BuyHaki","Geppo") end })
-ShopTab:AddButton({ Text = "Buy Soru", Callback = function() CommF_:InvokeServer("BuyHaki","Soru") end })
-ShopTab:AddButton({ Text = "Buy Ken", Callback = function() CommF_:InvokeServer("KenTalk","Buy") end })
-
-ShopTab:AddDivider()
-ShopTab:AddSection("Fighting Styles")
-local styleButtons = {
-    {"Black Leg","BuyBlackLeg"},{"Electro","BuyElectro"},{"Fishman Karate","BuyFishmanKarate"},
-    {"Superhuman","BuySuperhuman"},{"Death Step","BuyDeathStep"},{"Sharkman Karate","BuySharkmanKarate"},
-    {"Electric Claw","BuyElectricClaw"},{"Dragon Talon","BuyDragonTalon"},{"Godhuman","BuyGodhuman"},
-}
-for _, b in ipairs(styleButtons) do
-    ShopTab:AddButton({ Text = "Buy " .. b[1], Callback = function() CommF_:InvokeServer(b[2]) end })
-end
-
-ShopTab:AddDivider()
-ShopTab:AddSection("Fragments")
-ShopTab:AddButton({ Text = "Refund Stats", Callback = function() CommF_:InvokeServer("BlackbeardReward","Refund","2") end })
-ShopTab:AddButton({ Text = "Reroll Race", Callback = function() CommF_:InvokeServer("BlackbeardReward","Reroll","2") end })
-ShopTab:AddButton({ Text = "Buy Ghoul Race", Callback = function() CommF_:InvokeServer("Ectoplasm","Change", 4) end })
-ShopTab:AddButton({ Text = "Buy Cyborg Race", Callback = function() CommF_:InvokeServer("CyborgTrainer","Buy") end })
-
-ShopTab:AddDivider()
-ShopTab:AddSection("Weapons")
-local weapons = {
-    "Katana","Cutlass","Iron Mace","Dual Katana","Triple Katana","Pipe",
-    "Dual-Headed Blade","Bisento","Soul Cane","Slingshot","Musket","Flintlock",
-    "Refined Slingshot","Refined Flintlock","Cannon",
-}
-for _, w in ipairs(weapons) do
-    ShopTab:AddButton({ Text = "Buy " .. w, Callback = function() CommF_:InvokeServer("BuyItem", w) end })
-end
-
---============================================================
--- TAB: MISC
---============================================================
-local MiscTab = MainGroup:AddTab({ Name = "Misc", Icon = "Lucide:settings" })
-
-MiscTab:AddSection("Server")
-MiscTab:AddButton({ Text = "Rejoin Server", Callback = function() TPS:Teleport(game.PlaceId, LocalPlayer) end })
-MiscTab:AddButton({ Text = "Hop Server (Low Players)", Callback = function() K.Hop() end })
-MiscTab:AddButton({ Text = "Copy JobID", Callback = function() if setclipboard then setclipboard(game.JobId) end end })
-MiscTab:AddButton({
-    Text = "Redeem All Codes",
-    Callback = function()
-        local codes = {
-            "LIGHTNINGABUSE","1LOSTADMIN","ADMINFIGHT","GIFTING_HOURS","NOMOREHACK",
-            "BANEXPLOIT","WildDares","BossBuild","GetPranked","EARN_FRUITS",
-            "SUB2GAMERROBOT_RESET1","KITT_RESET","Bignews","CHANDLER","Fudd10",
-            "fudd10_v2","Sub2UncleKizaru","FIGHT4FRUIT","kittgaming","TRIPLEABUSE",
-            "Sub2CaptainMaui","Sub2Fer999","Enyu_is_Pro","Magicbus","JCWK",
-            "Starcodeheo","Bluxxy","SUB2GAMERROBOT_EXP1","Sub2NoobMaster123",
-            "Sub2Daigrock","Axiore","TantaiGaming","StrawHatMaine","Sub2OfficialNoobie",
-            "TheGreatAce","JULYUPDATE_RESET","ADMINHACKED","SEATROLLING","24NOADMIN",
-            "ADMIN_TROLL","NEWTROLL","SECRET_ADMIN","staffbattle","NOEXPLOIT",
-            "NOOB2ADMIN","CODESLIDE","fruitconcepts","krazydares"
-        }
-        local RedeemRemote = ReplicatedStorage.Remotes:FindFirstChild("Redeem")
-        if not RedeemRemote then return end
-        for _, code in ipairs(codes) do
-            task.wait(0.1)
-            pcall(function()
-                RedeemRemote:InvokeServer(code)
-            end)
-        end
-    end,
-})
-
-MiscTab:AddDivider()
-MiscTab:AddSection("Team")
-MiscTab:AddButton({ Text = "Join Pirates", Callback = function() CommF_:InvokeServer("SetTeam","Pirates") end })
-MiscTab:AddButton({ Text = "Join Marines", Callback = function() CommF_:InvokeServer("SetTeam","Marines") end })
-
-MiscTab:AddDivider()
-MiscTab:AddSection("GUI")
-MiscTab:AddToggle({ Text = "Disable Chat", Flag = "DisableChat", Default = false, Callback = function(v) StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, not v) end })
-MiscTab:AddToggle({ Text = "Disable Leaderboard", Flag = "DisableLB", Default = false, Callback = function(v) StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, not v) end })
-
-MiscTab:AddDivider()
-MiscTab:AddSection("Graphics")
-MiscTab:AddToggle({
-    Text = "Full Bright", Flag = "FullBright", Default = false,
-    Callback = function(v)
-        if v then
-            Lighting.Ambient = Color3.new(1,1,1)
-            Lighting.ColorShift_Bottom = Color3.new(1,1,1)
-            Lighting.ColorShift_Top = Color3.new(1,1,1)
-        else
-            Lighting.Ambient = Color3.new(0,0,0)
-        end
-    end,
-})
-MiscTab:AddToggle({
-    Text = "Walk on Water", Flag = "WalkWater", Default = false,
-    Callback = function(v)
-        local plane = Workspace.Map:FindFirstChild("WaterBase-Plane")
-        if plane then
-            plane.Size = v and Vector3.new(1000, 112, 1000) or Vector3.new(1000, 80, 1000)
-        end
-    end,
-})
-MiscTab:AddToggle({
-    Text = "Remove Damage Numbers", Flag = "NoDamage", Default = false,
-    Callback = function(v)
-        local dc = ReplicatedStorage:FindFirstChild("Assets") and ReplicatedStorage.Assets:FindFirstChild("GUI") and ReplicatedStorage.Assets.GUI:FindFirstChild("DamageCounter")
-        if dc then dc.Enabled = not v end
-    end,
-})
-MiscTab:AddToggle({
-    Text = "Remove Notifications", Flag = "NoNotify", Default = false,
-    Callback = function(v)
-        if LocalPlayer.PlayerGui:FindFirstChild("Notifications") then
-            LocalPlayer.PlayerGui.Notifications.Enabled = not v
-        end
-    end,
-})
-
---============================================================
--- TAB: SETTINGS
---============================================================
-local SetTab = MainGroup:AddTab({ Name = "Settings", Icon = "Lucide:sliders" })
-
-SetTab:AddSection("Combat Config (Speed Hub)")
-SetTab:AddToggle({
-    Text = "Kill Aura",
-    Description = "Mata inimigos em 500 studs (Volcano Event)",
-    Flag = "KillAura",
-    Default = false,
-    Callback = function(v) K.T_KillAura = v end,
-})
-SetTab:AddDropdown({
-    Text = "Weapon Tool",
-    Options = {"Melee", "Sword", "Blox Fruit", "Gun"},
-    Default = "Melee",
-    Callback = function(v) K.WeaponTool = v end,
-})
-SetTab:AddDropdown({
-    Text = "Tween Speed",
-    Options = {"100", "200", "300", "400", "500"},
-    Default = "300",
-    Callback = function(v) K.TweenSpeed = tonumber(v) or 300 end,
-})
-SetTab:AddToggle({
-    Text = "Bring Mob",
-    Flag = "BringMob",
-    Default = true,
-    Callback = function(v) K.BringMob = v end,
-})
-SetTab:AddDropdown({
-    Text = "Bring Mob Radius",
-    Options = {"100", "200", "300", "400", "500"},
-    Default = "300",
-    Callback = function(v) K.BringMobRadius = tonumber(v) or 300 end,
-})
-SetTab:AddToggle({
-    Text = "Fast Attack",
-    Flag = "FastAttack",
-    Default = true,
-    Callback = function(v) K.FastAttack = v end,
-})
-SetTab:AddToggle({
-    Text = "Auto Dodge Skill",
-    Flag = "AutoDodge",
-    Default = false,
-    Callback = function(v) K.AutoDodgeSkill = v end,
-})
-
-SetTab:AddDivider()
-SetTab:AddSection("Race / Haki (OK Hub)")
-SetTab:AddToggle({
-    Text = "Auto Turn On V3", Flag = "AutoV3Turn", Default = false,
-    Callback = function(v) K.T_AutoV3 = v end,
-})
-SetTab:AddToggle({
-    Text = "Auto Turn On V4", Flag = "AutoV4Turn", Default = false,
-    Callback = function(v) K.T_AutoV4 = v end,
-})
-SetTab:AddToggle({
-    Text = "Auto Turn On Buso", Flag = "AutoBuso", Default = false,
-    Callback = function(v) K.T_AutoBuso = v end,
-})
-SetTab:AddToggle({
-    Text = "Auto Haki Observation", Flag = "AutoKen", Default = false,
-    Callback = function(v) K.T_AutoKen = v end,
-})
-
-SetTab:AddDivider()
-SetTab:AddSection("Anti / Safety")
-SetTab:AddToggle({
-    Text = "Anti AFK", Flag = "AntiAFK", Default = true,
-    Callback = function(v)
-        if v then
-            LocalPlayer.Idled:Connect(function()
-                VU:Button2Down(Vector2.new(0,0), Workspace.CurrentCamera.CFrame)
-                task.wait(1)
-                VU:Button2Up(Vector2.new(0,0), Workspace.CurrentCamera.CFrame)
-            end)
-        end
-    end,
-})
-SetTab:AddToggle({
-    Text = "Auto Anti Admin Join Server", Flag = "AntiAdmin", Default = false,
-    Callback = function(v) K.T_AntiAdmin = v end,
-})
-SetTab:AddToggle({
-    Text = "Disable Notify", Flag = "DisableNotify", Default = false,
-    Callback = function(v)
-        if LocalPlayer.PlayerGui:FindFirstChild("Notifications") then
-            LocalPlayer.PlayerGui.Notifications.Enabled = not v
-        end
-    end,
-})
-SetTab:AddToggle({
-    Text = "Safe Mode (Foge se HP baixo)", Flag = "SafeMode", Default = false,
-    Callback = function(v) K.SafeMode = v end,
-})
-
---============================================================
--- CORE LOOPS
---============================================================
+--════════════════════════ LOOPS DE FARM ════════════════════════
 
 -- Auto Farm Level
-task.spawn(function()
-    while task.wait(0.5) do
-        if not K.T_FarmLevel then continue end
-        pcall(function()
-            local q = K.GetQuestInfo()
-            if not q or not q.mob then return end
-            if K.isQuestOn() then
-                local enemy = K.GetConnectionEnemies(q.mob)
-                if enemy then
-                    repeat
-                        task.wait()
-                        K.Attack.Kill(enemy, true)
-                    until not K.T_FarmLevel or not IsAlive(enemy)
-                else
-                    local spawns = Workspace["_WorldOrigin"].EnemySpawns
-                    for _, sp in ipairs(spawns:GetChildren()) do
-                        if sp.Name:find(q.mob) then
-                            K.Tp(sp.CFrame * CFrame.new(0, 30, 0))
-                            break
-                        end
-                    end
-                end
-            else
-                if q.cframe then
-                    K.Tp(q.cframe)
-                    if Root() and (Root().Position - q.cframe.Position).Magnitude <= 8 then
-                        CommF_:InvokeServer("StartQuest", q.quest, q.id)
-                    end
-                else
-                    CommF_:InvokeServer("StartQuest", q.quest, q.id)
-                end
-            end
-        end)
+CreateLoop("Auto Farm Level", 0.1, function()
+    if not CanFarm("Auto Farm Level") then return end
+    local char = LocalPlayer.Character
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    if not (char and hum and hum.Health > 0) then return end
+    local quest = GetQuestByLevel(LocalPlayer.Data.Level.Value)
+    if not quest then return end
+    if quest.QP then
+        local hasQuest = false
+        pcall(function() hasQuest = playerGui.Main.Quest.Visible end)
+        if not hasQuest then
+            if GetDistance(quest.QP) > 250 then ExecuteTween(quest.QP) return end
+            CommF_:InvokeServer("StartQuest", quest.Q, quest.N)
+            task.wait(0.3)
+        end
+    end
+    if not AttackNearest(quest.M) then
+        DestroyTween()
     end
 end)
 
 -- Auto Farm Nearest
-task.spawn(function()
-    while task.wait(0.3) do
-        if not K.T_FarmNearest then continue end
-        pcall(function()
-            local hrp = Root(); if not hrp then return end
-            local closest, dist = nil, math.huge
-            for _, e in ipairs(Workspace.Enemies:GetChildren()) do
-                if IsAlive(e) and e:FindFirstChild("HumanoidRootPart") then
-                    local d = (e.HumanoidRootPart.Position - hrp.Position).Magnitude
-                    if d < dist then dist = d; closest = e end
-                end
-            end
-            if closest then
-                repeat task.wait() K.Attack.Kill(closest, true) until not K.T_FarmNearest or not IsAlive(closest)
-            end
-        end)
+CreateLoop("Auto Farm Nearest", 0.1, function()
+    if not CanFarm("Auto Farm Nearest") then return end
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    local nearest, nd = nil, math.huge
+    for _, e in ipairs(Enemies:GetChildren()) do
+        local ehrp = e:FindFirstChild("HumanoidRootPart")
+        if ehrp and IsEntityAlive(e) then
+            local d = (ehrp.Position - hrp.Position).Magnitude
+            if d < nd then nd, nearest = d, e end
+        end
+    end
+    if nearest then
+        BringEnemies(nearest, nearest.HumanoidRootPart.CFrame)
+        ActivateHaki()
+        EquipSelectedTool()
+        local target = nearest.HumanoidRootPart.CFrame * CFrame.new(0, 30, 0)
+        if GetDistance(target) > 150 then ExecuteTween(target)
+        else DestroyTween() ExecuteBladeHits() end
+    else
+        DestroyTween()
     end
 end)
 
--- Auto Factory
-task.spawn(function()
-    while task.wait(0.4) do
-        if not K.T_Factory then continue end
-        pcall(function()
-            local core = K.GetConnectionEnemies("Core")
-            if core then
-                repeat task.wait()
-                    K.Tp(CFrame.new(448.47, 199.36, -441.39))
-                    K.Attack.Kill(core, true)
-                until not K.T_Factory or not IsAlive(core)
-            else
-                K.Tp(CFrame.new(448.47, 199.36, -441.39))
-            end
-        end)
+-- Auto Factory Raid
+local FactoryPos = CFrame.new(430, 22, -425)
+CreateLoop("Auto Factory Raid", 0.1, function()
+    if not FindEnemy("Core") then
+        DestroyTween()
+        if GetDistance(FactoryPos) > 150 then ExecuteTween(FactoryPos) end
+        return
     end
+    AttackNearest("Core", 20)
 end)
 
--- Auto Ectoplasm
-task.spawn(function()
-    while task.wait(0.4) do
-        if not K.T_Ecto then continue end
-        pcall(function()
-            local target = K.GetConnectionEnemies({"Ship Deckhand","Ship Engineer","Ship Steward","Ship Officer","Arctic Warrior"})
-            if target then
-                repeat task.wait() K.Attack.Kill(target, true) until not K.T_Ecto or not IsAlive(target)
-            else
-                CommF_:InvokeServer("requestEntrance", Vector3.new(923.21, 126.98, 32852.83))
-            end
-        end)
+-- Auto Farm Ectoplasma
+local EctoMobs = {"Ship Deckhand","Ship Engineer","Ship Steward","Ship Officer"}
+local CursedShipCF = CFrame.new(923.212, 126.976, 32852.832)
+CreateLoop("Auto Farm Ectoplasma", 0.1, function()
+    if not FindEnemy(EctoMobs) then
+        DestroyTween()
+        if GetDistance(CursedShipCF) > 400 then ExecuteTween(CursedShipCF) end
+        return
     end
+    AttackNearest(EctoMobs)
 end)
 
--- Auto Chest
-task.spawn(function()
-    while task.wait(0.3) do
-        if not K.T_Chest then continue end
-        pcall(function()
-            local hrp = Root(); if not hrp then return end
-            local near, nd = nil, math.huge
-            for _, chest in ipairs(CS:GetTagged("_ChestTagged")) do
-                if not chest:GetAttribute("IsDisabled") then
-                    local d = (chest:GetPivot().Position - hrp.Position).Magnitude
-                    if d < nd then nd = d; near = chest end
-                end
+-- Auto Collect Chest — CollectionService (Speed Hub X)
+CreateLoop("Auto Collect Chest", 0.1, function()
+    if not CanFarm("Auto Collect Chest") then return end
+    local best, bd = nil, math.huge
+    for _, chest in ipairs(CollectionService:GetTagged("_ChestTagged")) do
+        if chest and not chest:GetAttribute("IsDisabled") and chest.Parent then
+            local part = chest:IsA("BasePart") and chest
+                or (chest:IsA("Model") and (chest.PrimaryPart or chest:FindFirstChildWhichIsA("BasePart")))
+            if part then
+                local d = GetDistance(part.CFrame)
+                if d < bd then bd, best = d, part end
             end
-            if near then K.Tp(near:GetPivot()) end
-
-            if K.StopItems then
-                local function has(name)
-                    return (LocalPlayer.Backpack and LocalPlayer.Backpack:FindFirstChild(name)) or
-                           (LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(name))
-                end
-                if has("God's Chalice") or has("Sweet Chalice") or has("Fist of Darkness") then
-                    K.T_Chest = false
-                end
-            end
-        end)
+        end
     end
-end)
-
--- Auto Berry
-task.spawn(function()
-    while task.wait(0.3) do
-        if not K.T_Berry then continue end
-        pcall(function()
-            local bushes = CS:GetTagged("BerryBush")
-            for _, bush in ipairs(bushes) do
-                for _, attr in pairs(bush:GetAttributes()) do
-                    if type(attr) == "string" then
-                        K.Tp(bush.Parent:GetPivot())
-                        for _, child in ipairs(bush:GetChildren()) do
-                            if child:FindFirstChild("ProximityPrompt") then
-                                K.Tp(child.WorldPivot)
-                                fireproximityprompt(child.ProximityPrompt, math.huge)
-                            end
-                        end
-                    end
-                end
+    if best then
+        if GetDistance(best.CFrame) > 20 then ExecuteTween(best.CFrame)
+        else
+            DestroyTween()
+            local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if hrp and firetouchinterest then
+                firetouchinterest(hrp, best, 0)
+                firetouchinterest(hrp, best, 1)
             end
-        end)
-    end
-end)
-
--- Auto Kill Mob
-task.spawn(function()
-    while task.wait(0.2) do
-        if not K.T_KillMob or not K.SelectedMob then continue end
-        pcall(function()
-            local e = K.GetConnectionEnemies(K.SelectedMob)
-            if e then
-                repeat task.wait() K.Attack.Kill(e, true) until not K.T_KillMob or not IsAlive(e)
-            end
-        end)
-    end
-end)
-
--- Auto Elite
-task.spawn(function()
-    while task.wait(1) do
-        if not K.T_Elite then continue end
-        pcall(function()
-            if not K.isQuestOn() then
-                CommF_:InvokeServer("EliteHunter")
-            else
-                local e = K.GetConnectionEnemies({"Diablo","Deandre","Urban"})
-                if e then
-                    repeat task.wait() K.Attack.Kill(e, true) until not IsAlive(e) or not K.isQuestOn()
-                end
-            end
-        end)
-    end
-end)
-
--- Auto Elite + Hop
-task.spawn(function()
-    while task.wait(1.5) do
-        if not K.T_EliteHop then continue end
-        pcall(function()
-            if not K.isQuestOn() then
-                local r = CommF_:InvokeServer("EliteHunter")
-                if r == nil or (type(r) == "string" and string.find(r, "Cooldown")) then
-                    K.Hop()
-                end
-            else
-                local e = K.GetConnectionEnemies({"Diablo","Deandre","Urban"})
-                if e then
-                    repeat task.wait() K.Attack.Kill(e, true) until not IsAlive(e) or not K.isQuestOn()
-                else
-                    K.Hop()
-                end
-            end
-        end)
-    end
-end)
-
--- Auto Cake Prince
-task.spawn(function()
-    while task.wait(0.3) do
-        if not K.T_CakePrince then continue end
-        pcall(function()
-            local mirror = Workspace.Map:FindFirstChild("CakeLoaf") and Workspace.Map.CakeLoaf:FindFirstChild("BigMirror")
-            if not mirror then
-                K.Tp(CFrame.new(-2077, 252, -12373))
-                return
-            end
-            if mirror.Other.Transparency == 0 then
-                local boss = K.GetConnectionEnemies({"Cake Prince","Dough King"})
-                if boss then
-                    repeat task.wait() K.Attack.Kill(boss, true) until not IsAlive(boss)
-                else
-                    K.Tp(CFrame.new(-2151.82, 149.32, -12404.91))
-                end
-            else
-                local mob = K.GetConnectionEnemies({"Cookie Crafter","Cake Guard","Baking Staff","Head Baker"})
-                if mob then
-                    repeat task.wait() K.Attack.Kill(mob, true) until not IsAlive(mob) or (mirror and mirror.Other.Transparency == 0)
-                else
-                    K.Tp(CFrame.new(-2077, 252, -12373))
-                end
-            end
-        end)
-    end
-end)
-
--- Auto Summon Cake Prince
-task.spawn(function()
-    while task.wait(2) do
-        if not K.T_SummonCP then continue end
-        pcall(function()
-            local mirror = Workspace.Map.CakeLoaf:FindFirstChild("BigMirror")
-            if not mirror or mirror.Other.Transparency == 0 then return end
-            if Workspace.Enemies:FindFirstChild("Cake Prince") then return end
-            CommF_:InvokeServer("CakePrinceSpawner", true)
-        end)
-    end
-end)
-
--- Auto Dough King
-task.spawn(function()
-    while task.wait(0.5) do
-        if not K.T_DoughKing then continue end
-        pcall(function()
-            local dk = K.GetConnectionEnemies("Dough King")
-            if dk then
-                repeat task.wait() K.Attack.Kill(dk, true) until not IsAlive(dk)
-            else
-                K.Tp(CFrame.new(-1943.67, 251.50, -12337.88))
-            end
-        end)
-    end
-end)
-
--- Auto Rip Indra
-task.spawn(function()
-    while task.wait(0.4) do
-        if not K.T_RipIndra then continue end
-        pcall(function()
-            local r = K.GetConnectionEnemies("rip_indra")
-            if r then
-                repeat task.wait() K.Attack.Kill(r, true) until not IsAlive(r)
-            else
-                CommF_:InvokeServer("requestEntrance", Vector3.new(-5097.93, 316.44, -3142.66))
-                task.wait(0.3)
-                K.Tp(CFrame.new(-5344.82, 423.98, -2725.09))
-            end
-        end)
-    end
-end)
-
--- Auto Tyrant
-task.spawn(function()
-    while task.wait(0.5) do
-        if not K.T_Tyrant then continue end
-        pcall(function()
-            local boss = Workspace.Enemies:FindFirstChild("Tyrant of the Skies")
-            if boss and IsAlive(boss) then
-                repeat task.wait() K.Attack.Kill(boss, true) until not IsAlive(boss)
-            else
-                local mob = K.GetConnectionEnemies({"Serpent Hunter","Skull Slayer","Isle Champion","Sun-kissed Warrior"})
-                if mob then
-                    repeat task.wait() K.Attack.Kill(mob, true) until not IsAlive(mob)
-                else
-                    K.Tp(CFrame.new(-16268.29, 152.62, 1390.77))
-                end
-            end
-        end)
-    end
-end)
-
--- Auto Soul Reaper
-task.spawn(function()
-    while task.wait(0.4) do
-        if not K.T_SoulReaper then continue end
-        pcall(function()
-            local sr = K.GetConnectionEnemies("Soul Reaper")
-            if sr then
-                repeat task.wait() K.Attack.Kill(sr, true) until not IsAlive(sr)
-            elseif K.GetBP("Hallow Essence") then
-                EquipWeapon("Hallow Essence")
-                K.Tp(CFrame.new(-8932.32, 146.83, 6062.55))
-            else
-                CommF_:InvokeServer("Bones", "Buy", 1, 1)
-            end
-        end)
+        end
+    else
+        DestroyTween()
     end
 end)
 
 -- Auto Farm Bones
-task.spawn(function()
-    while task.wait(0.4) do
-        if not K.T_FarmBones then continue end
-        pcall(function()
-            local bones = {"Reborn Skeleton","Demonic Soul","Living Zombie","Possessed Mummy"}
-            local e = K.GetConnectionEnemies(bones)
-            if e then
-                repeat task.wait() K.Attack.Kill(e, true) until not IsAlive(e)
-            else
-                K.Tp(CFrame.new(-9516.98, 142.47, 5536.74))
-            end
-        end)
+CreateLoop("Auto Farm Bones", 0.1, function()
+    if not CanFarm("Auto Farm Bones") then return end
+    if not AttackNearest({"Reborn Skeleton","Demonic Soul","Living Zombie","Possessed Mummy"}) then
+        DestroyTween()
     end
 end)
 
--- Auto Trade Bones
-task.spawn(function()
-    while task.wait(0.5) do
-        if not K.T_TradeBones then continue end
-        pcall(function() CommF_:InvokeServer("Bones", "Buy", 1, 1) end)
-    end
+-- Auto Farm Material
+CreateLoop("Auto Farm Material", 0.1, function()
+    if not CanFarm("Auto Farm Material") then return end
+    local npcs = MaterialNPCs[Settings["Choose Material"]]
+    if npcs and not AttackNearest(npcs) then DestroyTween() end
 end)
 
--- Auto Random Bones
-task.spawn(function()
-    while task.wait(0.5) do
-        if not K.T_RandomBones then continue end
-        pcall(function() CommF_:InvokeServer("Bones", "Buy", 1, 1) end)
-    end
+-- Auto Attack Boss / All Boss
+CreateLoop("Auto Attack Boss", 0.1, function()
+    if not CanFarm("Auto Attack Boss") then return end
+    local sel = Settings["Choose Boss"]
+    if sel and sel ~= "" and not AttackNearest(sel) then DestroyTween() end
 end)
-
--- Auto Try Luck / Pray
-task.spawn(function()
-    local cfr = CFrame.new(-8761.31, 164.85, 6161.15)
-    while task.wait(0.3) do
-        if K.T_TryLuck then
-            pcall(function()
-                if (Root().Position - cfr.Position).Magnitude > 5 then
-                    K.Tp(cfr)
-                else
-                    CommF_:InvokeServer("gravestoneEvent", 1)
-                end
-            end)
-        end
-        if K.T_Pray then
-            pcall(function()
-                if (Root().Position - cfr.Position).Magnitude > 5 then
-                    K.Tp(cfr)
-                else
-                    CommF_:InvokeServer("gravestoneEvent", 2)
-                end
-            end)
+CreateLoop("Auto Attack All Boss", 0.1, function()
+    if not CanFarm("Auto Attack All Boss") then return end
+    local best, bd = nil, math.huge
+    for _, v in ipairs(Enemies:GetChildren()) do
+        if v:GetAttribute("IsBoss") and v:FindFirstChild("HumanoidRootPart") and IsEntityAlive(v) then
+            local d = GetDistance(v.HumanoidRootPart.CFrame)
+            if d < bd then bd, best = d, v end
         end
     end
-end)
-
--- Auto Mastery (Fruit/Gun/Sword)
-task.spawn(function()
-    while task.wait(0.4) do
-        pcall(function()
-            local island = K.MasteryIsland or "Bone"
-            local mob = island == "Cake" and "Cookie Crafter" or "Reborn Skeleton"
-            local pos = island == "Cake" and CFrame.new(-1943.67, 251.5, -12337.88) or CFrame.new(-9495.68, 453.58, 5977.34)
-
-            if K.T_MasteryFruit then
-                local e = K.GetConnectionEnemies(mob)
-                if e then
-                    repeat task.wait() K.Attack.Kill(e, true) until not IsAlive(e)
-                else K.Tp(pos) end
+    if not best then
+        for _, v in ipairs(RS:GetChildren()) do
+            if v:IsA("Model") and v:GetAttribute("IsBoss") and v:FindFirstChild("HumanoidRootPart") then
+                local d = GetDistance(v.HumanoidRootPart.CFrame)
+                if d < bd then bd, best = d, v end
             end
-            if K.T_MasterySword then
-                local e = K.GetConnectionEnemies(mob)
-                if e then
-                    repeat task.wait() K.Attack.Kill(e, true) until not IsAlive(e)
-                else K.Tp(pos) end
-            end
-            if K.T_MasteryGun then
-                local e = K.GetConnectionEnemies(mob)
-                if e then
-                    repeat task.wait()
-                        weaponSc("Gun")
-                        local g = LocalPlayer.Character:FindFirstChildOfClass("Tool")
-                        if g and g.ToolTip == "Gun" then
-                            local shoot = Net:FindFirstChild("RE/ShootGunEvent")
-                            if shoot then
-                                K.MousePos = e.HumanoidRootPart.Position
-                                shoot:FireServer(K.MousePos, {e.HumanoidRootPart})
-                            end
-                            SendMouseClick()
-                        end
-                    until not IsAlive(e)
-                else K.Tp(pos) end
-            end
-        end)
+        end
+    end
+    if best then
+        ActivateHaki()
+        EquipSelectedTool()
+        local target = best.HumanoidRootPart.CFrame * CFrame.new(0, 30, 0)
+        if GetDistance(target) > 150 then ExecuteTween(target)
+        else DestroyTween() ExecuteBladeHits() end
+    else
+        DestroyTween()
     end
 end)
 
--- Auto Fishing (OK Hub)
+-- Cake Prince / Dough King / Soul Reaper / Elite Hunter / Citizen
+CreateLoop("Auto Cake Prince", 0.1, function()
+    if not CanFarm("Auto Cake Prince") then return end
+    if not AttackNearest({"Cake Prince","Dough King","Baking Staff","Head Baker","Cake Guard","Cookie Crafter"}) then DestroyTween() end
+end)
+CreateLoop("Auto Dough King", 0.1, function()
+    if not CanFarm("Auto Dough King") then return end
+    if not AttackNearest({"Dough King","Cake Prince"}) then DestroyTween() end
+end)
+CreateLoop("Auto Soul Reaper", 0.1, function()
+    if not CanFarm("Auto Soul Reaper") then return end
+    if not FindEnemy("Soul Reaper") and HasTool("Hallow Essence") then
+        pcall(function() CommF_:InvokeServer("ActivateHallowEssence") end)
+    end
+    if not AttackNearest("Soul Reaper") then DestroyTween() end
+end)
+CreateLoop("Auto Elite Hunter", 0.1, function()
+    if not CanFarm("Auto Elite Hunter") then return end
+    if not AttackNearest({"Diablo","Deandre","Urban"}) then DestroyTween() end
+end)
+CreateLoop("Auto Citizen Quest", 0.1, function()
+    if not CanFarm("Auto Citizen Quest") then return end
+    if not AttackNearest({"Stone","Island Empress","Kilo Admiral","Captain Elephant","Beautiful Pirate"}) then DestroyTween() end
+end)
+
+-- Sea Events (Fishing) — checks do OK Hub + attack da engine
+CreateLoop("Auto Shark", 0.1, function() if not AttackNearest("Shark", 20) then DestroyTween() end end)
+CreateLoop("Auto Terrorshark", 0.1, function() if not AttackNearest("Terrorshark", 20) then DestroyTween() end end)
+CreateLoop("Auto Piranha", 0.1, function() if not AttackNearest("Piranha", 20) then DestroyTween() end end)
+CreateLoop("Auto Fish Crew", 0.1, function() if not AttackNearest({"Fish Crew Member","Haunted Crew Member"}, 20) then DestroyTween() end end)
+CreateLoop("Auto Sea Beast", 0.1, function()
+    local sb = workspace:FindFirstChild("SeaBeasts") and workspace.SeaBeasts:FindFirstChild("SeaBeast1")
+    if sb then
+        ActivateHaki() EquipSelectedTool()
+        if GetDistance(sb:GetPivot()) > 200 then ExecuteTween(sb:GetPivot())
+        else DestroyTween() ExecuteBladeHits() end
+    else DestroyTween() end
+end)
+
+-- Fast Attack + Kill Aura — Speed Hub X
 task.spawn(function()
-    while task.wait(0.5) do
-        if not K.T_Fishing then continue end
-        pcall(function()
-            local char = LocalPlayer.Character
-            local tool = char and char:FindFirstChildOfClass("Tool")
-            if not tool or tool:GetAttribute("InventoryCategory") ~= "Rod" then
-                if K.Rod and LocalPlayer.Backpack:FindFirstChild(K.Rod) then
-                    char.Humanoid:EquipTool(LocalPlayer.Backpack[K.Rod])
-                end
-                return
-            end
-
-            local FishRep = ReplicatedStorage:FindFirstChild("FishReplicated")
-            if not FishRep then return end
-            local FishingReq = FishRep:FindFirstChild("FishingRequest")
-
-            local state = tool:GetAttribute("State")
-            local serverState = tool:GetAttribute("ServerState")
-
-            if state == "ReeledIn" or serverState == "ReeledIn" then
-                FishingReq:InvokeServer("StartCasting")
-                task.wait(0.5)
-                if FishingReq then
-                    FishingReq:InvokeServer("CastLineAtLocation", char.HumanoidRootPart.Position + Vector3.new(0, -5, -20), 100, true)
-                end
-            elseif state == "Biting" or serverState == "Biting" then
-                FishingReq:InvokeServer("Catching", true)
-                task.wait(0.15)
-                FishingReq:InvokeServer("Catch", 1)
-            end
-        end)
+    while task.wait() do
+        if Unloaded then break end
+        if Settings["Fast Attack"] or Settings["Kill Aura"] then
+            local delay = tonumber(Settings["Fast Attack Delay"]) or 0
+            pcall(ExecuteBladeHits)
+            if delay > 0 then task.wait(delay) end
+        end
     end
 end)
 
--- Auto Buy Bait / Fishing Quest / Sell Fish
-task.spawn(function()
-    while task.wait(1.5) do
-        pcall(function()
-            local RF = ReplicatedStorage.Modules.Net:FindFirstChild("RF/JobsRemoteFunction")
-            local RFCraft = ReplicatedStorage.Modules.Net:FindFirstChild("RF/Craft")
-            if K.T_BuyBait and K.Bait and RFCraft then
-                pcall(function() RFCraft:InvokeServer("Craft", K.Bait, {}) end)
-            end
-            if K.T_SellFish and RF then
-                pcall(function() RF:InvokeServer("FishingNPC", "SellFish") end)
-            end
-            if K.T_FishComplete and RF then
-                pcall(function() RF:InvokeServer("FishingNPC", "FinishQuest") end)
-            end
-            if K.T_FishQuest and RF then
-                pcall(function() RF:InvokeServer("FishingNPC", "Angler", "AskQuest") end)
-            end
-            if K.T_SpamZ then
-                local ability = ReplicatedStorage.Modules.Net:FindFirstChild("RF/JobToolAbilities")
-                if ability then
-                    pcall(function() ability:InvokeServer("Z", true) end)
-                end
-            end
-        end)
-    end
-end)
-
--- Kill Aura (Volcano event)
-task.spawn(function()
-    while task.wait(0.5) do
-        if not K.T_KillAura then continue end
-        pcall(function()
-            local hrp = Root(); if not hrp then return end
-            if sethiddenproperty then sethiddenproperty(LocalPlayer, "SimulationRadius", math.huge) end
-            for _, e in ipairs(Workspace.Enemies:GetChildren()) do
-                if IsAlive(e) and e:FindFirstChild("HumanoidRootPart") then
-                    if (e.HumanoidRootPart.Position - hrp.Position).Magnitude <= 500 then
-                        e.Humanoid.Health = 0
-                    end
-                end
-            end
-        end)
-    end
-end)
-
--- Auto V3 / V4 / Buso / Ken
-task.spawn(function()
-    while task.wait(0.5) do
-        pcall(function()
-            if K.T_AutoBuso then
-                local c = LocalPlayer.Character
-                if c and not c:FindFirstChild("HasBuso") then
-                    CommF_:InvokeServer("Buso")
-                end
-            end
-            if K.T_AutoKen then
-                ReplicatedStorage.Remotes.CommE:FireServer("Ken", true)
-            end
-            if K.T_AutoV3 then
-                ReplicatedStorage.Remotes.CommE:FireServer("ActivateAbility")
-            end
-            if K.T_AutoV4 then
-                local c = LocalPlayer.Character
-                if c and c:FindFirstChild("RaceEnergy") and c.RaceEnergy.Value == 1 then
-                    SendKey("Y")
-                end
-            end
-        end)
-    end
-end)
-
--- Anti Admin Join
-task.spawn(function()
-    local blacklist = {
-        "red_game43","rip_indra","Axiore","Polkster","wenlocktoad","Daigrock",
-        "Uzi","Azarth","Lunoven","TheGreateAced","rip_fud","Hingoi","Death_King",
-    }
-    while task.wait(1.5) do
-        if not K.T_AntiAdmin then continue end
-        pcall(function()
-            for _, p in ipairs(Players:GetPlayers()) do
-                if table.find(blacklist, p.Name) then
-                    K.Hop()
-                    return
-                end
-            end
-        end)
-    end
-end)
-
--- Safe Mode
-task.spawn(function()
-    while task.wait(0.3) do
-        if not K.SafeMode then continue end
-        pcall(function()
-            local char = LocalPlayer.Character
-            local hum = char and char:FindFirstChildOfClass("Humanoid")
-            if hum and hum.Health / hum.MaxHealth * 100 < 25 then
-                K.shouldTween = true
-                K.Tp(Root().CFrame * CFrame.new(0, 500, 0))
-            end
-        end)
-    end
-end)
-
--- Auto Travel
-task.spawn(function()
-    while task.wait(0.5) do
-        if not K.T_AutoTravel or not K.SelectedIsland then continue end
-        pcall(function()
-            for _, v in ipairs(Workspace._WorldOrigin.Locations:GetChildren()) do
-                if v.Name == K.SelectedIsland then
-                    K.Tp(v.CFrame * CFrame.new(0, 30, 0))
-                end
-            end
-        end)
-    end
-end)
-
--- Auto Tween NPC
-task.spawn(function()
-    while task.wait(0.5) do
-        if not K.T_TweenNPC or not K.SelectedNPC then continue end
-        pcall(function()
-            for _, v in ipairs(ReplicatedStorage:FindFirstChild("NPCs"):GetChildren()) do
-                if v.Name == K.SelectedNPC and v:FindFirstChild("HumanoidRootPart") then
-                    K.Tp(v.HumanoidRootPart.CFrame)
-                end
-            end
-        end)
-    end
-end)
-
--- Auto Stats
-task.spawn(function()
-    while task.wait(0.5) do
-        pcall(function()
-            local stats = {
-                {"AutoMelee", "Melee"},
-                {"AutoSword", "Sword"},
-                {"AutoGun", "Gun"},
-                {"AutoDevil", "Demon Fruit"},
-                {"AutoDefense", "Defense"},
-            }
-            for _, s in ipairs(stats) do
-                if K[s[1]] and statsValue > 0 then
-                    K.statsSettings(s[2], statsValue)
-                end
-            end
-        end)
-    end
-end)
-
--- Fruits Management
+-- Stop On Rare Items
 task.spawn(function()
     while task.wait(1) do
-        pcall(function()
-            if K.T_RandomFruit then CommF_:InvokeServer("Cousin", "Buy") end
-            if K.T_StoreFruit then
-                for _, t in ipairs(LocalPlayer.Backpack:GetChildren()) do
-                    if t:IsA("Tool") and t:FindFirstChild("EatRemote", true) then
-                        CommF_:InvokeServer("StoreFruit", t:GetAttribute("OriginalName"), t)
-                    end
+        if Unloaded then break end
+        if Settings["Stop On Rare Items"] and IsAnyFeatureActive() then
+            local found = HasRareItem()
+            if found then
+                for _, f in ipairs(FeatureFlags) do
+                    Settings[f] = false
+                    if G_NAMES[f] then _G[G_NAMES[f]] = false end
+                    pcall(function() VindUI:SetUIElementValue(f, false, false) end)
                 end
+                Notify("Item Raro!", found .. " encontrado — farms desligados!", "success")
             end
-            if K.T_DropFruit then
-                for _, t in ipairs(LocalPlayer.Backpack:GetChildren()) do
-                    if t:IsA("Tool") and t.Name:find("Fruit") then
-                        LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):EquipTool(t)
-                        task.wait(0.1)
-                        if t:FindFirstChild("EatRemote") then
-                            t.EatRemote:InvokeServer("Drop")
-                        end
-                    end
-                end
-            end
-            if K.T_TweenFruit then
-                for _, v in ipairs(Workspace:GetChildren()) do
-                    if v.Name:find("Fruit") and v:FindFirstChild("Handle") then
-                        K.Tp(v.Handle.CFrame)
-                    end
-                end
-            end
-            if K.T_CollectFruit then
-                local hrp = Root()
-                for _, v in ipairs(Workspace:GetChildren()) do
-                    if v.Name:find("Fruit") and v:FindFirstChild("Handle") then
-                        v.Handle.CFrame = hrp.CFrame
-                    end
-                end
-            end
-            if K.T_FruitSniper then
-                local fruits = CommF_:InvokeServer("GetFruits")
-                for _, f in ipairs(fruits) do
-                    pcall(function() CommF_:InvokeServer("PurchaseRawFruit", f.Name, false) end)
-                end
-            end
-        end)
+        end
     end
 end)
 
--- Raid helpers
+-- Auto Store Fruit (OK Hub)
+CreateLoop("Auto Store Fruit", 1, function()
+    for _, x in ipairs(LocalPlayer.Backpack:GetChildren()) do
+        local remote = x:FindFirstChild("EatRemote", true)
+        if remote then
+            pcall(function()
+                CommF_:InvokeServer("StoreFruit", remote.Parent:GetAttribute("OriginalName"), x)
+            end)
+        end
+    end
+end)
+
+-- Auto Add Points (OK Hub — statsSetings)
+CreateLoop("Auto Add Points", 0.5, function()
+    pcall(function()
+        local stat = Settings["Stat Select"] == "Devil Fruit" and "Demon Fruit" or Settings["Stat Select"]
+        if LocalPlayer.Data.Points.Value > 0 then
+            CommF_:InvokeServer("AddPoint", stat, math.min(Settings["Stat Points"] or 10, LocalPlayer.Data.Points.Value))
+        end
+    end)
+end)
+
+-- Auto Turn On Buso
 task.spawn(function()
     while task.wait(1) do
-        pcall(function()
-            if K.T_ChipBeli and not LocalPlayer.Backpack:FindFirstChild("Special Microchip") then
-                CommF_:InvokeServer("RaidsNpc", "Select", K.SelectedChip or "Flame")
-            end
-            if K.T_ChipFruit and not LocalPlayer.Backpack:FindFirstChild("Special Microchip") then
-                local fruits = CommF_:InvokeServer("GetFruits")
-                for _, f in ipairs(fruits) do
-                    if f.Price <= 490000 then
-                        CommF_:InvokeServer("LoadFruit", tostring(f.Name))
-                        CommF_:InvokeServer("RaidsNpc", "Select", K.SelectedChip or "Flame")
-                        break
-                    end
-                end
-            end
-            if K.T_Awakening then
-                CommF_:InvokeServer("Awakener", "Check")
-                CommF_:InvokeServer("Awakener", "Awaken")
-            end
-            if K.T_AutoPvP then
-                local pg = LocalPlayer.PlayerGui
-                if pg.Main and pg.Main:FindFirstChild("PvpDisabled") and pg.Main.PvpDisabled.Visible then
-                    CommF_:InvokeServer("EnablePvp")
-                end
-            end
-        end)
+        if Unloaded then break end
+        if Settings["Auto Turn On Buso"] then pcall(ActivateHaki) end
     end
 end)
 
--- Auto Start Raid
+-- Auto Haki Observation (aperta F ao renascer — igual OK Hub AutoKen)
 task.spawn(function()
-    while task.wait(0.4) do
-        if not K.T_StartRaid then continue end
-        pcall(function()
-            local gui = LocalPlayer.PlayerGui:FindFirstChild("Main")
-            local top = gui and gui:FindFirstChild("TopHUDList")
-            if not top or top.RaidTimer.Visible then return end
-            if not LocalPlayer.Backpack:FindFirstChild("Special Microchip") then return end
-
-            if World2 then
-                local btn = Workspace.Map.CircleIsland.RaidSummon2.Button.Main
-                if btn then
-                    if btn:FindFirstChild("ProximityPrompt") then fireproximityprompt(btn.ProximityPrompt)
-                    elseif btn:FindFirstChild("ClickDetector") then fireclickdetector(btn.ClickDetector) end
-                end
-            elseif World3 then
-                local btn = Workspace.Map["Boat Castle"].RaidSummon2.Button.Main
-                if btn then
-                    if btn:FindFirstChild("ProximityPrompt") then fireproximityprompt(btn.ProximityPrompt)
-                    elseif btn:FindFirstChild("ClickDetector") then fireclickdetector(btn.ClickDetector) end
-                end
-            end
-        end)
-    end
+    LocalPlayer.CharacterAdded:Connect(function()
+        task.wait(2)
+        if Settings["Auto Ken"] then
+            pcall(function()
+                VIM:SendKeyEvent(true, "F", false, game)
+                task.wait(0.05)
+                VIM:SendKeyEvent(false, "F", false, game)
+            end)
+        end
+    end)
 end)
 
--- Auto Raid + Next Island
+-- Anti AFK (OK Hub)
+local antiAfkConn = nil
 task.spawn(function()
-    local islands = {"Island 1","Island 2","Island 3","Island 4","Island 5"}
-    while task.wait(0.4) do
-        if not K.T_Raiding then continue end
-        pcall(function()
-            local locs = Workspace["_WorldOrigin"].Locations
-            local gui = LocalPlayer.PlayerGui.Main.TopHUDList.RaidTimer
-            if not gui.Visible then return end
-            local char = LocalPlayer.Character
-            local root = char and char:FindFirstChild("HumanoidRootPart")
-            if not root then return end
-
-            for _, name in ipairs(islands) do
-                local loc = locs:FindFirstChild(name)
-                if loc then
-                    for _, mob in ipairs(Workspace.Enemies:GetChildren()) do
-                        local mh = mob:FindFirstChild("Humanoid")
-                        local mhrp = mob:FindFirstChild("HumanoidRootPart")
-                        if mh and mhrp and mh.Health > 0 and (mhrp.Position - loc.Position).Magnitude < 450 then
-                            repeat task.wait() K.Attack.Kill(mob, true) until not K.T_Raiding or not mob.Parent or mh.Health <= 0
-                        end
-                    end
-                end
-            end
-        end)
+    while task.wait(1) do
+        if Unloaded then break end
+        if Settings["Anti AFK"] and not antiAfkConn then
+            antiAfkConn = LocalPlayer.Idled:Connect(function()
+                VU:CaptureController()
+                VU:ClickButton2(Vector2.new())
+            end)
+        elseif not Settings["Anti AFK"] and antiAfkConn then
+            antiAfkConn:Disconnect() antiAfkConn = nil
+        end
     end
 end)
 
--- Auto Farm Dungeon
+-- Auto Anti Admin Join Server (OK Hub)
+local AdminWatchlist = {} -- adicione usernames aqui
+Players.PlayerAdded:Connect(function(plr)
+    task.wait(0.5)
+    if Settings["Anti Admin"] and (table.find(AdminWatchlist, plr.Name) or table.find(AdminWatchlist, plr.DisplayName)) then
+        Notify("Anti Admin", plr.Name .. " entrou — saindo!", "warning")
+        task.wait(1)
+        TeleportService:Teleport(game.PlaceId, LocalPlayer)
+    end
+end)
+
+-- ESP
+local function ApplyESP(model, tag, color)
+    if not model or not model.Parent then return end
+    local h = model:FindFirstChild("KyrovaESP_" .. tag)
+    if not h then
+        h = Instance.new("Highlight")
+        h.Name = "KyrovaESP_" .. tag
+        h.FillTransparency = 0.6
+        h.Parent = model
+    end
+    h.FillColor, h.OutlineColor, h.Enabled = color, color, true
+end
+local function RemoveESP(model, tag)
+    local h = model and model:FindFirstChild("KyrovaESP_" .. tag)
+    if h then h:Destroy() end
+end
+task.spawn(function()
+    while task.wait(1) do
+        if Unloaded then break end
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer and plr.Character then
+                if Settings["ESP Player"] then ApplyESP(plr.Character,"Player",Color3.fromRGB(255,0,0))
+                else RemoveESP(plr.Character,"Player") end
+            end
+        end
+        for _, mob in ipairs(Enemies:GetChildren()) do
+            if Settings["ESP Mob"] then ApplyESP(mob,"Mob",Color3.fromRGB(255,255,0))
+            else RemoveESP(mob,"Mob") end
+        end
+        for _, ch in ipairs(CollectionService:GetTagged("_ChestTagged")) do
+            if ch:IsA("BasePart") or ch:IsA("Model") then
+                if Settings["ESP Chest"] then ApplyESP(ch,"Chest",Color3.fromRGB(0,255,0))
+                else RemoveESP(ch,"Chest") end
+            end
+        end
+        for _, f in ipairs(workspace:GetChildren()) do
+            if string.find(f.Name, "Fruit") then
+                if Settings["ESP Fruit"] then ApplyESP(f,"Fruit",Color3.fromRGB(170,0,255))
+                else RemoveESP(f,"Fruit") end
+            end
+        end
+    end
+end)
+
+-- Remove Fog
+task.spawn(function()
+    local default = Lighting.FogEnd
+    while task.wait(1) do
+        if Unloaded then break end
+        Lighting.FogEnd = Settings["Remove Fog"] and 9e9 or default
+    end
+end)
+
+-- WalkSpeed / JumpPower / Infinite Energy
 task.spawn(function()
     while task.wait(0.2) do
-        if not K.T_FarmDungeon then continue end
-        pcall(function()
-            for _, mob in ipairs(Workspace.Enemies:GetChildren()) do
-                if not K.T_FarmDungeon then break end
-                local mh = mob:FindFirstChild("Humanoid")
-                local mhrp = mob:FindFirstChild("HumanoidRootPart")
-                if mh and mhrp and mh.Health > 0 then
-                    repeat task.wait() K.Attack.Kill(mob, true) until not K.T_FarmDungeon or not mob.Parent or mh.Health <= 0
-                end
-            end
-        end)
-    end
-end)
-
--- Auto Random Fruit (redundant safe loop)
-task.spawn(function()
-    while task.wait(1) do
-        if K.T_RandomFruit then
-            pcall(function() CommF_:InvokeServer("Cousin", "Buy") end)
+        if Unloaded then break end
+        local char = LocalPlayer.Character
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            if Settings["Apply WalkSpeed"] then pcall(function() hum.WalkSpeed = Settings["WalkSpeed"] end) end
+            if Settings["Apply JumpPower"] then pcall(function() hum.JumpPower = Settings["JumpPower"] end) end
+        end
+        if char and Settings["Infinite Energy"] then
+            pcall(function()
+                local energy = char:FindFirstChild("Energy")
+                if energy then energy.Value = math.max(energy.Value, 1) end
+            end)
         end
     end
 end)
 
--- Prehistoric Island Event (Auto Find)
-task.spawn(function()
-    while task.wait(0.5) do
-        if not K.T_FindPrehis then continue end
-        pcall(function()
-            local locs = Workspace["_WorldOrigin"].Locations
-            local prehis = locs:FindFirstChild("Prehistoric Island")
-            if prehis then
-                K.Tp(prehis.CFrame * CFrame.new(0, 200, 0))
-            end
-        end)
-    end
+-- Auto Turn v3 / v4 (OK Hub) — HOOKS: cole as lógicas na extensão
+CreateLoop("Auto Turn V3", 1, function() -- [LOGICA OK HUB — Human v3]
+    -- os mobs estão em Human_v3_Mob = {"Fajita","Jeremy","Diamond"} no OK Hub
+end)
+CreateLoop("Auto Turn V4", 1, function() -- [LOGICA OK HUB — Race V4]
 end)
 
--- Auto Start Prehistoric
-task.spawn(function()
-    while task.wait(0.4) do
-        if not K.T_StartPrehis then continue end
-        pcall(function()
-            if Workspace.Map:FindFirstChild("PrehistoricIsland") then
-                local promptPart = Workspace.Map.PrehistoricIsland.Core:FindFirstChild("ActivationPrompt", true)
-                if promptPart and promptPart:FindFirstChild("ProximityPrompt") then
-                    if (Root().Position - promptPart.CFrame.Position).Magnitude <= 150 then
-                        fireproximityprompt(promptPart.ProximityPrompt, math.huge)
-                        SendKey("E", 1.5)
-                    end
-                    K.Tp(promptPart.CFrame)
-                end
-            end
-        end)
-    end
-end)
+--════════════════════════ UI — KYROVA HUB ════════════════════════
 
--- Auto Collect Dino Bones
-task.spawn(function()
-    while task.wait(0.4) do
-        if not K.T_DinoBones then continue end
-        pcall(function()
-            for _, v in ipairs(Workspace:GetChildren()) do
-                if v.Name == "DinoBone" then K.Tp(v.CFrame) end
-            end
-        end)
-    end
-end)
+getgenv().CONFIG = {
+    Theme = "Dark",
+    Intro = {
+        Enabled = true, Title = "Kyrova Hub", Eyebrow = "BEM-VINDO",
+        Subtitle = "Blox Fruits • Carregando...", Logo = "rbxassetid://71647128089295",
+        UseBlur = true, Transparency = 0.22, Shimmer = true,
+        Duration = 2.6, Skippable = true, ReducedMotion = false,
+    },
+    Integrations = {Spotify=false, Assistant=false, Cloud=false, GlobalChat=false},
+    MobileScaleReference = 450,
+    UserInfo = {Enabled=true, Avatar="player", NameMode="display"},
+    FeedbackWebhook = "", CloudBaseUrl = "", CommunityUrl = "",
+}
 
--- Auto Collect Dragon Eggs
-task.spawn(function()
-    while task.wait(0.5) do
-        if not K.T_DragonEggs then continue end
-        pcall(function()
-            if Workspace.Map:FindFirstChild("PrehistoricIsland") then
-                local core = Workspace.Map.PrehistoricIsland:FindFirstChild("Core")
-                local eggs = core and core:FindFirstChild("SpawnedDragonEggs")
-                if eggs then
-                    local egg = eggs:FindFirstChild("DragonEgg")
-                    if egg and egg:FindFirstChild("Molten") then
-                        K.Tp(egg.Molten.CFrame)
-                        fireproximityprompt(egg.Molten.ProximityPrompt, 30)
-                    end
-                end
-            end
-        end)
-    end
-end)
+local VindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Skinny-yz/vindUI-Test/main/full.luau"))()
+VindUI:SetTheme(getgenv().CONFIG.Theme)
+VindUI:PreloadIcons({"Lucide","Material","Phosphor","SF"})
+VindUI:SetScaleRange(0.75, 1.35)
+VindUI:SetMobileScaleReference(getgenv().CONFIG.MobileScaleReference)
+VindUI:ShowIntro(getgenv().CONFIG.Intro):Wait()
 
--- Auto Pull Lever (Race V4)
-task.spawn(function()
-    while task.wait(0.5) do
-        if not K.T_PullLever then continue end
-        pcall(function()
-            local t = Workspace.Map:FindFirstChild("Temple of Time")
-            if t then
-                for _, d in ipairs(t:GetDescendants()) do
-                    if d:IsA("ProximityPrompt") then
-                        fireproximityprompt(d, math.huge)
-                    end
-                end
-            end
-        end)
-    end
-end)
-
--- Auto Train V4
-task.spawn(function()
-    while task.wait(0.5) do
-        if not K.T_TrainV4 then continue end
-        pcall(function()
-            local char = LocalPlayer.Character
-            if char:FindFirstChild("RaceEnergy") and char.RaceEnergy.Value == 1 then
-                SendKey("Y")
-                CommF_:InvokeServer("UpgradeRace", "Buy")
-                K.Tp(CFrame.new(-8987.04, 215.86, 5886.71))
-            else
-                local e = K.GetConnectionEnemies({"Reborn Skeleton","Living Zombie","Demonic Soul","Posessed Mummy"})
-                if e then
-                    repeat task.wait() K.Attack.Kill(e, true) until not IsAlive(e)
-                else
-                    K.Tp(CFrame.new(-9495.68, 453.58, 5977.34))
-                end
-            end
-        end)
-    end
-end)
-
---============================================================
--- FINAL
---============================================================
-VindUI:Notify({
+local Window = VindUI:CreateWindow({
     Title = "Kyrova Hub",
-    Text  = "Todos os módulos ativos! Ícone: 71647128089295",
-    Type  = "info",
-    Duration = 5,
+    Subtitle = "Blox Fruits • Sea " .. (World1 and 1 or World2 and 2 or 3),
+    Icon = "rbxassetid://71647128089295",
+    Size = UDim2.fromOffset(640, 455),
+    MinSize = Vector2.new(500, 360),
+    Draggable = true, Resizable = true, UseBlur = true,
+    DefaultTab = "Main", TabWidth = 145, TabScrollbar = true,
+    UserInfo = getgenv().CONFIG.UserInfo,
 })
 
-print("[Kyrova Hub] Loaded successfully.")
+local function AddToggle(tab, key, text, extra)
+    Settings[key] = Settings[key] or false
+    local opts = {Text = text, Flag = key, Default = Settings[key]}
+    if extra then for k, v in pairs(extra) do if k ~= "Callback" then opts[k] = v end end end
+    opts.Callback = function(value)
+        Settings[key] = value
+        if G_NAMES[key] then _G[G_NAMES[key]] = value end
+        if extra and extra.Callback then extra.Callback(value) end
+    end
+    return tab:AddToggle(opts)
+end
+
+local Tabs = {}
+local MainGroup = Window:AddTabGroup({Name = "KYROVA HUB"})
+Tabs.Info     = MainGroup:AddTab({Name="Info / Status", Icon="Lucide:info"})
+Tabs.Main     = MainGroup:AddTab({Name="Main", Icon="Lucide:swords"})
+Tabs.Fishing  = MainGroup:AddTab({Name="Fishing", Icon="Lucide:fish"})
+Tabs.Quest    = MainGroup:AddTab({Name="Quest & Item", Icon="Lucide:scroll"})
+Tabs.Volcano  = MainGroup:AddTab({Name="Volcano Event", Icon="Lucide:flame"})
+Tabs.Stats    = MainGroup:AddTab({Name="Stats & ESP", Icon="Lucide:bar-chart-3"})
+Tabs.Fruit    = MainGroup:AddTab({Name="Fruit & Raid", Icon="Lucide:cherry"})
+Tabs.LocalP   = MainGroup:AddTab({Name="Local Player", Icon="Lucide:user"})
+Tabs.Teleport = MainGroup:AddTab({Name="Teleport", Icon="Lucide:map-pin"})
+Tabs.Shop     = MainGroup:AddTab({Name="Shopping", Icon="Lucide:shopping-cart"})
+Tabs.Misc     = MainGroup:AddTab({Name="Miscellaneous", Icon="Lucide:puzzle"})
+local SysGroup = Window:AddTabGroup({Name = "SYSTEM"})
+Tabs.Settings = SysGroup:AddTab({Name="Settings", Icon="Lucide:settings-2"})
+
+-- ─── INFO / STATUS (OK Hub, sem discord) ───
+do
+    Tabs.Info:AddCard({
+        UserId = LocalPlayer.UserId,
+        Title = "Bem-vindo, " .. LocalPlayer.DisplayName,
+        Description = "Kyrova Hub • " .. (World1 and "1st Sea" or World2 and "2nd Sea" or "3rd Sea"),
+    })
+    Tabs.Info:AddSystemInfoGrid({Description = "FPS, Ping, Executor e info da sessão"})
+    pcall(function()
+        Tabs.Info:AddInfoGrid({
+            Title = "Suas Informações", Columns = 2,
+            Items = {
+                {Label="Level",Value=tostring(LocalPlayer.Data.Level.Value)},
+                {Label="Beli",Value=tostring(LocalPlayer.Data.Money.Value)},
+                {Label="Fragments",Value=tostring(LocalPlayer.Data.Fragments.Value)},
+                {Label="Bounty",Value=tostring(LocalPlayer.Data.Bounty.Value)},
+                {Label="Race",Value=tostring(LocalPlayer.Data.Race.Value)},
+                {Label="Fruit",Value=tostring(LocalPlayer.Data.DevilFruit.Value)},
+            },
+        })
+    end)
+    Tabs.Info:AddButton({Text="Rejoin Server", Icon="Lucide:log-in",
+        Callback=function() TeleportService:Teleport(game.PlaceId, LocalPlayer) end})
+    Tabs.Info:AddButton({Text="Copy Job ID", Icon="Lucide:clipboard",
+        Callback=function()
+            if setclipboard then setclipboard(game.JobId); Notify("Copiado","Job ID na área de transferência","success")
+            else Notify("Erro","Executor sem setclipboard","warning") end
+        end})
+end
+
+-- ─── MAIN ───
+do
+    Tabs.Main:AddSection("Farm", "Lucide:swords")
+    AddToggle(Tabs.Main, "Auto Farm Level", "Auto Farm")                    -- Speed Hub X
+    AddToggle(Tabs.Main, "Auto Farm Nearest", "Auto Farm Nearest")          -- Speed Hub X
+    AddToggle(Tabs.Main, "Auto Factory Raid", "Auto Factory Raid")
+    AddToggle(Tabs.Main, "Auto Farm Ectoplasma", "Auto Farm Ectoplasma")
+    AddToggle(Tabs.Main, "Auto Collect Chest", "Auto Collect Chest")        -- Speed Hub X
+    AddToggle(Tabs.Main, "Stop On Rare Items", "Stop On Rare Items")        -- Speed Hub
+    Tabs.Main:AddSection("Farming", "Lucide:leaf")
+    AddToggle(Tabs.Main, "Auto Farm Bones", "Auto Farm Bones")
+    AddToggle(Tabs.Main, "Auto Farm Material", "Auto Farm Material")
+    Tabs.Main:AddDropdown({Text="Select Material", Flag="Choose Material",
+        Options=MaterialList, Default=MaterialList[1],
+        Callback=function(v) Settings["Choose Material"]=v end})
+    AddToggle(Tabs.Main, "Auto Cake Prince", "Auto Cake Prince")
+    AddToggle(Tabs.Main, "Auto Dough King", "Auto Dough King")
+    AddToggle(Tabs.Main, "Auto Soul Reaper", "Auto Soul Reaper")
+    AddToggle(Tabs.Main, "Auto Elite Hunter", "Auto Elite Hunter")
+    AddToggle(Tabs.Main, "Auto Citizen Quest", "Auto Citizen Quest")
+    Tabs.Main:AddSection("Boss", "Lucide:skull")
+    Tabs.Main:AddDropdown({Text="Select Boss", Flag="Choose Boss",
+        Options=BossList, Default=BossList[1],
+        Callback=function(v) Settings["Choose Boss"]=v end})
+    AddToggle(Tabs.Main, "Auto Attack Boss", "Auto Attack Boss")
+    AddToggle(Tabs.Main, "Auto Attack All Boss", "Auto Attack All Boss")
+    Tabs.Main:AddSection("Stack", "Lucide:layers")
+    AddToggle(Tabs.Main, "Stack Farming Enabled", "Enable Stack Farming (prioridade)")
+end
+
+-- ─── FISHING ───
+do
+    Tabs.Fishing:AddSection("Sea Events", "Lucide:fish")
+    AddToggle(Tabs.Fishing, "Auto Shark", "Auto Kill Shark")
+    AddToggle(Tabs.Fishing, "Auto Terrorshark", "Auto Kill Terrorshark")
+    AddToggle(Tabs.Fishing, "Auto Piranha", "Auto Kill Piranha")
+    AddToggle(Tabs.Fishing, "Auto Fish Crew", "Auto Kill Fish Crew")
+    AddToggle(Tabs.Fishing, "Auto Sea Beast", "Auto Kill Sea Beast")
+end
+
+-- ─── QUEST & ITEM (OK Hub — flags _G prontas) ───
+do
+    Tabs.Quest:AddSection("Swords & Guns", "Lucide:swords")
+    AddToggle(Tabs.Quest, "Auto Saber", "Auto Saber")
+    AddToggle(Tabs.Quest, "Auto Pole", "Auto Pole (v1)")
+    AddToggle(Tabs.Quest, "Auto Pole V2", "Auto Pole V2")
+    AddToggle(Tabs.Quest, "Auto Saw", "Auto Saw")
+    AddToggle(Tabs.Quest, "Auto Trident", "Auto Trident W2")
+    AddToggle(Tabs.Quest, "Auto Yama", "Auto Yama")
+    AddToggle(Tabs.Quest, "Auto Tushita", "Auto Tushita")
+    AddToggle(Tabs.Quest, "Auto CDK", "Auto CDK")
+    AddToggle(Tabs.Quest, "Auto Soul Guitar", "Auto Soul Guitar")
+    AddToggle(Tabs.Quest, "Auto Serpent Bow", "Auto Serpent Bow")
+    Tabs.Quest:AddSection("Fighting Styles", "Lucide:fist")
+    AddToggle(Tabs.Quest, "Auto Superhuman", "Auto Superhuman")
+    AddToggle(Tabs.Quest, "Auto Death Step", "Auto Death Step")
+    AddToggle(Tabs.Quest, "Auto Sharkman", "Auto Sharkman Karate")
+    AddToggle(Tabs.Quest, "Auto Electric Claw", "Auto Electric Claw")
+    AddToggle(Tabs.Quest, "Auto Dragon Talon", "Auto Dragon Talon")
+    AddToggle(Tabs.Quest, "Auto God Human", "Auto God Human")
+    Tabs.Quest:AddSection("Quests", "Lucide:scroll")
+    AddToggle(Tabs.Quest, "Auto Rainbow Haki", "Auto Rainbow Haki")
+    AddToggle(Tabs.Quest, "Auto Bartilo", "Auto Bartilo Quest")
+    AddToggle(Tabs.Quest, "Auto Cavender", "Auto Cavender")
+    Tabs.Quest:AddParagraph({Title="Nota",
+        Text="Esses toggles setam as flags _G (AutoSaber, Auto_Yama, etc). Cole as funções do OK Hub na área de extensão no fim do script e elas ativam automaticamente."})
+end
+
+-- ─── VOLCANO EVENT ───
+do
+    Tabs.Volcano:AddSection("Volcano Event (Sea 3)", "Lucide:flame")
+    AddToggle(Tabs.Volcano, "Auto Collect Ember", "Auto Collect Azure Ember")       -- [LOGICA OK HUB]
+    AddToggle(Tabs.Volcano, "Auto Prehistoric", "Auto Summon Prehistoric Island")   -- [LOGICA OK HUB]
+    AddToggle(Tabs.Volcano, "Tween Prehistoric", "Tween to Prehistoric Island")     -- [LOGICA OK HUB]
+end
+
+-- ─── STATS & ESP ───
+do
+    Tabs.Stats:AddSection("Auto Stats", "Lucide:bar-chart-3")
+    Tabs.Stats:AddDropdown({Text="Select Stat", Flag="Stat Select",
+        Options={"Melee","Defense","Sword","Gun","Devil Fruit"}, Default="Melee",
+        Callback=function(v) Settings["Stat Select"]=v end})
+    Tabs.Stats:AddSlider({Text="Points per tick", Flag="Stat Points",
+        Min=1, Max=100, Default=10, Increment=1,
+        Callback=function(v) Settings["Stat Points"]=v end})
+    AddToggle(Tabs.Stats, "Auto Add Points", "Auto Add Points")
+    Tabs.Stats:AddSection("ESP", "Lucide:eye")
+    AddToggle(Tabs.Stats, "ESP Player", "Player ESP")
+    AddToggle(Tabs.Stats, "ESP Mob", "Mob ESP")
+    AddToggle(Tabs.Stats, "ESP Chest", "Chest ESP")
+    AddToggle(Tabs.Stats, "ESP Fruit", "Fruit ESP")
+end
+
+-- ─── FRUIT & RAID ───
+do
+    Tabs.Fruit:AddSection("Fruits", "Lucide:cherry")
+    AddToggle(Tabs.Fruit, "Auto Store Fruit", "Auto Store Fruits")
+    Tabs.Fruit:AddDropdown({Text="Select Fruit", Flag="Choose Fruit",
+        Options=FruitList, Default=FruitList[1],
+        Callback=function(v) Settings["Choose Fruit"]=v end})
+    Tabs.Fruit:AddSection("Raid", "Lucide:swords")
+    Tabs.Fruit:AddDropdown({Text="Select Chip", Flag="Choose Chip",
+        Options=ChipList, Default="Flame",
+        Callback=function(v) Settings["Choose Chip"]=v end})
+    AddToggle(Tabs.Fruit, "Auto Raid", "Auto Raid")   -- [LOGICA OK HUB]
+end
+
+-- ─── LOCAL PLAYER ───
+do
+    Tabs.LocalP:AddSection("Character", "Lucide:user")
+    Tabs.LocalP:AddSlider({Text="Walk Speed", Flag="WalkSpeed",
+        Min=16, Max=500, Default=16, Increment=1,
+        Callback=function(v) Settings["WalkSpeed"]=v end})
+    Tabs.LocalP:AddSlider({Text="Jump Power", Flag="JumpPower",
+        Min=50, Max=500, Default=50, Increment=1,
+        Callback=function(v) Settings["JumpPower"]=v end})
+    AddToggle(Tabs.LocalP, "Apply WalkSpeed", "Enable Walk Speed")
+    AddToggle(Tabs.LocalP, "Apply JumpPower", "Enable Jump Power")
+    AddToggle(Tabs.LocalP, "Infinite Energy", "Infinite Energy")
+    Tabs.LocalP:AddButton({Text="Reset Character", Icon="Lucide:skull",
+        Callback=function() pcall(function() LocalPlayer.Character.Humanoid.Health = 0 end) end})
+end
+
+-- ─── TELEPORT ───
+do
+    local Locations = {}
+    pcall(function()
+        for _, v in ipairs(workspace._WorldOrigin.Locations:GetChildren()) do
+            table.insert(Locations, v.Name)
+        end
+    end)
+    table.sort(Locations)
+    if #Locations == 0 then Locations = {"(entre no jogo)"} end
+    Tabs.Teleport:AddSection("Teleport", "Lucide:map-pin")
+    Tabs.Teleport:AddDropdown({Text="Select Island", Flag="TP Island",
+        Options=Locations, Default=Locations[1],
+        Callback=function(v) Settings["TP Island"]=v end})
+    Tabs.Teleport:AddButton({Text="Tween to Island", Icon="Lucide:rocket",
+        Callback=function()
+            local loc = workspace._WorldOrigin.Locations:FindFirstChild(Settings["TP Island"])
+            if loc then
+                ExecuteTween(CFrame.new(loc.Position + Vector3.new(0, 50, 0)))
+                Notify("Teleport", "Indo para " .. Settings["TP Island"], "info")
+            end
+        end})
+    Tabs.Teleport:AddButton({Text="Stop Tween", Icon="Lucide:x", Callback=DestroyTween})
+end
+
+-- ─── SHOPPING (Speed Hub X verbatim) ───
+do
+    local Shop = {
+        ["Fragments"] = {
+            {"Race Reroll", {"BlackbeardReward","Reroll","2"}},
+            {"Reset Stats", {"BlackbeardReward","Refund","2"}},
+        },
+        ["Fighting Style"] = {
+            {"Buy Black Leg",{"BuyBlackLeg"}},{"Buy Electro",{"BuyElectro"}},
+            {"Buy Fishman Karate",{"BuyFishmanKarate"}},
+            {"Buy Dragon Claw",{"BlackbeardReward","DragonClaw","2"}},
+            {"Buy Superhuman",{"BuySuperhuman"}},{"Buy Death Step",{"BuyDeathStep"}},
+            {"Buy Sharkman Karate",{"BuySharkmanKarate"}},
+            {"Buy Electric Claw",{"BuyElectricClaw"}},
+            {"Buy Dragon Talon",{"BuyDragonTalon"}},
+            {"Buy Godhuman",{"BuyGodhuman"}},{"Buy Sanguine Art",{"BuySanguineArt"}},
+        },
+        ["Ability Teacher"] = {
+            {"Buy Geppo",{"BuyHaki","Geppo"}},{"Buy Buso",{"BuyHaki","Buso"}},
+            {"Buy Soru",{"BuyHaki","Soru"}},{"Buy Ken (Observation)",{"KenTalk","Buy"}},
+        },
+        ["Sword"] = {
+            {"Buy Katana",{"BuyItem","Katana"}},{"Buy Cutlass",{"BuyItem","Cutlass"}},
+            {"Buy Dual Katana",{"BuyItem","Dual Katana"}},
+            {"Buy Iron Mace",{"BuyItem","Iron Mace"}},
+            {"Buy Triple Katana",{"BuyItem","Triple Katana"}},
+            {"Buy Pipe",{"BuyItem","Pipe"}},
+            {"Buy Dual-Headed Blade",{"BuyItem","Dual-Headed Blade"}},
+            {"Buy Soul Cane",{"BuyItem","Soul Cane"}},
+            {"Buy Bisento",{"BuyItem","Bisento"}},
+        },
+        ["Gun"] = {
+            {"Buy Musket",{"BuyItem","Musket"}},
+            {"Buy Slingshot",{"BuyItem","Slingshot"}},
+            {"Buy Flintlock",{"BuyItem","Flintlock"}},
+            {"Buy Refined Slingshot",{"BuyItem","Refined Slingshot"}},
+            {"Buy Refined Flintlock",{"BuyItem","Refined Flintlock"}},
+            {"Buy Cannon",{"BuyItem","Cannon"}},
+            {"Buy Kabucha",{"BlackbeardReward","Slingshot","2"}},
+        },
+        ["Accessories"] = {
+            {"Buy Black Cape",{"BuyItem","Black Cape"}},
+            {"Buy Swordsman Hat",{"BuyItem","Swordsman Hat"}},
+            {"Buy Tomoe Ring",{"BuyItem","Tomoe Ring"}},
+        },
+        ["Race"] = {
+            {"Ghoul Race",{"Ectoplasm","Change","4"}},
+            {"Cyborg Race",{"CyborgTrainer","Buy"}},
+        },
+    }
+    for _, sectionName in ipairs({"Fragments","Fighting Style","Ability Teacher","Sword","Gun","Accessories","Race"}) do
+        Tabs.Shop:AddSection(sectionName, "Phosphor:shopping-cart")
+        for _, item in ipairs(Shop[sectionName]) do
+            Tabs.Shop:AddButton({Text=item[1], Callback=function()
+                pcall(function() CommF_:InvokeServer(unpack(item[2])) end)
+                Notify("Shop", item[1], "success")
+            end})
+        end
+    end
+end
+
+-- ─── MISCELLANEOUS ───
+do
+    Tabs.Misc:AddSection("Performance", "Lucide:gauge")
+    AddToggle(Tabs.Misc, "FPS Boost", "FPS Boost", {Callback=function(v)
+        if v then
+            pcall(function()
+                local t = workspace.Terrain
+                t.WaterWaveSize=0 t.WaterWaveSpeed=0 t.WaterReflectance=0 t.WaterTransparency=0
+                Lighting.GlobalShadows=false Lighting.FogEnd=9e9 Lighting.Brightness=0
+                settings().Rendering.QualityLevel="Level01"
+                for _, e in ipairs(Lighting:GetChildren()) do
+                    if e:IsA("BlurEffect") or e:IsA("SunRaysEffect") or e:IsA("ColorCorrectionEffect")
+                        or e:IsA("BloomEffect") or e:IsA("DepthOfFieldEffect") then
+                        e.Enabled = false
+                    end
+                end
+            end)
+        end
+    end})
+    AddToggle(Tabs.Misc, "Remove Fog", "Remove Fog")
+    Tabs.Misc:AddSection("Server", "Lucide:server")
+    Tabs.Misc:AddButton({Text="Server Hop", Icon="Lucide:refresh-cw",
+        Callback=function() ServerHop() Notify("Hop","Procurando servidor...","info") end})
+    Tabs.Misc:AddButton({Text="Rejoin", Icon="Lucide:log-in",
+        Callback=function() TeleportService:Teleport(game.PlaceId, LocalPlayer) end})
+end
+
+-- ─── SETTINGS (na ordem exata que você pediu) ───
+do
+    Tabs.Settings:AddSection("Combat", "Lucide:swords")
+    AddToggle(Tabs.Settings, "Kill Aura", "Kill Aura")                          -- da tab Volcano Event
+    Tabs.Settings:AddDropdown({Text="Weapon Tool", Flag="Weapon Tool",          -- Speed Hub X
+        Options={"Melee","Sword","Blox Fruit","Gun"}, Default="Melee",
+        Callback=function(v) Settings["Weapon Tool"]=v end})
+    Tabs.Settings:AddDropdown({Text="Tween Speed", Flag="Tween Speed",          -- Speed Hub X
+        Options={"250","300","350","400","500","700"}, Default="350",
+        Callback=function(v) Settings["Tween Speed"]=tonumber(v) end})
+    AddToggle(Tabs.Settings, "Bring Mob", "Bring Mob")                          -- Speed Hub X
+    Tabs.Settings:AddDropdown({Text="Bring Radius", Flag="Bring Radius",        -- Speed Hub X
+        Options={"150","200","250","300","500","1000"}, Default="300",
+        Callback=function(v) Settings["Bring Radius"]=tonumber(v) end})
+    AddToggle(Tabs.Settings, "Fast Attack", "Fast Attack")                      -- Speed Hub X
+    Tabs.Settings:AddSlider({Text="Fast Attack Delay", Flag="Fast Attack Delay",
+        Min=0, Max=1, Default=0, Increment=0.05, Suffix="s",
+        Callback=function(v) Settings["Fast Attack Delay"]=v end})
+    Tabs.Settings:AddSection("General", "Lucide:settings-2")
+    AddToggle(Tabs.Settings, "Auto Turn V3", "Auto Turn v3")                    -- OK Hub [hook]
+    AddToggle(Tabs.Settings, "Auto Turn V4", "Auto Turn v4")                    -- OK Hub [hook]
+    AddToggle(Tabs.Settings, "Anti AFK", "Anti AFK")                            -- OK Hub
+    AddToggle(Tabs.Settings, "Anti Admin", "Auto Anti Admin Join Server")       -- OK Hub
+    AddToggle(Tabs.Settings, "Disable Notify", "Disable Notify")                -- OK Hub
+    AddToggle(Tabs.Settings, "Auto Turn On Buso", "Auto Turn On Buso")          -- OK Hub
+    AddToggle(Tabs.Settings, "Auto Ken", "Auto Haki Observation")               -- OK Hub
+    Tabs.Settings:AddSection("Config", "Lucide:save")
+    Tabs.Settings:AddButton({Text="Save Config", Icon="Lucide:save",
+        Callback=function()
+            local ok, err = VindUI:SaveConfig("KyrovaHub")
+            Notify("Config", ok and "Configuração salva!" or tostring(err), ok and "success" or "error")
+        end})
+    Tabs.Settings:AddButton({Text="Load Config", Icon="Lucide:folder-open",
+        Callback=function()
+            local ok, err = VindUI:LoadConfig("KyrovaHub")
+            Notify("Config", ok and "Configuração carregada!" or tostring(err), ok and "success" or "warning")
+        end})
+    Tabs.Settings:AddButton({Text="Unload Kyrova Hub", Icon="Lucide:power",
+        Callback=function()
+            Unloaded = true
+            DestroyTween()
+            VindUI:Unload()
+        end})
+end
+
+Window:AddAppearanceTab()
+Window:SelectTab("Main")
+Window:Open()
+Notify("Kyrova Hub", "Carregado! RightShift para abrir/fechar.", "success")
+
+--═══════════════════════════════════════════════════════════════════
+--  ÁREA DE EXTENSÃO — cole aqui as funções do OK Hub
+--  (a partir do QuestB em diante: farm de quests, volcano, raids...)
+--
+--  Elas já têm acesso a:
+--    • Settings["Auto Saber"] etc. (todas as flags)
+--    • _G.AutoSaber, _G.Auto_Yama... (pontes automáticas)
+--    • ExecuteTween(cf), DestroyTween(), ExecuteBladeHits(),
+--      BringEnemies(mob, cf), AttackNearest(names), FindEnemy(names),
+--      GetDistance(cf), EquipSelectedTool(), ActivateHaki(), FireRemote(...)
+--  Exemplo:
+--    task.spawn(function() while task.wait() do
+--        if Settings["Auto Saber"] then
+--            -- cole aqui o loop do Auto Saber do OK Hub (trocando _tp → ExecuteTween)
+--        end
+--    end end)
+--═══════════════════════════════════════════════════════════════════
