@@ -501,7 +501,22 @@ local GameData = {
 			["Dual-Headed Blade"] = { "Dual-Headed Blade" },
 			["Bisento"] = { "Bisento" },
 			["Soul Cane"] = { "Soul Cane" },
-			["Pole v.2"] = { "ThunderGodTalk" }
+			["Trident"] = { "Trident" },
+			["Wardens Sword"] = { "Wardens Sword" },
+			["Bisento"] = { "Bisento" },
+			["Triple Katana"] = { "Triple Katana" },
+			["Twin Hooks"] = { "Twin Hooks" },
+			["Dual-Headed Blade"] = { "Dual-Headed Blade" },
+			["Flail"] = { "Flail" },
+			["Gravity Blade"] = { "Gravity Blade" },
+			
+			["Spikey Trident"] = { "Spikey Trident" },
+			["Fishing Trophy"] = { "Fishing Trophy" },
+			["Shark Saw"] = { "Shark Saw" },
+			["Iron Mace"] = { "Iron Mace" },
+			["Cutlass"] = { "Cutlass" },
+			["Katana"] = { "Katana" },
+			["Dual Katana"] = { "Dual Katana" },
 		}
 	},
 	Islands = {
@@ -806,7 +821,7 @@ function hoangtuveu()
     -- UI — ENDERMAN HUB (KAITUN) — Compact Modern
     -- ============================================================
     local gui = Instance.new('ScreenGui')
-    gui.Name = "HEX HUB"
+    gui.Name = "Enderman Hub status"
     gui.Parent = game:GetService('CoreGui')
     gui.Enabled = true
     gui.ResetOnSpawn = true
@@ -815,14 +830,14 @@ function hoangtuveu()
     gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
     local Theme = {
-        Bg          = Color3.fromRGB(22, 22, 28),
-        BgHeader    = Color3.fromRGB(30, 30, 40),
+        Bg          = Color3.fromRGB(31, 17, 24),
+        BgHeader    = Color3.fromRGB(48, 24, 39),
         Accent      = Color3.fromRGB(150, 80, 255),
-        Accent2     = Color3.fromRGB(0, 210, 255),
-        Stroke      = Color3.fromRGB(55, 55, 70),
-        Text        = Color3.fromRGB(235, 235, 245),
-        TextDim     = Color3.fromRGB(150, 150, 170),
-        Green       = Color3.fromRGB(80, 220, 130),
+        Accent2     = Color3.fromRGB(200, 120, 255),
+        Stroke      = Color3.fromRGB(90, 45, 65),
+        Text        = Color3.fromRGB(250, 240, 248),
+        TextDim     = Color3.fromRGB(210, 170, 190),
+        Green       = Color3.fromRGB(180, 120, 255),
     }
 
     local container = Instance.new("Frame")
@@ -897,8 +912,8 @@ function hoangtuveu()
 
     local headerGrad = Instance.new("UIGradient", header)
     headerGrad.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(45, 25, 75)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 45, 70)),
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(120, 30, 80)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(50, 20, 40)),
     })
     headerGrad.Rotation = 0
 
@@ -932,7 +947,7 @@ function hoangtuveu()
     title.Position = UDim2.new(0, 26, 0, 0)
     title.Size = UDim2.new(1, -36, 1, 0)
     title.Font = Enum.Font.GothamBold
-    title.Text = "HEX HUB"
+    title.Text = "Enderman Hub status"
     title.TextSize = 13
     title.TextColor3 = Theme.Text
     title.TextXAlignment = Enum.TextXAlignment.Left
@@ -941,7 +956,7 @@ function hoangtuveu()
     local titleGrad = Instance.new("UIGradient", title)
     titleGrad.Color = ColorSequence.new({
         ColorSequenceKeypoint.new(0, Color3.fromRGB(200, 150, 255)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(120, 220, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 100, 220)),
     })
 
     local version = Instance.new("TextLabel")
