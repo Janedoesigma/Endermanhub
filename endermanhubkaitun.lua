@@ -6906,7 +6906,7 @@ task.spawn(function()
         return lbl
     end
 
-    local TextLabel = makeLabel("Hex Hub", UDim2.new(0.4, 0, 0.05, 0))
+    local TextLabel = makeLabel("Enderman Hub", UDim2.new(0.4, 0, 0.05, 0))
     local UIGradient2 = Instance.new("UIGradient", TextLabel)
     UIGradient2.Color = ColorSequence.new({
         ColorSequenceKeypoint.new(0, Color3.fromRGB(204, 52, 235)),
@@ -7000,7 +7000,7 @@ task.spawn(function()
     ToggleBtn.AnchorPoint = Vector2.new(0, 0.5)
     ToggleBtn.Position = UDim2.new(0, 15, 0.5, 0)
     ToggleBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-    ToggleBtn.Image = "rbxthumb://type=Asset&id=100653737935048&w=420&h=420"
+    ToggleBtn.Image = "rbxthumb://type=Asset&id=138469334540273&w=420&h=420"
     ToggleBtn.ZIndex = 100
     ToggleBtn.Draggable = true
     ToggleBtn.Active = true
