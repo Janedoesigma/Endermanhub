@@ -2,8 +2,9 @@
 -- FALLBACK: só define o Config se não foi definido por um menu externo
 -- (Isso permite que o script funcione sozinho E também junto com o WindUI)
 -- ============================================================
-if not Config then
-    Config = {
+local DefaultConfig
+do
+    DefaultConfig = {
         Team = "Pirates",
         Configuration = {
             HopWhenIdle = true,
@@ -67,6 +68,34 @@ if not Config then
         AutoSea3 = true,
         AutoRaidIce_TargetFragments = 5000,
     }
+end
+
+-- [INTEGRAÇÃO COM A INTERFACE] Aceita o Config vindo da UI (WindUI) por qualquer
+-- caminho comum (Config / getgenv().Config / _G.Config / shared.Config) e
+-- PREENCHE as chaves que a UI não definiu com o padrão. Antes, se a UI não
+-- tivesse Melee.AutoBuy ou Items.AutoFullyMelees, o auto-melee ficava desligado
+-- em silêncio e nunca comprava nenhum soco.
+do
+    local function DeepFill(dst, src, top)
+        for k, v in pairs(src) do
+            if dst[k] == nil then
+                if type(v) == "table" then dst[k] = DeepFill({}, v, false) else dst[k] = v end
+            elseif type(dst[k]) == "table" and type(v) == "table" and not (top and (k == "Sword" or k == "BossWeapons")) then
+                DeepFill(dst[k], v, false)
+            end
+        end
+        return dst
+    end
+    local ext = Config
+    if type(ext) ~= "table" and getgenv then local ok, g = pcall(getgenv); if ok and type(g) == "table" and type(g.Config) == "table" then ext = g.Config end end
+    if type(ext) ~= "table" and type(_G.Config) == "table" then ext = _G.Config end
+    if type(ext) ~= "table" and shared and type(shared.Config) == "table" then ext = shared.Config end
+    if type(ext) == "table" then
+        Config = DeepFill(ext, DefaultConfig, true)
+        print("[Kaitun] Config recebido da interface (chaves faltantes preenchidas com padrão)")
+    else
+        Config = DefaultConfig
+    end
 end
 
 print("[Tiro] Script da duoc nap, dang cho game load...")
@@ -2593,7 +2622,10 @@ function W.Attack(target) pcall(function() _G.FastAttack = os.time() end) end
             local locs = TeacherLocations[teacher]
             if not locs then return true end
 
-            local cf = locs[SeaIndex]
+            -- [FIX] posição REAL do NPC (se estiver carregado) tem prioridade sobre a tabela fixa
+            local liveNpc = workspace.NPCs:FindFirstChild(teacher) or Services.ReplicatedStorage.NPCs:FindFirstChild(teacher)
+            local livePos = liveNpc and (liveNpc:FindFirstChild("HumanoidRootPart") and liveNpc.HumanoidRootPart.CFrame or (liveNpc.GetPivot and liveNpc:GetPivot()))
+            local cf = livePos or locs[SeaIndex]
             if not cf then
                 if SeaIndex ~= 3 then
                     Remotes.CommF_:InvokeServer("TravelZou")
@@ -2602,10 +2634,13 @@ function W.Attack(target) pcall(function() _G.FastAttack = os.time() end) end
                 return true -- đang ở Sea 3 mà bảng thiếu toạ độ Sea 3 (không nên xảy ra)
             end
 
-            if CaculateDistance(cf) > 10 then
+            -- [FIX] tolerância 10 → 20 e no máximo 25s tentando; depois tenta comprar mesmo assim
+            MeleeTeacherSince = MeleeTeacherSince or os.clock()
+            if CaculateDistance(cf) > 20 and os.clock() - MeleeTeacherSince < 25 then
                 TweenController.Create(cf)
                 return false
             end
+            MeleeTeacherSince = nil
             return true
         end
 
@@ -2767,7 +2802,8 @@ function W.Attack(target) pcall(function() _G.FastAttack = os.time() end) end
                     SetTask('MainTask', 'Auto Full Melee | Mua ' .. melee.name)
                     local checkResult = BuyMelee(melee.key, true)  -- Bước 1: check (proxy ghi vào J nếu hợp lệ)
                     task.wait(0.3)
-                    BuyMelee(melee.key)                            -- Bước 2: mua thật (kích hoạt proxy auto-navigate + invoke thật)
+                    local buyResult = BuyMelee(melee.key)          -- Bước 2: mua thật (kích hoạt proxy auto-navigate + invoke thật)
+                    print("[Melee] compra", melee.key, "check=", checkResult, "resultado=", buyResult)
                     task.wait(0.5)
                     if CheckItem(melee.name) then
                         SetTask('MainTask', 'Auto Full Melee | ✅ Mua thành công ' .. melee.name)
