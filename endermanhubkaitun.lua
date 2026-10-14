@@ -94,7 +94,7 @@ _G.SelectWeapon = nil
 task.spawn(function()
     while task.wait(0.5) do
         pcall(function()
-            local bp = LocalPlayer:FindFirstChild("Backpack")
+            local bp = lp and lp:FindFirstChild("Backpack")
             if not bp then return end
             if _G.ChooseWP == "Melee" then
                 for _, v in pairs(bp:GetChildren()) do
@@ -1236,7 +1236,7 @@ function hoangtuveu()
     local J = {}
     setmetatable(Remotes, {__index = function(W, W)
         if W ~= 'CommF_' then
-            print('captured unregistered signal', key)
+            print('captured unregistered signal', tostring(W))
             return Services.ReplicatedStorage.Remotes[W]
         end
         local W = {InvokeServer = function(a, ...)
@@ -1562,10 +1562,10 @@ end
     Pipes = {['Part1'] = 'Really black', ['Part2'] = 'Really black', ["Part3"] = "Dusty Rose", ['Part4'] = "Storm blue", ['Part5'] = 'Really black', ['Part6'] = "Parsley green", ["Part7"] = 'Really black', ["Part8"] = "Dusty Rose", ["Part9"] = 'Really black', ['Part10'] = 'Storm blue'}
     function GenerateUUID()
         local W = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
-        return string.gsub("xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx", '[xy]', function(W)
-            local W = (Idx == 'x') and math.random(0, 0xf) or math.random(8, 0xb)
-            return string.format('%x', W)
-        end)
+        return (string.gsub(W, '[xy]', function(c)
+            local n = (c == 'x') and math.random(0, 0xf) or math.random(8, 0xb)
+            return string.format('%x', n)
+        end))
     end
     function CheckIsPlayerAlive(W) W = W or LocalPlayer; return W and W.Character and W.Character.Humanoid and W.Character.HumanoidRootPart and W.Character.Head and W.Character.Humanoid.Health > 0 end
     function ConvertTo(W, a) return W.new(a.X, a.Y, a.Z) end
@@ -2458,6 +2458,9 @@ function W.Attack(target) pcall(function() _G.FastAttack = os.time() end) end
     FunctionsHandler.MeleesController:RegisterMethod("Refresh", function()
         if not Config.Items.AutoFullyMelees or not Config.Melee.AutoBuy then return nil end
         if ScriptStorage.PlayerData.Level < 200 then return nil end
+        -- [FIX ANTI-TRAVA] Se Start não conseguiu agir (nível/dinheiro/fragmentos
+        -- insuficientes), cede a vez ao LevelFarm por alguns segundos.
+        if (ScriptStorage.MeleeBlockedUntil or 0) > os.clock() then return nil end
         -- [FIXED] Bỏ "if _G.Level then return nil end" — đây là khóa VĨNH VIỄN,
         -- một khi thiếu tiền 1 lần là MeleesController tắt luôn mãi mãi vì
         -- không có chỗ nào khác set lại _G.Level = false. Bỏ hẳn cờ này,
@@ -2606,17 +2609,25 @@ function W.Attack(target) pcall(function() _G.FastAttack = os.time() end) end
             return true
         end
 
+        local blockedAny = false
         for _, melee in ipairs(meleeList) do
             if _G.Stop then return end
 
             local bp = CheckItem(melee.name)
             if not bp then
+                -- [FIX ANTI-TRAVA] Nível insuficiente: NÃO compra e NÃO bloqueia o farm
+                if melee.levelReq and ScriptStorage.PlayerData.Level < melee.levelReq then
+                    SetTask('SubTask', 'Auto Melee | ' .. melee.name .. ' precisa Lv ' .. melee.levelReq .. ' (farmando level)')
+                    blockedAny = true
+                    continue
+                end
                 -- [NEW] Dragon Claw V1 cần riêng 1500 Fragments — nếu chưa
                 -- đủ thì đây chính là lý do phải farm raid (raid cho
                 -- Fragments), không phải lỗi gì khác
                 if melee.name == "Dragon Claw" and (ScriptStorage.PlayerData.Fragments or 0) < 1500 then
-                    SetTask('MainTask', 'Auto Full Melee | Dragon Claw cần 1500 Fragments — đang farm Raid (' .. (ScriptStorage.PlayerData.Fragments or 0) .. '/1500)')
-                    return
+                    SetTask('SubTask', 'Auto Full Melee | Dragon Claw cần 1500 Fragments (' .. (ScriptStorage.PlayerData.Fragments or 0) .. '/1500)')
+                    blockedAny = true
+                    continue
                 end
 
                 local canBuy = true
@@ -2657,8 +2668,9 @@ function W.Attack(target) pcall(function() _G.FastAttack = os.time() end) end
                 if melee.needMastery then
                     local preMastery = ScriptStorage.Melees[melee.needMastery.item] or 0
                     if not CheckItem(melee.needMastery.item) or preMastery < melee.needMastery.value then
-                        SetTask('MainTask', 'Auto Full Melee | Cần ' .. melee.needMastery.item .. ' đạt ' .. melee.needMastery.value .. ' mastery trước (hiện ' .. preMastery .. ') để mua ' .. melee.name)
-                        return
+                        SetTask('SubTask', 'Auto Full Melee | Cần ' .. melee.needMastery.item .. ' đạt ' .. melee.needMastery.value .. ' mastery trước (hiện ' .. preMastery .. ') để mua ' .. melee.name)
+                        blockedAny = true
+                        continue
                     end
                 end
 
@@ -2710,8 +2722,9 @@ function W.Attack(target) pcall(function() _G.FastAttack = os.time() end) end
                     -- liệu Godhuman khi cả 8 melee kia đã mua + đủ mastery
                     local ready, reason = AllMeleesReady()
                     if not ready then
-                        SetTask('MainTask', 'Auto Full Melee | Godhuman: chưa đủ điều kiện — ' .. (reason or "?"))
-                        return
+                        SetTask('SubTask', 'Auto Full Melee | Godhuman: chưa đủ điều kiện — ' .. (reason or "?"))
+                        blockedAny = true
+                        continue
                     end
 
                     local materials = {
@@ -2767,8 +2780,9 @@ function W.Attack(target) pcall(function() _G.FastAttack = os.time() end) end
                     -- vòng sau khi tiền/Fragments đủ (RaidController vẫn
                     -- chạy song song farm Fragments qua TasksOrder bình thường)
                     -- Đúng yêu cầu boss man: "chạy lại mua tới chừng nào mua được"
-                    SetTask('MainTask', 'Auto Full Melee | Cần farm tiền cho ' .. melee.name)
-                    return
+                    SetTask('SubTask', 'Auto Full Melee | Cần farm tiền cho ' .. melee.name)
+                    blockedAny = true
+                    continue
                 end
             else
                 -- [FIXED] Mastery đọc từ ScriptStorage.Melees[name] — đây mới
@@ -2779,10 +2793,7 @@ function W.Attack(target) pcall(function() _G.FastAttack = os.time() end) end
                 -- dù mastery còn thấp.
                 local mastery = ScriptStorage.Melees[melee.name] or 0
 
-                if melee.levelReq and ScriptStorage.PlayerData.Level < melee.levelReq then
-                    SetTask('MainTask', 'Auto Full Melee | Cần Player Level ' .. melee.levelReq .. ' cho ' .. melee.name)
-                    return
-                end
+                -- [FIX ANTI-TRAVA] melee já comprado: não existe motivo para exigir nível aqui
 
                 -- [NEW] V1 đạt 500 mastery + chưa có V2 tương ứng → ưu tiên
                 -- Raid lấy Fragments (yêu cầu boss man: "nếu đc 500 mastery
@@ -2822,7 +2833,12 @@ function W.Attack(target) pcall(function() _G.FastAttack = os.time() end) end
             end
         end
 
-        SetTask('MainTask', 'Auto Full Melee | 🎉 Hoàn thành tất cả!')
+        if blockedAny then
+            -- nada para fazer agora: libera LevelFarm/Raid por 8s e tenta de novo
+            ScriptStorage.MeleeBlockedUntil = os.clock() + 8
+        else
+            SetTask('MainTask', 'Auto Full Melee | 🎉 Hoàn thành tất cả!')
+        end
     end)
 
     -- ============================================================
@@ -3388,7 +3404,9 @@ function W.Attack(target) pcall(function() _G.FastAttack = os.time() end) end
         local currentLevel = ScriptStorage.PlayerData.Level or 0
 
         -- Guard: đã lên đủ level sang Sea 2 → không farm Sea 1 nữa
-        if currentLevel >= 700 and SeaIndex == 1 then return end
+        -- [FIX ANTI-TRAVA] só para se o AutoSea2 vai realmente viajar; se estiver
+        -- desligado, continua farmando em vez de ficar parado para sempre
+        if currentLevel >= 700 and SeaIndex == 1 and Config.AutoSea2 then return end
 
         -- ── Sea 3: farm Bones nếu cần (giữ nguyên bản DynamicIsland gốc)
         if SeaIndex == 3 then
@@ -4004,7 +4022,7 @@ function W.Attack(target) pcall(function() _G.FastAttack = os.time() end) end
         if k then
             SetTask("MainTask", "Auto Farm Boss - Defeating " .. k.Name)
             SetTask('SubTask', '👑 Boss: ' .. k.Name .. ' | HP: ' .. math.floor(k.Humanoid.Health / k.Humanoid.MaxHealth * 100) .. '%')
-            CombatController.Attack(tostring(k), null, null, function() SpecialItems = nil end)
+            CombatController.Attack(tostring(k), nil, nil, function() SpecialItems = nil end)
             SpecialItems = nil
 
             -- [ADDED] "Reset teleport về farm level tiếp" — boss man yêu cầu:
@@ -4093,11 +4111,12 @@ function W.Attack(target) pcall(function() _G.FastAttack = os.time() end) end
     -- ============================================================
     local function getInventoryFruits()
         local fruits = {}
-        local inventory = require(ReplicatedStorage.ItemConfig):GetItems(ReplicatedStorage.ItemConfig.KEYS.QUANTITY)
+        local RS_ = game:GetService("ReplicatedStorage")
+        local inventory = require(RS_.ItemConfig):GetItems(RS_.ItemConfig.KEYS.QUANTITY)
         for _, item in pairs(inventory) do
             if item.Value and item.Value > 0 then
                 local _, data = pcall(function()
-                    return ReplicatedStorage.FruitInfo.List[item.ItemId]
+                    return game:GetService("ReplicatedStorage").FruitInfo.List[item.ItemId]
                 end)
                 if data then
                     local name = data.Display.Name or item.ItemId
@@ -6043,12 +6062,30 @@ function W.Attack(target) pcall(function() _G.FastAttack = os.time() end) end
     Remotes.CommF_:InvokeServer("Cousin", 'Buy')
     task.spawn(function()
         task.wait(Config.Configuration.AutoHopDelay)
-        if not Config.Configuration.AutoHop then Hop('Autohop') end
+        if Config.Configuration.AutoHop then Hop('Autohop') end
     end)
 
     -- ============================================================
     -- AUTO SEA 2 & 3 (CÁC THREAD RIÊNG)
     -- ============================================================
+    -- [FIX ANTI-TRAVA] Watchdog: se AutoSea2/3 der erro depois de ligar
+    -- SeaTransitionActive, a flag ficava true para sempre e o LevelFarm nunca
+    -- mais rodava. Se ficar ligada por mais de 120s, desliga.
+    task.spawn(function()
+        local since
+        while task.wait(1) do
+            if _G.SeaTransitionActive then
+                since = since or os.clock()
+                if os.clock() - since > 120 then
+                    _G.SeaTransitionActive = false
+                    since = nil
+                end
+            else
+                since = nil
+            end
+        end
+    end)
+
     task.spawn(function()
         while task.wait(0.5) do
             if Config.AutoSea2 then
@@ -6060,11 +6097,11 @@ function W.Attack(target) pcall(function() _G.FastAttack = os.time() end) end
                             Remotes.CommF_:InvokeServer("DressrosaQuestProgress", "Detective")
                             FunctionsHandler.LocalPlayerController.Methods.EquipTool:Call("Key")
                             TweenController.Create(CFrame.new(1347.71, 37.38, -1325.65))
-                            repeat task.wait() until not Config.AutoSea2 or (HumanoidRootPart and (HumanoidRootPart.Position - Vector3.new(1347.71, 37.38, -1325.65)).Magnitude < 5)
+                            local _t0 = tick(); repeat task.wait() until not Config.AutoSea2 or tick() - _t0 > 30 or (HumanoidRootPart and (HumanoidRootPart.Position - Vector3.new(1347.71, 37.38, -1325.65)).Magnitude < 5)
                         elseif iceDoor and iceDoor.CanCollide == false and iceDoor.Transparency == 1 then
                             if workspace.Enemies:FindFirstChild("Ice Admiral") then
                                 CombatController.Attack("Ice Admiral")
-                                repeat task.wait() until not Config.AutoSea2 or not workspace.Enemies:FindFirstChild("Ice Admiral") or workspace.Enemies["Ice Admiral"].Humanoid.Health <= 0
+                                local _t1 = tick(); repeat task.wait() until not Config.AutoSea2 or tick() - _t1 > 90 or not workspace.Enemies:FindFirstChild("Ice Admiral") or workspace.Enemies["Ice Admiral"].Humanoid.Health <= 0
                                 Remotes.CommF_:InvokeServer("TravelDressrosa")
                             else
                                 TweenController.Create(CFrame.new(1347.71, 37.38, -1325.65))
@@ -6313,7 +6350,7 @@ function W.Attack(target) pcall(function() _G.FastAttack = os.time() end) end
     end
 end
 
-hoangtuveu()
+task.spawn(hoangtuveu)
 --============================================================
 -- [EXTRAS] NO ANIMATION + AUTO REDEEM CODES + AUTO RANDOM FRUIT (GACHA)
 -- Opções (pode editar/desligar):
