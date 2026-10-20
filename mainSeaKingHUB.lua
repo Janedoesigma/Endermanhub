@@ -821,3 +821,68 @@ SaveManager:BuildConfigSection(Tabs.Settings)
 Window:SelectTab(1)
 Fluent:Notify({ Title = "Blox Fruits", Content = "Script carregado.", Duration = 5 })
 SaveManager:LoadAutoloadConfig()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "CtrlButtonGui"
+gui.ResetOnSpawn = false
+gui.Parent = playerGui
+
+local button = Instance.new("TextButton")
+button.Name = "CtrlButton"
+button.Size = UDim2.new(0, 48, 0, 38)
+button.Position = UDim2.new(0, 100, 0, 200)
+button.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+button.TextColor3 = Color3.fromRGB(255, 255, 255)
+button.Text = "CTRL"
+button.TextSize = 13
+button.Font = Enum.Font.GothamBold
+button.BorderSizePixel = 0
+button.Active = true
+button.Draggable = true
+button.Parent = gui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 8)
+corner.Parent = button
+
+button.MouseButton1Click:Connect(function()
+    -- Mostra que o botão foi clicado
+    button.BackgroundColor3 = Color3.fromRGB(100, 75, 200)
+
+    task.wait(0.15)
+
+    button.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+end)
